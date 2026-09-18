@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Logo FL Briefing Board — planche</title>
+<style>
+  body{margin:0;padding:24px;background:#2a2d31;color:#B7C3CF;font:13px system-ui,sans-serif}
+  .row{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;margin-bottom:28px}
+  figure{margin:0;text-align:center}
+  figcaption{margin-top:6px;font-size:11px}
+  .light{background:#F4F7FA;padding:10px;border-radius:6px}
+  .dark{background:#070B10;padding:10px;border-radius:6px}
+  img{display:block}
+  .px{image-rendering:pixelated}
+</style>
+</head>
+<body>
+  <div class="row">
+    <figure><img src="../assets/fl-briefing-board-patch.svg" width="300"><figcaption>Briefing Board — 300 px</figcaption></figure>
+    <figure><img src="creator.png" width="300"><figcaption>Creator Missions (référence)</figcaption></figure>
+    <figure><img src="../assets/fl-briefing-board-patch.svg" width="128"><figcaption>128 px</figcaption></figure>
+    <figure><img src="../assets/fl-briefing-board-patch.svg" width="64"><figcaption>64 px</figcaption></figure>
+  </div>
+  <div class="row">
+    <figure class="dark"><img src="../assets/fl-briefing-board-icon.svg" width="128"><figcaption>icône 128</figcaption></figure>
+    <figure class="dark"><img src="../assets/fl-briefing-board-icon.svg" width="32"><figcaption>32</figcaption></figure>
+    <figure class="dark"><img src="../assets/fl-briefing-board-icon.svg" width="16"><figcaption>16</figcaption></figure>
+    <figure class="dark"><canvas id="px16" width="16" height="16" class="px" style="width:96px;height:96px;display:block"></canvas><figcaption>16 px réels, agrandis ×6</figcaption></figure>
+    <figure class="light"><img src="../assets/fl-briefing-board-icon.svg" width="32"><figcaption>32 sur clair</figcaption></figure>
+    <figure class="light"><img src="../assets/fl-briefing-board-icon.svg" width="16"><figcaption>16 sur clair</figcaption></figure>
+  </div>
+<script>
+  /* rastériser vraiment à 16 px : une balise <img> agrandie resterait vectorielle */
+  const im = new Image();
+  im.onload = () => document.getElementById('px16').getContext('2d').drawImage(im, 0, 0, 16, 16);
+  im.src = '../assets/fl-briefing-board-icon.svg';
+</script>
+</body>
+</html>

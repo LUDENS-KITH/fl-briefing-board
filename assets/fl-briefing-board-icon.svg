@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">FL Briefing Board — icône</title>
+  <desc id="desc">Icône FL Briefing Board : écusson, radar et axe d'attaque.</desc>
+  <polygon points="32,1.5 59,15.2 59,48.8 32,62.5 5,48.8 5,15.2" fill="#0B1220" stroke="#D1A94A" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M32 33L36 14.4A19 19 0 0 1 47 21.3Z" fill="#2F8CFF" fill-opacity=".22"/>
+  <path d="M32 33L47 21.3" stroke="#2F8CFF" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="32" cy="33" r="9.5" fill="none" stroke="#2F8CFF" stroke-opacity=".32" stroke-width="1.6"/>
+  <circle cx="32" cy="33" r="19" fill="none" stroke="#2F8CFF" stroke-opacity=".55" stroke-width="1.6"/>
+  <path d="M13 33L51 33" stroke="#2F8CFF" stroke-opacity=".32" stroke-width="1.6"/>
+  <path d="M18.6 19.6L45.4 46.4" stroke="#2F8CFF" stroke-opacity=".18" stroke-width="1.6"/>
+  <path d="M32 14L32 52" stroke="#2F8CFF" stroke-opacity=".32" stroke-width="1.6"/>
+  <path d="M45.4 19.6L18.6 46.4" stroke="#2F8CFF" stroke-opacity=".18" stroke-width="1.6"/>
+  <path d="M20 45Q16 26 30.8 23.5" fill="none" stroke="#FF8A00" stroke-width="4.6" stroke-linecap="round"/>
+  <polygon points="40,22 31,28.3 29.4,18.9" fill="#FF8A00" stroke="#FF8A00" stroke-width="1.6" stroke-linejoin="round"/>
+  <polygon points="47,16.2 51.6,20.8 47,25.4 42.4,20.8" fill="#FF4D4D" fill-opacity=".25" stroke="#FF4D4D" stroke-width="2.3" stroke-linejoin="round"/>
+</svg>

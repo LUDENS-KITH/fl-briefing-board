@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>FL Briefing Board</title>
+<link rel="icon" type="image/svg+xml" href="assets/fl-briefing-board-icon.svg">
+<style>
+  :root{
+    --fl-bg-0:#070B10; --fl-bg-1:#0B1220;
+    --fl-blue-2:#2F8CFF; --fl-orange-2:#FF8A00; --fl-gold-2:#D1A94A;
+    --fl-danger:#FF4D4D; --fl-success:#34D399;
+    --fl-silver-0:#E6EDF5; --fl-silver-1:#B7C3CF; --fl-silver-3:#4A5661;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--fl-bg-0);
+    font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;color:var(--fl-silver-0)}
+  body{display:flex;flex-direction:column}
+
+  #bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;
+    background:var(--fl-bg-1);border-bottom:1px solid rgba(183,195,207,.18);z-index:5}
+  #bar .sep{width:1px;height:26px;background:rgba(183,195,207,.2);margin:0 4px}
+  .brand{display:flex;align-items:center;gap:7px;font-weight:700;letter-spacing:.06em;font-size:12px;
+    color:var(--fl-silver-1);text-transform:uppercase;margin-right:6px;white-space:nowrap}
+  .brand b{color:var(--fl-blue-2)}
+  .brand img{display:block}
+  button{font:inherit;font-size:13px;line-height:1;padding:8px 10px;border-radius:8px;cursor:pointer;
+    background:rgba(230,237,245,.06);color:var(--fl-silver-0);border:1px solid rgba(183,195,207,.2)}
+  button:hover{background:rgba(230,237,245,.12)}
+  button.on{background:rgba(47,140,255,.18);border-color:var(--fl-blue-2);color:#fff}
+  .sw{width:26px;height:26px;padding:0;border-radius:50%;border:2px solid transparent}
+  .sw.on{border-color:var(--fl-silver-0);transform:scale(1.12)}
+  .wd,.ls{width:30px;padding:8px 0;text-align:center}
+  #scale.on{border-color:var(--fl-gold-2);color:var(--fl-gold-2)}
+  #decl.warn{border-color:var(--fl-orange-2);color:var(--fl-orange-2)}
+
+  #main{flex:1;display:flex;min-height:0}
+
+  /* palette de formes */
+  #pal{width:172px;flex:none;overflow-y:auto;padding:6px 8px 20px;
+    background:var(--fl-bg-1);border-right:1px solid rgba(183,195,207,.18)}
+  body.nopal #pal{display:none}
+  .grp{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fl-silver-3);
+    margin:10px 2px 6px;font-weight:700}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .tile{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 2px 4px;
+    background:rgba(230,237,245,.04)}
+  .tile span{font-size:9.5px;color:var(--fl-silver-1);line-height:1.1;text-align:center}
+  .tile canvas{display:block}
+  .tile.on{background:rgba(47,140,255,.2);border-color:var(--fl-blue-2)}
+  .tile.on span{color:#fff}
+
+  #stage{flex:1;position:relative;min-width:0}
+  canvas#c{position:absolute;inset:0;touch-action:none;cursor:crosshair}
+
+  #ti{position:fixed;z-index:11;display:none;font:inherit;font-size:16px;padding:6px 8px;
+    border-radius:6px;background:var(--fl-bg-1);color:var(--fl-silver-0);
+    border:1px solid var(--fl-blue-2);outline:none;min-width:190px}
+
+  /* carte : choix du théâtre et du fond, en haut à droite de la vue de dessus */
+  #mapbar{position:absolute;top:8px;right:8px;display:flex;gap:6px;align-items:center;padding:5px 7px;
+    background:rgba(11,18,32,.92);border:1px solid rgba(183,195,207,.2);border-radius:9px;z-index:4;
+    font-size:12px;color:var(--fl-silver-1)}
+  #mapbar select{font:inherit;font-size:12px;background:var(--fl-bg-0);color:var(--fl-silver-0);
+    border:1px solid rgba(183,195,207,.25);border-radius:6px;padding:3px 4px}
+  #mapbar button{padding:4px 9px;font-size:13px}
+  #mapbar .mo{display:none}
+  body.mapped #mapbar .mo{display:inline-flex;align-items:center;gap:4px}
+
+  /* coupe : bandeau entre la vue de dessus et la vue de profil */
+  #profbar{position:absolute;left:0;right:0;height:34px;display:none;align-items:center;gap:6px;
+    padding:0 10px;background:var(--fl-bg-1);border-top:1px solid rgba(209,169,74,.55);
+    border-bottom:1px solid rgba(183,195,207,.18);z-index:4;font-size:12px;color:var(--fl-silver-1)}
+  #profbar .ptitle{font-weight:700;letter-spacing:.12em;color:var(--fl-gold-2);margin-right:4px}
+  #profbar button{padding:5px 9px;font-size:12px}
+  #profbar select{font:inherit;font-size:12px;background:var(--fl-bg-0);color:var(--fl-silver-0);
+    border:1px solid rgba(183,195,207,.25);border-radius:6px;padding:3px 4px;margin-left:4px}
+  #profbar label{margin-left:8px}
+  #profbar .pnote{margin-left:auto;color:var(--fl-silver-3);font-size:11px;white-space:nowrap}
+  @media (max-width:1100px){ #profbar .pnote{display:none} }
+
+  /* À propos : la carte de visite de LK Studio */
+  #aboutbox{position:fixed;inset:0;z-index:20;background:rgba(3,6,10,.72);display:flex;
+    align-items:center;justify-content:center;padding:16px}
+  #aboutbox[hidden]{display:none}
+  #aboutbox .card{position:relative;max-width:560px;width:100%;background:var(--fl-bg-1);
+    border:1px solid rgba(209,169,74,.5);border-radius:14px;padding:22px 24px;color:var(--fl-silver-0);
+    font-size:14px;line-height:1.5}
+  #aboutbox h1{font-size:19px;margin:0 0 6px}
+  #aboutbox h1 span{font-size:12px;color:var(--fl-silver-1);font-weight:600}
+  #aboutbox p{margin:0 0 8px}
+  #aboutbox .head{display:flex;gap:16px;align-items:center}
+  #aboutbox .studio{display:flex;gap:16px;align-items:center;margin:16px 0;padding:12px;
+    background:#F4F1EA;color:#1D1D1B;border-radius:10px}           /* le fusain garde son papier */
+  #aboutbox .studio a{color:#1D1D1B;font-weight:700}
+  #aboutbox .studio img{border-radius:6px;flex:none}
+  #aboutbox a{color:var(--fl-gold-2)}
+  #aboutbox .fl{display:block;padding:12px 14px;border:1px solid rgba(47,140,255,.5);border-radius:10px;
+    background:rgba(47,140,255,.08);color:var(--fl-silver-0);text-decoration:none;margin-bottom:12px}
+  #aboutbox .fl b{color:var(--fl-blue-2)}
+  #aboutbox .small{font-size:11px;color:var(--fl-silver-1);margin:0}
+  #aboutclose{position:absolute;top:10px;right:10px;padding:4px 10px}
+  .demobadge{display:none;font-size:11px;font-weight:700;letter-spacing:.1em;color:#070B10;
+    background:var(--fl-gold-2);padding:4px 8px;border-radius:6px;text-decoration:none}
+  body.demo .demobadge{display:inline-block}
+  @media (max-width:560px){ #aboutbox .head, #aboutbox .studio{flex-direction:column;text-align:center} }
+
+  /* planches : une par phase du briefing */
+  #tabs{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 16px)}
+  .tab{font-size:12px;padding:6px 11px;border-radius:7px;background:rgba(11,18,32,.92)}
+  .tab.on{background:rgba(209,169,74,.18);border-color:var(--fl-gold-2);color:#fff}
+  .tab.x{padding:6px 8px;color:var(--fl-silver-1)}
+  .tab.add{color:var(--fl-gold-2);border-style:dashed}
+  #hint{position:absolute;right:10px;bottom:12px;font-size:11px;color:var(--fl-silver-3);
+    pointer-events:none;max-width:44%;text-align:right}
+  @media (max-width:1100px){ #hint{display:none} }
+  @media (max-width:760px){ .brand{display:none} #pal{width:104px} .tile span{display:none} }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <span class="brand"><img src="assets/fl-briefing-board-icon.svg" alt="" width="22" height="22">FL <b>Briefing Board</b></span>
+  <a class="demobadge" href="index.html" title="Démo : rien n'est enregistré. Cliquez pour ouvrir votre propre tableau.">DÉMO</a>
+
+  <button data-tool="select" title="Sélectionner / déplacer (V) — sur une carte, glisser dans le vide déplace la carte">⬈</button>
+  <button data-tool="pan"    title="Main : déplacer la carte (H) — ou clic droit, clic molette, espace + glisser">✋</button>
+  <button data-tool="arrow"  title="Flèche — incurvable après tracé (A)">➜</button>
+  <button data-tool="line"   title="Trait (L)">／</button>
+  <button data-tool="pen"    title="Crayon libre (P)">✏️</button>
+  <button data-tool="circle" title="Cercle (C)">◯</button>
+  <button data-tool="rect"   title="Rectangle (R)">▭</button>
+  <button data-tool="zone"   title="Zone hachurée — CAP, engagement, interdite (Z) : cliquez les sommets, refermez sur le premier ou double-cliquez">⬠</button>
+  <button data-tool="ruler"  title="Règle — distance et cap (M)">📏</button>
+  <button data-tool="text"   title="Texte (T)">T</button>
+  <button data-tool="erase"  title="Gomme — supprime l'objet touché (E)">⌫</button>
+
+  <span class="sep"></span>
+  <button class="sw on" data-color="#2F8CFF" style="background:#2F8CFF" title="Bleu — ami"></button>
+  <button class="sw" data-color="#FF4D4D" style="background:#FF4D4D" title="Rouge — hostile"></button>
+  <button class="sw" data-color="#D1A94A" style="background:#D1A94A" title="Or"></button>
+  <button class="sw" data-color="#34D399" style="background:#34D399" title="Vert — neutre"></button>
+  <button class="sw" data-color="#FF8A00" style="background:#FF8A00" title="Orange"></button>
+  <button class="sw" data-color="#E6EDF5" style="background:#E6EDF5" title="Blanc"></button>
+
+  <span class="sep"></span>
+  <button class="wd" data-w="2" title="Trait fin">▁</button>
+  <button class="wd on" data-w="4" title="Trait moyen">▃</button>
+  <button class="wd" data-w="8" title="Trait épais">▅</button>
+
+  <span class="sep"></span>
+  <button class="ls on" data-ls="solid" title="Trait plein — réel">━</button>
+  <button class="ls" data-ls="dash"  title="Tirets — prévu">╍</button>
+  <button class="ls" data-ls="dot"   title="Pointillés — menace, incertain">┉</button>
+
+  <span class="sep"></span>
+  <button id="dup"   title="Dupliquer la sélection (Ctrl+D)">⧉</button>
+  <button id="flip"  title="Flèche double sens">⇄</button>
+  <button id="front" title="Mettre au premier plan">↑</button>
+  <button id="undo"  title="Annuler (Ctrl+Z)">↶</button>
+  <button id="redo"  title="Rétablir (Ctrl+Y)">↷</button>
+
+  <span class="sep"></span>
+  <button id="hide"  title="Masquer la palette">◧</button>
+  <button id="theme" title="Fond clair / sombre">◐</button>
+  <button id="split" title="Coupe : vue de profil sous la vue de dessus, altitudes en pieds et niveaux de vol">⊟ Coupe</button>
+  <button id="meas"  title="Cotes : distance et cap sur les traits et flèches (prochains tracés, et la sélection)">📐 Cotes</button>
+  <button id="hdg"   title="Caps vrais ou magnétiques (comme au cockpit DCS)">Cap vrai</button>
+  <button id="decl"  title="Déclinaison magnétique de la planche">Décl. ?</button>
+  <button id="unit"  title="Unité des distances : milles nautiques ou kilomètres">NM</button>
+  <button id="scale" title="Échelle de la planche">Échelle</button>
+  <button id="png"   title="Exporter la planche en PNG, telle qu'à l'écran">⇩ PNG</button>
+  <button id="knee"  title="Exporter la planche au format kneeboard DCS (portrait 768 × 1024), à copier dans Saved Games\DCS\Kneeboard">⇩ Kneeboard</button>
+  <button id="clear" title="Effacer la planche affichée">Effacer</button>
+  <button id="about" title="À propos — LK Studio">ⓘ</button>
+</div>
+
+<div id="main">
+  <div id="pal"></div>
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="mapbar">
+      <select id="theatre" title="Carte du théâtre DCS en fond — vivante : molette pour zoomer, clic droit pour se déplacer">
+        <option value="">Sans carte</option>
+      </select>
+      <select id="mstyle" class="mo" title="Fond de carte">
+        <option value="topo">Topographique</option><option value="sat">Satellite</option>
+        <option value="osm">Plan routier</option>
+      </select>
+      <label class="mo" title="Aérodromes DCS, sous leur nom DCS"><input type="checkbox" id="afs" checked> Aérodromes</label>
+      <button id="zin"  class="mo" title="Zoomer (+)">+</button>
+      <button id="zout" class="mo" title="Dézoomer (−)">−</button>
+      <button id="zfit" class="mo" title="Recadrer sur tout le théâtre">⤢</button>
+    </div>
+    <div id="profbar">
+      <span class="ptitle">COUPE</span>
+      <button data-tool="terrain" title="Relief : tracez la crête à main levée, elle se remplit jusqu'au sol">⛰ Relief</button>
+      <button data-tool="dome"    title="Enveloppe sol-air : partez du site au sol, tirez jusqu'à son rayon et son plafond">◠ Menace SA</button>
+      <button data-tool="block"   title="Bloc d'altitude : glissez verticalement entre deux altitudes">▤ Bloc d'alt.</button>
+      <label>Plafond
+        <select id="ceil">
+          <option value="10000">10 000 ft</option><option value="20000">20 000 ft</option>
+          <option value="40000">40 000 ft</option><option value="60000">60 000 ft</option>
+        </select></label>
+      <label>Largeur
+        <select id="range">
+          <option value="10">10 NM</option><option value="20">20 NM</option><option value="40">40 NM</option>
+          <option value="80">80 NM</option><option value="160">160 NM</option>
+        </select></label>
+      <label title="La coupe suit les waypoints de la vue de dessus, dans l'ordre de leurs numéros. Tirez un waypoint verticalement pour son altitude, double-cliquez pour la taper."><input type="checkbox" id="linked"> Route liée</label>
+      <span class="pnote">pieds · FL au-dessus de 18 000 ft · altitudes calées sur 500 ft</span>
+    </div>
+    <div id="tabs"></div>
+    <div id="hint">Touchez le vide pour poser, gardez appuyé pour orienter · touchez une forme pour la déplacer · double-clic : étiquette · carte : molette pour zoomer, clic droit pour se déplacer</div>
+  </div>
+</div>
+
+<input id="ti" placeholder="texte puis Entrée">
+
+<div id="aboutbox" hidden>
+  <div class="card">
+    <button id="aboutclose" title="Fermer">×</button>
+    <div class="head">
+      <img src="assets/fl-briefing-board-patch.svg" alt="Écusson FL Briefing Board" width="96" height="96">
+      <div>
+        <h1>FL Briefing Board <span id="aboutver"></span></h1>
+        <p>Le tableau de briefing et de debriefing des escadrons DCS World : formes aéro
+        prêtes à poser, cartes des théâtres, coupe liée à la route, caps magnétiques,
+        export kneeboard.</p>
+      </div>
+    </div>
+    <div class="studio">
+      <img src="assets/lk-studio-logo.png" alt="LK Studio" width="112" height="105">
+      <div>
+        <p><b>Conçu et développé par LK Studio</b>, studio de création logicielle installé
+        à Tours.</p>
+        <p><a href="https://l-k-studio.com" target="_blank" rel="noopener">l-k-studio.com</a></p>
+      </div>
+    </div>
+    <a class="fl" href="https://flightledger.io" target="_blank" rel="noopener">
+      <b>FlightLedger</b> — débriefez vos vrais vols : carnet de vol, analyse Tacview,
+      escadrons. Le briefing prépare le vol ; FlightLedger raconte ce qui s'est passé. →</a>
+    <p class="small">
+      <a id="aboutcode" href="#" target="_blank" rel="noopener" hidden>Code source</a>
+      Licence MIT pour le code · nom et logos réservés à LK Studio ·
+      cartes © OpenStreetMap, OpenTopoMap, Esri · modèle magnétique WMM2025 (NOAA) ·
+      non affilié à Eagle Dynamics — DCS World est une marque d'Eagle Dynamics SA.
+    </p>
+  </div>
+</div>
+
+<script src="theatres.js?v=1.1"></script>
+<script src="magnetic.js?v=1.0"></script>
+<script src="symbols.js?v=0.7"></script>
+<script src="board.js?v=1.1.1"></script>
+<script>
+  /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
+  if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')
+    document.body.insertAdjacentHTML('afterbegin',
+      '<div style="padding:10px 14px;background:#FF4D4D;color:#070B10;font-weight:700">' +
+      'symbols.js ou board.js n\'a pas été chargé — gardez les fichiers du dossier ensemble.</div>');
+</script>
+</body>
+</html>
