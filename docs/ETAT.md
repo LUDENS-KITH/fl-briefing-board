@@ -11,8 +11,10 @@ annoncées ci-dessous ont été exécutées et observées, aucune ne repose sur 
 relecture de code. Ce qui manque à ce jour n'est pas un défaut : c'est un périmètre
 volontairement fermé (§5).
 
-Le dépôt git est **initialisé mais sans aucun commit** (en attente du feu vert de
-Vince). Un seul test automatique : la déclinaison magnétique contre les valeurs
+Le dépôt est **public depuis le 2026-09-18** :
+[LUDENS-KITH/fl-briefing-board](https://github.com/LUDENS-KITH/fl-briefing-board), démo en
+ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
+(GitHub Pages, branche `main`). Un seul test automatique : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 

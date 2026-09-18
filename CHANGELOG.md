@@ -5,7 +5,10 @@ Les dates sont celles de la livraison effective. Chaque version note ce qui a é
 
 ## v1.1 — 2026-09-18
 
-Préparation du dépôt public, vitrine de LK Studio. **Rien n'est encore publié.**
+Publication : dépôt public [LUDENS-KITH/fl-briefing-board](https://github.com/LUDENS-KITH/fl-briefing-board)
+et démo en ligne [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo),
+le 2026-09-18 — vitrine de LK Studio. Vérifié depuis l'adresse publique : deux planches,
+carte du Caucase et ses tuiles chargées en HTTPS, route liée, aucune erreur.
 
 ### Ajouté
 - **Signature LK Studio** dans chaque export : « FL Briefing Board · LK Studio ·
