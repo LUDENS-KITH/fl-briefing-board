@@ -3,6 +3,20 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.1.1 — 2026-09-23
+
+### Ajouté
+- Guide d'utilisation **EN-US** complet : [docs/GUIDE.en-US.md](docs/GUIDE.en-US.md).
+- Page **Soutenir / Ko-Fi** : invitations Discord, contreparties recommandées,
+  politique de crédits et texte prêt à publier.
+- Lien Discord permanent vérifié : `https://discord.gg/cTepFwBPUy`.
+
+### Modifié
+- README : liens visibles vers les guides FR/EN-US, la page Ko-Fi et l'invitation
+  Discord cliquable.
+- Crédits : règle de mention des soutiens communautaires, sans données personnelles
+  ni montant publié sans accord explicite.
+
 ## v1.1 — 2026-09-18
 
 Publication : dépôt public [LUDENS-KITH/fl-briefing-board](https://github.com/LUDENS-KITH/fl-briefing-board)

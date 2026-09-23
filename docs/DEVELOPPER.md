@@ -24,9 +24,11 @@ FL Briefing Board/
 ├─ CHANGELOG.md      ce qui a changé, version par version
 └─ docs/
    ├─ GUIDE.md       guide d'utilisation, geste par geste
+   ├─ GUIDE.en-US.md guide d'utilisation en anglais US
    ├─ DEVELOPPER.md  ce fichier
    ├─ ETAT.md        où en est le projet : vérifié, non vérifié, hors périmètre
-   └─ MODELE.md      contrat interne : objets, interaction, persistance, ajout d'une forme
+   ├─ MODELE.md      contrat interne : objets, interaction, persistance, ajout d'une forme
+   └─ SOUTENIR.md    Ko-Fi, invitations Discord, crédits des soutiens
 ```
 
 Les trois fichiers restent à la racine délibérément : un sous-dossier `src/`

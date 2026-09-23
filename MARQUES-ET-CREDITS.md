@@ -20,6 +20,14 @@ FL Briefing Board est un projet indépendant, **non affilié à Eagle Dynamics**
 DCS World et les noms des modules et des cartes DCS sont des marques d'Eagle Dynamics SA,
 citées ici pour désigner les théâtres auxquels l'outil s'applique.
 
+## Soutiens communautaires
+
+Les soutiens Ko-Fi ou Discord peuvent être remerciés dans les notes du projet, avec
+leur accord explicite. Voir [docs/SOUTENIR.md](docs/SOUTENIR.md).
+
+Règle de publication : pseudo seul par défaut, pas de nom réel, pas d'adresse e-mail,
+pas d'identifiant Discord complet et pas de montant versé sans accord explicite.
+
 ## Données et services tiers
 
 | Élément | Source | Conditions |

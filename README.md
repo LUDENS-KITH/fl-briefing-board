@@ -13,7 +13,8 @@
   <a href="https://ludens-kith.github.io/fl-briefing-board/?demo"><b>▶ Essayer la démo</b></a> ·
   <a href="https://l-k-studio.com">LK Studio</a> ·
   <a href="https://flightledger.io">FlightLedger</a> ·
-  <a href="docs/GUIDE.md">Guide</a>
+  <a href="docs/GUIDE.md">Guide FR</a> ·
+  <a href="docs/GUIDE.en-US.md">Guide EN-US</a>
 </p>
 
 <p align="center">
@@ -59,7 +60,15 @@ un écran comme à la souris.
 
 Les cartes demandent une connexion Internet ; le tableau blanc, non.
 
-Le [guide](docs/GUIDE.md) décrit chaque geste et chaque raccourci.
+Les guides décrivent chaque geste et chaque raccourci :
+[FR](docs/GUIDE.md) · [EN-US](docs/GUIDE.en-US.md).
+
+## Soutenir
+
+FL Briefing Board reste gratuit, sans compte et sans installation. Pour soutenir le
+temps de conception et de documentation, voir [Soutenir / Ko-Fi](docs/SOUTENIR.md).
+Le lien Discord permanent à partager dans les posts, hors image, est :
+[discord.gg/cTepFwBPUy](https://discord.gg/cTepFwBPUy).
 
 ## Un projet LK Studio
 
@@ -86,6 +95,7 @@ sait **et ce qu'il n'a pas vérifié** :
 | [docs/ETAT.md](docs/ETAT.md) | ce qui est vérifié, daté, et ce qui ne l'est pas |
 | [docs/MODELE.md](docs/MODELE.md) | le contrat interne du moteur |
 | [docs/DEVELOPPER.md](docs/DEVELOPPER.md) | structure, outils, tests |
+| [docs/SOUTENIR.md](docs/SOUTENIR.md) | Ko-Fi, invitations Discord, crédits des soutiens |
 | [CHANGELOG.md](CHANGELOG.md) | chaque version, et ce qui a été vérifié en l'exécutant |
 
 Les contributions sont bienvenues — un symbole qui manque, un théâtre, une correction.
@@ -96,8 +106,10 @@ Les contributions sont bienvenues — un symbole qui manque, un théâtre, une c
 28 ready-to-place aviation symbols, live maps of the 14 DCS theatres,
 an altitude profile linked to the route, true or magnetic headings (NOAA World Magnetic Model),
 multi-phase boards and DCS kneeboard export. No install, no account.
-[Try the demo](https://ludens-kith.github.io/fl-briefing-board/?demo). Made in Tours, France,
-by [LK Studio](https://l-k-studio.com) — also the makers of [FlightLedger](https://flightledger.io).
+[Try the demo](https://ludens-kith.github.io/fl-briefing-board/?demo), read the
+[EN-US guide](docs/GUIDE.en-US.md), or join the
+[FlightLedger Discord](https://discord.gg/cTepFwBPUy). Made in Tours, France, by
+[LK Studio](https://l-k-studio.com) — also the makers of [FlightLedger](https://flightledger.io).
 
 ## Licence
 
