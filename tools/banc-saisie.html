@@ -344,6 +344,34 @@ test('Curseur TDC : se pose par-dessus une piste sans la saisir', async (ok) => 
   ok(a.s('JSON.stringify([objs[0].x, objs[0].y])') === '[400,300]', 'la piste a bougé');
 });
 
+/* ---------- lot 2 : kit radar F-16C ---------- */
+
+test('Écran FCR du F-16C : ↑ ↓ l\'échelle, ← → l\'azimut A6, A3, A1', async (ok) => {
+  const a = await open();
+  a.tile('f16_rws'); a.click(520, 360);
+  a.key('v'); a.click(520, 360);
+  ok(a.s('sel && sel.k') === 'f16_rws', 'écran non sélectionné');
+  a.key('ArrowLeft'); a.key('ArrowLeft');
+  ok(a.s('objs[0].az') === 1, `azimut après ← ← : ${a.s('objs[0].az')}`);
+  a.key('ArrowUp');
+  ok(a.s('objs[0].rng') === 80, `échelle après ↑ : ${a.s('objs[0].rng')}`);
+});
+
+test('Piste TWS du F-16C : le geste oriente le symbole ; une seule cible désignée, pas sur un autre module', async (ok) => {
+  const a = await open();
+  a.tile('f16_track'); a.drag(400, 300, 480, 300);
+  ok(Math.abs(a.s('objs[0].a') - Math.PI / 2) < .05, `cap de la piste : ${a.s('objs[0].a')}`);
+  ok(a.s('objs[0].s === SHAPES.f16_track.s0'), `taille : ${a.s('objs[0].s')}`);
+  a.tile('f16_track'); a.click(560, 300);
+  a.tile('fa18_hafu_h'); a.click(700, 300);
+  a.tile('f16_bug'); a.click(400, 300);
+  ok(a.s('objs[0].mark') === 'bug', `cible désignée : ${a.s('objs[0].mark')}`);
+  a.click(560, 300);
+  ok(a.s('!objs[0].mark && objs[1].mark') === 'bug', 'deux cibles désignées');
+  a.click(700, 300);
+  ok(a.s('!objs[2].mark'), 'marque du F-16C posée sur une piste du F/A-18C');
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

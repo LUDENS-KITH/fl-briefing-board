@@ -246,8 +246,8 @@ code dédié.
 | `v0`, `v1`… | sommets d'une zone | déplace ce sommet |
 
 Trois formes du kit radar dérogent aux cas 5 et 6 : une vignette de **marque** (L&S,
-DT2) ne pose rien, elle marque le HAFU touché (`markTrack()`, une seule marque de chaque
-sorte par vue) ; un **curseur** (`over`) se pose par-dessus ce qu'il touche sans le
+DT2 du F/A-18C, cible désignée du F-16C) ne pose rien, elle marque la piste touchée du
+même appareil (`markTrack()`, une seule marque de chaque sorte par vue) ; un **curseur** (`over`) se pose par-dessus ce qu'il touche sans le
 saisir ; un **écran** (`under`) reste traversable pour `grab()` et se glisse sous les
 autres objets à la pose (`insertLow()`).
 
@@ -363,12 +363,13 @@ maClé: { g:'air', label:'Mon aéronef', s0:1.1, tile:.38, hit:1.25, draw(c){
 | `smax` | échelle maximale au geste et à la poignée | `6` |
 | `col` | couleur donnée à la pose, à la place de la couleur choisie | absent |
 | `scope` | écran : `page`, `rng`, `az`, `ranges`, `azs` proposés au clavier, `pb` libellés des boutons | absent |
-| `hafu` | une piste : peut porter une marque | absent |
+| `track` | une piste : peut porter une marque de son groupe | absent |
+| `tileA` | angle de la vignette, pour une forme qui se reconnaît inclinée | `0` |
 | `mark` | la vignette marque la piste touchée au lieu de poser | absent |
 | `over` | se pose par-dessus ce qu'on touche, sans le saisir | absent |
 
 `draw(c, o)` reçoit aussi l'objet : un écran y lit son échelle et son azimut, un HAFU sa
-marque. Une forme droite sans tige garde une poignée, au coin haut droit, qui la
+marque. `withMark()` dessine la marque d'une piste. Une forme droite sans tige garde une poignée, au coin haut droit, qui la
 redimensionne. Le kit radar vit en fin de `symbols.js`, un groupe de palette par module,
 et chaque élément cite sa source dans [RADAR.md](RADAR.md).
 

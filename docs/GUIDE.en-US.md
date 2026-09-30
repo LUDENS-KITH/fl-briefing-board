@@ -19,11 +19,14 @@ has a T-tail, and the bomber has four engines.
 Nothing is a bitmap. Every shape is parametric, so it can be rotated, resized and
 recolored without quality loss. To add a shape, see [docs/MODELE.md §8](MODELE.md).
 
-## Radar Kit — F/A-18C
+## Radar Kit — F/A-18C and F-16C
 
-A palette group, **Radar F/A-18C**, explains the Hornet's air-to-air attack radar page
-(RDR ATTK). Everything is drawn from the ED manual, and every element cites its page:
-[RADAR.md](RADAR.md).
+Two palette groups, **Radar F/A-18C** and **Radar F-16C**, explain each aircraft's
+air-to-air radar page. Everything is drawn from the module's ED manual, and every
+element cites its page: [RADAR.md](RADAR.md). The two symbologies do not mix: a mark
+only goes on a track of its own aircraft.
+
+**F/A-18C — RDR ATTK page**
 
 - **RWS, TWS and STT displays:** the cockpit display, its 20 pushbuttons and their
   labels, the B-scope. A display goes **under** other objects and stays pass-through:
@@ -39,8 +42,19 @@ A palette group, **Radar F/A-18C**, explains the Hornet's air-to-air attack rada
 - **TDC cursor:** two vertical lines, placed over the designated track or brick.
 - Threat rank, speed or altitude of a track go into its label (double-click).
 
+**F-16C — FCR page**
+
+- **FCR RWS and TWS displays:** pushbutton labels, range between its arrows, azimuth
+  scan width (`←` `→`: A6, A3, A1, whose limits are drawn), antenna elevation scale,
+  horizon line, range marks.
+- **Search targets**, hot (line below) or cold (line above).
+- **TWS tracks** (yellow) and **system tracks** (white): the whole symbol turns with
+  the target's ground track; the placing gesture orients it.
+- **Bugged target:** a mark, a circle around the track, one per board.
+- **A-A cursor**, **jamming** chevrons and **bullseye**.
+
 Prepare radar boards **without a map**: on a map, a display would follow the terrain
-as you zoom. The online demo shows one (the "Radar" board).
+as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" boards).
 
 ## Maps
 

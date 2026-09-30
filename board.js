@@ -1026,12 +1026,14 @@ function backToSelect(){
   setTool('select');
   commit();
 }
-/* L&S et DT2 (manuel F/A-18C, p. 173 et 176) : la piste prioritaire et la deuxième
-   désignée, une seule de chaque par vue. Reposer la même marque sur la même piste
-   l'enlève. Un HAFU ancré l'accepte : c'est un état, pas une géométrie. */
+/* marques de piste — L&S et DT2 du F/A-18C (p. 173, 176), cible désignée du F-16C
+   (p. 404, 415) : une seule de chaque par vue, sur une piste du même appareil. Reposer
+   la même marque sur la même piste l'enlève. Une piste ancrée l'accepte : c'est un
+   état, pas une géométrie. */
 function markTrack(x, y, mk){
-  const t = topmost(x, y, o => o.t === 'sym' && (SHAPES[o.k] || {}).hafu);
-  if (!t){ toast('L&S et DT2 se posent sur une piste HAFU'); return; }
+  const sh = SHAPES[symKey];
+  const t = topmost(x, y, o => o.t === 'sym' && (SHAPES[o.k] || {}).track && SHAPES[o.k].g === sh.g);
+  if (!t){ toast(`${sh.label} se pose sur une piste du groupe « ${(GROUPS.find(([g]) => g === sh.g) || [])[1]} »`); return; }
   snapshot();
   const on = t.mark !== mk;
   for (const o of objs) if (o.mark === mk && (o.v || 'm') === (t.v || 'm')) delete o.mark;
@@ -1366,7 +1368,7 @@ for (const [g, titre] of GROUPS){
     tc.width = 52; tc.height = 46;
     const c2 = tc.getContext('2d');
     c2.strokeStyle = c2.fillStyle = '#B7C3CF';
-    paintSym(c2, { t:'sym', k, x:26, y:23, a:0, s:(SHAPES[k].tile || .45) * 34/SIZE,
+    paintSym(c2, { t:'sym', k, x:26, y:23, a:SHAPES[k].tileA || 0, s:(SHAPES[k].tile || .45) * 34/SIZE,
                    c:'#B7C3CF', w:2.4, n:1, mini:true });
     b.appendChild(tc);
 
@@ -1801,9 +1803,23 @@ function demoBoards(){
     { t:'text', s:'losange : DT2, deuxième piste', x:640, y:164, c:G, w:2 },
     { t:'text', s:'briques : contacts bruts (HITS)', x:640, y:188, c:GR, w:2 },
   ];
-  return [board('Ingress', ingress), board('Attaque', attaque),
-          { name:'Radar', objs: radar, wpN:1, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
-            magDec:null, past:[], future:[] }];
+  /* le même exercice au F-16C, lu dans son propre manuel : FCR en TWS */
+  const WH = '#E6EDF5';
+  const viper = [
+    sym('f16_tws', 380, 200, 0, '#4FC3F7', .8, { locked:true }),
+    sym('f16_track', 400, 142, 2.4, G, .9, ink),
+    sym('f16_systrack', 432, 176, 3.6, WH, .9, { ...ink, mark:'bug' }),
+    sym('f16_hot', 352, 238, 0, WH, .9, ink),
+    sym('f16_cold', 330, 128, 0, WH, .9, ink),
+    sym('f16_cursor', 352, 238, 0, WH, .9, ink),
+    { t:'text', s:'F-16C · FCR en TWS', x:640, y:110, c:Wh, w:4 },
+    { t:'text', s:'cercle : cible désignée (bugged)', x:640, y:140, c:WH, w:2 },
+    { t:'text', s:'jaune : piste TWS · blanc : piste système', x:640, y:164, c:G, w:2 },
+    { t:'text', s:'trait sous le carré : cible chaude', x:640, y:188, c:WH, w:2 },
+  ];
+  const flat = (name, objs) => ({ name, objs, wpN:1, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
+                                  magDec:null, past:[], future:[] });
+  return [board('Ingress', ingress), board('Attaque', attaque), flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
 
 (function boot(){

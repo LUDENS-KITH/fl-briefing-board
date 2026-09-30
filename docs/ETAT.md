@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 21 scénarios). Pas de déploiement.
+(`tools/banc-saisie.html`, 23 scénarios). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
 ## 2. Ce qui est vérifié
@@ -88,6 +88,8 @@ par événements pointeur réels, pas en relisant le code.
 | Kit radar F/A-18C | écran posé sous les pistes, traversable, pris par son coin, agrandi par sa poignée ; échelle et azimut au clavier, annulables | conforme | 2026-09-30 |
 | Kit radar F/A-18C | HAFU orienté au geste sans changer de taille, à sa couleur d'identité ; L&S et DT2 uniques par planche ; curseur TDC posé sur une piste | conforme | 2026-09-30 |
 | Kit radar F/A-18C | rendu relu en image : pages RWS, TWS, STT, vignettes, planche de démo, kneeboard | conforme | 2026-09-30 |
+| Kit radar F-16C | 2 scénarios au banc : la cible désignée échoue avant le moteur (marques par appareil), passe après ; le réglage au clavier passait déjà, le moteur étant générique ; 23/23 | conforme | 2026-09-30 |
+| Kit radar F-16C | rendu relu en image : FCR RWS et TWS, limites de balayage A3, vignettes, planche de démo ; aucune erreur console | conforme | 2026-09-30 |
 
 ## 3. Ce qui n'est pas vérifié
 
@@ -140,7 +142,9 @@ plafond et largeur réglables par planche.
 
 **Kit radar F/A-18C** : écrans RDR ATTK en RWS, TWS et STT (20 boutons, libellés
 sourcés, B-scope), briques, HAFU ami, inconnu, hostile avec tige de cap, marques L&S et
-DT2, curseur TDC ; planche « Radar » dans la démo.
+DT2, curseur TDC. **Kit radar F-16C** : écrans FCR en RWS et TWS, cibles de recherche
+chaude et froide, pistes TWS et système, cible désignée, curseur A-A, brouillage,
+bullseye. Une planche de démo par appareil.
 
 **Planches** : une par phase, copiées d'un clic, chacune avec son historique et son
 échelle. **Exports** : PNG écran, kneeboard DCS 768 × 1024.
