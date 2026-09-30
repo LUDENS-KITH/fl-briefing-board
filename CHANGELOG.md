@@ -3,6 +3,30 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.5 — 2026-09-30
+
+Lot 4 du [plan d'action](docs/PLAN.md), engagé par Vince : le fichier de briefing.
+
+### Ajouté
+- **Enregistrer le briefing** (⇩ Briefing, `Ctrl+S`) : toutes les planches, leurs
+  réglages et leurs images dans un fichier `.json` versionné.
+- **Ouvrir un briefing** (⇧ Ouvrir, `Ctrl+O`, ou glisser le fichier sur la page) : il
+  remplace le tableau affiché après confirmation. Un fichier qui n'est pas un briefing
+  est refusé ; d'un fichier reçu, on ne garde que ce que le moteur sait dessiner.
+- **Les images de fond sont gardées d'une ouverture à l'autre** : leurs octets vivent
+  en IndexedDB. Une image introuvable au démarrage est retirée, et on le dit.
+- Banc de saisie : 4 scénarios de plus, 31 en tout.
+
+### Vérifié en exécutant
+Banc 31/31, les 4 nouveaux rouges avant le code · Brave sans interface en `file://`,
+comme le raccourci bureau : image relue après rechargement ; briefing enregistré dans un
+profil, ouvert dans un second profil vierge : identique, image comprise · un nom de
+planche piégé en HTML reste du texte · la barre garde sa hauteur.
+
+### Constaté
+- La persistance en `file://`, notée non vérifiée depuis la v0.9, l'est désormais, dans
+  Brave.
+
 ## v1.4 — 2026-09-30
 
 Lot 3 du [plan d'action](docs/PLAN.md) : la vue radar liée.

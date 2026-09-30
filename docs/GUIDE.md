@@ -148,8 +148,14 @@ d'une image reste possible.
   prochain tracé. Même chose pour l'épaisseur.
 - Dupliquer (`Ctrl+D`), premier plan, flèche double sens, supprimer (`Suppr`).
 - Crayon libre, trait, cercle, rectangle, texte restent disponibles.
-- Image de fond (carte) par **glisser-déposer** ou `Ctrl+V`, redimensionnable. La
-  gomme ne la touche pas : elle se retire par sélection puis `Suppr`.
+- Image de fond (carte) par **glisser-déposer** ou `Ctrl+V`, redimensionnable, et
+  **gardée d'une ouverture à l'autre**. La gomme ne la touche pas : elle se retire par
+  sélection puis `Suppr`.
+- **Enregistrer le briefing** (⇩ Briefing, `Ctrl+S`) : toutes les planches, leurs
+  réglages et leurs images, dans un fichier `.json`. **L'ouvrir** (⇧ Ouvrir, `Ctrl+O`,
+  ou glisser le fichier sur la page) sur un autre poste, ou le passer au meneur
+  suivant : il remplace le tableau affiché, après confirmation. Un fichier qui n'est pas
+  un briefing est refusé, et le tableau reste tel quel.
 - Annuler / rétablir, export **PNG** horodaté, fond sombre ou clair, palette
   masquable.
 - **Kneeboard DCS** : PNG portrait 768 × 1024 à copier dans
@@ -158,11 +164,11 @@ d'une image reste possible.
 **Raccourcis** — `V` sélection · `A` flèche · `L` trait · `P` crayon · `C` cercle ·
 `R` rectangle · `Z` zone · `M` règle · `T` texte · `E` gomme · `H` main · `Ctrl+Z` /
 `Ctrl+Y` / `Ctrl+D` · `PgPréc` / `PgSuiv` planches · `+` / `−` zoom de la carte · `K`
-ancrer · `Échap` ou clic droit : retour à la sélection.
+ancrer · `Échap` ou clic droit : retour à la sélection · `Ctrl+S` enregistrer le briefing ·
+`Ctrl+O` l'ouvrir.
 
 ## Ce qu'il ne fait pas
 
 Pas de zoom ni de défilement sans carte (le tableau blanc, c'est l'écran) · pas de collaboration temps
-réel · pas de carte hors ligne · pas de sélection multiple ni de groupes · les
-cartes de fond ne sont pas conservées d'une ouverture à l'autre. Ces
+réel · pas de carte hors ligne · pas de sélection multiple ni de groupes. Ces
 absences sont des décisions, pas des oublis : [docs/ETAT.md §5](ETAT.md).

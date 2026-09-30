@@ -147,8 +147,14 @@ drag and drop your own background image.
   width.
 - Duplicate (`Ctrl+D`), bring to front, double-headed arrow, delete (`Delete`).
 - Freehand pencil, line, circle, rectangle and text remain available.
-- Background image by drag-and-drop or `Ctrl+V`, resizable. The eraser never removes
-  the background image: select it and press `Delete`.
+- Background image by drag-and-drop or `Ctrl+V`, resizable, and **kept across
+  launches**. The eraser never removes the background image: select it and press
+  `Delete`.
+- **Save the briefing** (⇩ Briefing, `Ctrl+S`): every board, its settings and its
+  images, in a `.json` file. **Open it** (⇧ Ouvrir, `Ctrl+O`, or drop the file on the
+  page) on another computer, or hand it to the next flight lead: it replaces the board
+  on screen, after confirmation. A file that is not a briefing is refused, and the board
+  stays as it is.
 - Undo / redo, timestamped PNG export, dark or light background, hideable palette.
 - **DCS kneeboard:** portrait PNG, 768 × 1024, to copy into
   `Saved Games\DCS\Kneeboard\` (not yet verified in DCS).
@@ -156,11 +162,12 @@ drag and drop your own background image.
 **Shortcuts:** `V` select · `A` arrow · `L` line · `P` pencil · `C` circle ·
 `R` rectangle · `Z` zone · `M` ruler · `T` text · `E` eraser · `H` hand ·
 `Ctrl+Z` / `Ctrl+Y` / `Ctrl+D` · `Page Up` / `Page Down` boards · `+` / `-` map zoom ·
-`K` pin · `Esc` or right-click: back to selection.
+`K` pin · `Esc` or right-click: back to selection · `Ctrl+S` save the briefing ·
+`Ctrl+O` open one.
 
 ## What It Does Not Do
 
 No zoom or scrolling without a map: the whiteboard is the screen. No real-time
-collaboration. No offline map tiles. No multi-selection or groups. Background maps are
-not preserved across launches. These are design choices, not omissions; see
+collaboration. No offline map tiles. No multi-selection or groups. These are design
+choices, not omissions; see
 [docs/ETAT.md §5](ETAT.md).

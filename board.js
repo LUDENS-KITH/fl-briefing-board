@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.4', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.5', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -460,7 +460,7 @@ function drawObj(o){
   ctx.strokeStyle = o.c; ctx.fillStyle = o.c;
   ctx.lineWidth = o.w || 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-  if (o.t === 'img') ctx.drawImage(o.el, o.x, o.y, o.w2, o.h2);
+  if (o.t === 'img'){ if (ready(o.el)) ctx.drawImage(o.el, o.x, o.y, o.w2, o.h2); }
 
   else if (o.t === 'stroke'){
     dash(o);
@@ -1430,28 +1430,91 @@ ti.addEventListener('keydown', e => {
 });
 ti.addEventListener('blur', () => closeText(true));
 
-/* ---------- image de fond ---------- */
-function addImage(src){
-  const el = new Image();
-  el.onload = () => {
+/* ---------- images de fond ----------
+   Une image porte un identifiant ; ses octets vivent en mémoire (imgBlobs) et, hors
+   démo, en IndexedDB, pour survivre au rechargement : localStorage n'en garde que la
+   place et la taille. Un échec est capturé — l'image sera seulement oubliée au
+   rechargement, comme avant la v1.5. */
+const imgBlobs = new Map(), imgEls = new Map();
+const newImgId = () => 'img-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+/* un seul élément par image, partagé par ses copies d'une planche à l'autre */
+function imageOf(id){
+  if (!imgEls.has(id)){
+    const el = new Image();
+    el.onload = requestDraw;
+    el.src = URL.createObjectURL(imgBlobs.get(id));
+    imgEls.set(id, el);
+  }
+  return imgEls.get(id);
+}
+const IDB_NAME = 'fl-briefing-board';
+let idbOpen = null;
+function idbStore(mode){
+  idbOpen = idbOpen || new Promise((ok, ko) => {
+    const r = indexedDB.open(IDB_NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('images');
+    r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error);
+  });
+  return idbOpen.then(db => db.transaction('images', mode).objectStore('images'));
+}
+const idbReq = q => new Promise((ok, ko) => { q.onsuccess = () => ok(q.result); q.onerror = () => ko(q.error); });
+/* la démo n'écrit jamais chez le visiteur : ni localStorage, ni IndexedDB */
+const idbPut = (id, blob) => DEMO ? Promise.resolve() : idbStore('readwrite').then(s => idbReq(s.put(blob, id)));
+const idbGet = id => idbStore('readonly').then(s => idbReq(s.get(id)));
+/* ne garder en IndexedDB que les images qu'une planche cite encore */
+async function idbKeep(ids){
+  const keys = await idbStore('readonly').then(s => idbReq(s.getAllKeys()));
+  const gone = keys.filter(k => !ids.has(k));
+  if (gone.length){ const s = await idbStore('readwrite'); await Promise.all(gone.map(k => idbReq(s.delete(k)))); }
+}
+
+function addImage(blob){
+  const id = newImgId();
+  imgBlobs.set(id, blob);
+  const el = imageOf(id);
+  const place = () => {
     const k = Math.min(stage.clientWidth / el.width, planH() / el.height, 1);
     let w2 = el.width * k, h2 = el.height * k, x = (stage.clientWidth - w2) / 2, y = (planH() - h2) / 2;
     if (cam){ [x, y] = s2w(x, y); w2 /= camK(); h2 /= camK(); }   // posée sur le terrain
     snapshot();
-    objs.unshift({ t:'img', el, x, y, w2, h2, w0:w2, h0:h2, c:'#000', w:1 });
+    objs.unshift({ t:'img', id, el, x, y, w2, h2, w0:w2, h0:h2, c:'#000', w:1 });
     commit();
+    idbPut(id, blob).catch(() => {});
   };
-  el.src = src;
+  if (ready(el)) place(); else el.addEventListener('load', place, { once: true });
+}
+
+/* au démarrage, chaque image retrouve ses octets ; celles qu'on ne retrouve plus sont
+   retirées, et on le dit. Puis IndexedDB ne garde que ce qui est encore cité. */
+async function restoreImages(){
+  const ids = new Set(boards.flatMap(b => b.objs.filter(o => o.t === 'img').map(o => o.id)));
+  for (const id of ids)
+    if (!imgBlobs.has(id)){ const blob = await idbGet(id).catch(() => null); if (blob) imgBlobs.set(id, blob); }
+  stash();                                 // un geste a pu changer la planche pendant la lecture
+  let lost = 0;
+  for (const b of boards){
+    const n = b.objs.length;
+    b.objs = b.objs.filter(o => o.t !== 'img' || imgBlobs.has(o.id));
+    lost += n - b.objs.length;
+    for (const o of b.objs) if (o.t === 'img') o.el = imageOf(o.id);
+  }
+  objs = boards[cur].objs;
+  if (lost) toast(lost > 1 ? `${lost} images de fond n'ont pas pu être relues` : 'Une image de fond n\'a pas pu être relue');
+  if (!DEMO) idbKeep(new Set(boards.flatMap(b => b.objs.filter(o => o.t === 'img').map(o => o.id)))).catch(() => {});
+  commit();
 }
 addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', e => {
   e.preventDefault();
-  const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
-  if (f) addImage(URL.createObjectURL(f));
+  const files = [...e.dataTransfer.files];
+  const brief = files.find(f => /\.json$/i.test(f.name) || f.type === 'application/json');
+  if (brief) return openBriefing(brief);                 // un briefing enregistré
+  const f = files.find(f => f.type.startsWith('image/'));
+  if (f) addImage(f);
 });
 addEventListener('paste', e => {
   const it = [...e.clipboardData.items].find(i => i.type.startsWith('image/'));
-  if (it) addImage(URL.createObjectURL(it.getAsFile()));
+  if (it) addImage(it.getAsFile());
 });
 
 /* ---------- palette de formes ---------- */
@@ -1753,6 +1816,73 @@ $('decl').onclick = () => {
   snapshot(); magDec = d; commit();
 };
 
+/* ---------- fichier de briefing ----------
+   Tout le tableau dans un .json : planches, réglages, images comprises (en data URL),
+   pour préparer un briefing sur un poste et le mener sur un autre, ou le passer au
+   meneur suivant. `format` et `version` sont vérifiés à l'ouverture. */
+const FILE_FORMAT = 'fl-briefing-board', FILE_VERSION = 1;
+/* un objet tel qu'il s'écrit : sans l'élément image, qui se recrée à la lecture */
+const record = o => { const { el, ...r } = snap(o); return r; };
+const boardsRecord = () => boards.map(b => ({ name: b.name, wpN: b.wpN, nmPx: b.nmPx || 0, prof: b.prof, map: b.map,
+                                              cam: b.cam, magDec: b.magDec ?? null, objs: b.objs.map(record) }));
+const blobData = blob => new Promise((ok, ko) => {
+  const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => ko(r.error); r.readAsDataURL(blob);
+});
+function dataBlob(url){
+  const [head, b64] = url.split(','), bin = atob(b64), u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u], { type: head.slice(5, head.indexOf(';')) });
+}
+async function briefingFile(){
+  stash();
+  const out = { format: FILE_FORMAT, version: FILE_VERSION, app: APP.version, saved: new Date().toISOString(),
+                cur, unit, split, headRef, boards: boardsRecord(), images: {} };
+  for (const b of out.boards) for (const o of b.objs)
+    if (o.t === 'img' && !(o.id in out.images) && imgBlobs.has(o.id)) out.images[o.id] = await blobData(imgBlobs.get(o.id));
+  return out;
+}
+$('save').onclick = async () => {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(await briefingFile())], { type: 'application/json' }));
+  download(url, `fl-briefing-${slug(boards[0].name)}-${stamp()}.json`);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
+
+/* un fichier reçu vient d'ailleurs : on ne garde que ce que le moteur sait dessiner, et
+   une image n'est acceptée qu'en PNG, JPEG, WebP ou GIF */
+const KNOWN_T = new Set(['sym', 'arrow', 'line', 'rect', 'circle', 'stroke', 'zone', 'ruler', 'terrain', 'dome',
+                         'block', 'text', 'img']);
+const IMG_DATA = /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+async function openBriefing(file){
+  let j = null;
+  try { j = JSON.parse(await file.text()); } catch(_){}
+  if (!j || j.format !== FILE_FORMAT || j.version !== FILE_VERSION || !Array.isArray(j.boards) || !j.boards.length){
+    toast('Ce fichier n\'est pas un briefing FL Briefing Board'); return;
+  }
+  stash();
+  if (boards.some(b => b.objs.length) && !confirm('Ouvrir ce briefing remplace tout le tableau affiché. Continuer ?')) return;
+  const blobs = new Map();
+  for (const [id, url] of Object.entries(j.images || {}))
+    if (typeof url === 'string' && IMG_DATA.test(url)) blobs.set(id, dataBlob(url));
+  const keep = o => o && typeof o === 'object' && KNOWN_T.has(o.t) && (o.t !== 'sym' || SHAPES[o.k])
+                    && (o.t !== 'img' || blobs.has(o.id));
+  const known = m => m && THEATRES.some(t => t.id === m.theatre) ? m : null;
+  const okProf = p => p && typeof p === 'object' && p.ceil > 0 && p.range > 0 ? p : undefined;
+  leaveGesture();
+  boards = j.boards.map(b => ({
+    name: String(b.name || 'Phase').slice(0, 80), objs: (Array.isArray(b.objs) ? b.objs : []).filter(keep),
+    wpN: b.wpN || 1, nmPx: +b.nmPx || 0, prof: okProf(b.prof), map: known(b.map), cam: known(b.map) && b.cam || null,
+    magDec: b.magDec ?? null, past: [], future: [] }));
+  for (const [id, blob] of blobs){ imgBlobs.set(id, blob); imgEls.delete(id); idbPut(id, blob).catch(() => {}); }
+  for (const b of boards) for (const o of b.objs) if (o.t === 'img') o.el = imageOf(o.id);
+  unit = j.unit === 'km' ? 'km' : 'nm'; $('unit').textContent = unit === 'km' ? 'km' : 'NM';
+  split = !!j.split; headRef = j.headRef === 'mag' ? 'mag' : 'true';
+  load(Math.max(0, Math.min(+j.cur || 0, boards.length - 1)));
+  sel = null; renderTabs(); fit(); commit();
+  toast(`Briefing ouvert : ${boards.length} planche${boards.length > 1 ? 's' : ''}`);
+}
+$('open').onclick = () => $('openfile').click();
+$('openfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openBriefing(f); };
+
 $('about').onclick = () => {
   $('aboutver').textContent = 'v' + APP.version;
   $('aboutcode').hidden = !APP.code; $('aboutcode').href = APP.code || '#';
@@ -1799,6 +1929,8 @@ addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && k === 'z'){ e.preventDefault(); $(e.shiftKey ? 'redo' : 'undo').click(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'y'){ e.preventDefault(); $('redo').click(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'd'){ e.preventDefault(); $('dup').click(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 's'){ e.preventDefault(); $('save').click(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'o'){ e.preventDefault(); $('open').click(); return; }
   if (e.ctrlKey || e.metaKey) return;
 
   if (draft && draft.t === 'zone' && e.key === 'Enter'){ finishZone(); return; }
@@ -1862,9 +1994,7 @@ function commit(){
   try {
     stash();
     if (DEMO) return;                        // la démo ne touche pas au tableau du visiteur
-    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, boards: boards.map(b => ({
-      name: b.name, wpN: b.wpN, nmPx: b.nmPx || 0, prof: b.prof, map: b.map, cam: b.cam, magDec: b.magDec ?? null,
-      objs: b.objs.filter(o => o.t !== 'img').map(snap) })) }));
+    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, boards: boardsRecord() }));
   } catch(_){}
 }
 
@@ -1991,4 +2121,5 @@ function demoBoards(){
   fit();
   setTool(tool);                           // l'outil d'ouverture, allumé dans la barre
   commit();
+  restoreImages();
 })();
