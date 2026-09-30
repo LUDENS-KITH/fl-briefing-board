@@ -47,8 +47,9 @@
 - **Export kneeboard DCS** — la planche, sa coupe et ses caps, au format du cockpit.
 - **Un fichier de briefing** — tout le tableau, images comprises, à préparer sur un poste
   et à mener sur un autre, ou à passer au meneur suivant.
-- **Un mode présentation** — plein écran, phases au clavier, pointeur laser : pour mener
-  le briefing en partage d'écran.
+- **Un mode présentation** — plein écran, phases au clavier, pointeur laser, et la
+  manœuvre qui se déroule d'une phase à l'autre : pour mener le briefing en partage
+  d'écran.
 - **L'import d'une mission DCS** — glissez le `.miz` : la route du vol, le bullseye, les
   défenses aériennes et les navires se posent sur la carte, au mètre près.
 

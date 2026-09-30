@@ -91,7 +91,9 @@ l'annulation, le changement de thème et l'export PNG triviaux.
 
 Douze types d'objets. Champs communs à tous : `t` (type), `c` (couleur CSS),
 `w` (épaisseur de trait en pixels). Les objets tracés portent aussi `ls` : `solid`,
-`dash` ou `dot`. Tout objet peut porter `locked: true` : il est **ancré** (§4).
+`dash` ou `dot`. Tout objet peut porter `locked: true` : il est **ancré** (§4). Tout
+objet porte un `uid`, posé à sa première écriture (`withUids()` dans `commit()` et
+`load()`) : « + phase » le garde, une copie Ctrl+D en reçoit un neuf.
 
 | `t` | Champs propres | Sens |
 |---|---|---|
@@ -241,6 +243,16 @@ palette, onglets et contrôles de carte masqués) et le plein écran du navigate
 qu'on présente, `pointerdown` ne fait que le laser ou déplacer la carte, le clavier ne
 répond qu'aux phases et à `Échap`, le double-clic est ignoré. Sortir du plein écran par
 le navigateur (`fullscreenchange`) quitte aussi la présentation.
+
+**Animation entre phases.** En présentation, la navigation passe par `animateTo(i)` :
+la planche d'arrivée est chargée aussitôt, et `anim` retient les objets et la caméra de
+la planche de départ. Pendant `ANIM_MS`, `draw()` remplace le temps d'un dessin `objs`
+par `tweenAt(k)` et `cam` par la caméra interpolée, puis les rend : rien de transitoire
+n'est jamais écrit. `tweenAt()` apparie les objets par `uid` (même type, même vue) et
+interpole leurs nombres — sauf `n` —, leur cap par le plus court chemin, les points de
+leurs tracés s'ils sont aussi nombreux, leur couleur ; un objet d'un seul côté reçoit
+`__alpha`, que `drawObj()` applique. La route liée et la vue radar se recalculent sur
+l'état interpolé. Entre deux repères différents, pas d'animation.
 
 Le laser vit hors du tableau : `laser.pts` en pixels d'écran, chaque point daté, relié
 au précédent s'il est du même glissé (`s`) ; `laserTrail()` ne rend que ceux de moins

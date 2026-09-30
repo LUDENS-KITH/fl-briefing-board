@@ -641,6 +641,48 @@ test('Un .miz illisible est refusé ; le tableau reste', async (ok) => {
   ok(/mission|archive/i.test(a.toast()), `message : « ${a.toast()} »`);
 });
 
+/* ---------- lot 7 : animation entre phases ---------- */
+
+test("Identifiant stable : « + phase » le garde, Ctrl+D en donne un neuf", async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  const uid = a.s('objs[0].uid');
+  ok(typeof uid === 'string' && uid.length > 2, `identifiant : ${uid}`);
+  a.button('.tab.add');
+  ok(a.s('objs[0].uid') === uid, `copie de phase : ${a.s('objs[0].uid')}, attendu ${uid}`);
+  a.key('v'); a.click(400, 300); a.key('d', { ctrlKey: true });
+  ok(a.s('objs.length === 2 && objs[1].uid !== objs[0].uid && !!objs[1].uid'), `duplication : ${a.s('JSON.stringify(objs.map(o => o.uid))')}`);
+});
+
+test('Présentation : → joue la transition — à mi-course entre ses deux positions ; une forme apparue entre en fondu', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(300, 300);
+  a.button('.tab.add');
+  a.key('v'); a.drag(300, 300, 500, 300);                   // phase 2 : le chasseur a avancé
+  a.button('[data-color="#FF4D4D"]');                      // et il est passé au rouge
+  a.tile('bomber'); a.click(420, 520);                      // et un bombardier apparaît
+  a.key('PageUp');
+  ok(a.s('cur') === 0, `planche de départ : ${a.s('cur') + 1}`);
+  a.button('#present');
+  a.key('ArrowRight');
+  ok(a.s('cur') === 1 && !!a.s('anim'), `après → : planche ${a.s('cur') + 1}, animation ${!!a.s('anim')}`);
+  const mid = JSON.parse(a.s('JSON.stringify(tweenAt(.5).map(o => [o.k, Math.round(o.x), o.__alpha ?? 1, o.c]))'));
+  const f = mid.find(o => o[0] === 'fighter'), b = mid.find(o => o[0] === 'bomber');
+  ok(f && Math.abs(f[1] - 400) <= 1 && f[2] === 1, `chasseur à mi-course : ${JSON.stringify(f)}`);
+  ok(b && Math.abs(b[2] - .5) < .01, `bombardier à mi-course : ${JSON.stringify(b)}`);
+  ok(f && !/^#(2F8CFF|FF4D4D)$/i.test(f[3]), `couleur du chasseur à mi-course : ${f && f[3]}, ni celle du départ ni celle de l'arrivée attendue`);
+  await pause(2000);
+  ok(a.s('draw(), anim') === null && a.s('objs[0].x') === 500, `fin : animation ${a.s('anim')}, chasseur x ${a.s('objs[0].x')}`);
+});
+
+test('Hors présentation, changer de planche reste instantané', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(300, 300);
+  a.button('.tab.add');
+  a.key('PageUp');
+  ok(a.s('cur') === 0 && !a.s('anim'), `planche ${a.s('cur') + 1}, animation ${a.s('anim')}`);
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

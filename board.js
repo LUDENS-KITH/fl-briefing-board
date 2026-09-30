@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.7', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.8', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -259,6 +259,14 @@ function altText(ft){
   return ft >= 18000 ? 'FL' + String(ft / 100).padStart(3, '0') : ft.toLocaleString('fr-FR') + ' ft';
 }
 
+/* ---------- identité des objets ----------
+   Chaque objet porte un `uid`, posé à sa première écriture. « + phase » le garde : c'est
+   par lui que l'animation reconnaît un objet d'une planche à l'autre. Une copie
+   (Ctrl+D) en reçoit un neuf. */
+let uidN = 0;
+const newUid = () => 'o' + Date.now().toString(36) + (uidN++).toString(36);
+const withUids = list => { for (const o of list) if (!o.uid) o.uid = newUid(); return list; };
+
 /* ---------- historique par instantanés ---------- */
 let past = [], future = [];
 const snap  = o => ({ ...o, pts: o.pts && o.pts.map(p => p.slice()) });
@@ -294,7 +302,7 @@ function stash(){ boards[cur] = { ...boards[cur], objs, wpN, nmPx, prof: { ...pr
 function load(i){
   cur = i;
   const b = boards[i];
-  objs = b.objs; wpN = b.wpN || 1; nmPx = b.nmPx || 0; past = b.past || []; future = b.future || [];
+  objs = withUids(b.objs); wpN = b.wpN || 1; nmPx = b.nmPx || 0; past = b.past || []; future = b.future || [];
   prof = b.prof ? { ...b.prof } : { ceil: 40000, range: 40 };
   mapCfg = b.map ? { ...b.map } : null; cam = b.cam ? { ...b.cam } : null;
   magDec = b.magDec ?? null;
@@ -377,7 +385,21 @@ function layout(){
 /* ---------- rendu ---------- */
 const BG = () => dark ? '#070B10' : '#F4F7FA';
 
+/* pendant une transition, on dessine l'état interpolé — objets et caméra — sans rien
+   écrire : objs et cam sont rendus aussitôt le dessin fini */
 function draw(){
+  if (!anim) return drawFrame();
+  const k = Math.min(1, (performance.now() - anim.t0) / ANIM_MS);
+  if (k >= 1){ anim = null; return drawFrame(); }
+  const real = objs, realCam = cam, e = ease(k);
+  objs = tweenAt(e);
+  if (anim.camA && realCam) cam = { x: anim.camA.x + (realCam.x - anim.camA.x) * e,
+                                   y: anim.camA.y + (realCam.y - anim.camA.y) * e,
+                                   z: anim.camA.z + (realCam.z - anim.camA.z) * e };
+  try { drawFrame(); } finally { objs = real; cam = realCam; }
+  requestDraw();
+}
+function drawFrame(){
   const w = stage.clientWidth, h = planH();
   route = computeRoute();
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -459,6 +481,7 @@ const dash = o => ctx.setLineDash(DASH[o.ls] ? DASH[o.ls](o.w || 4) : []);
 
 function drawObj(o){
   ctx.save();
+  if (o.__alpha !== undefined) ctx.globalAlpha = o.__alpha;   // transition : il paraît ou disparaît
   ctx.strokeStyle = o.c; ctx.fillStyle = o.c;
   ctx.lineWidth = o.w || 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
@@ -1618,7 +1641,7 @@ $('dup').onclick = () => {
   if (!sel) return;
   snapshot();
   const kk = (sel.v || 'm') === 'm' ? camK() : 1;
-  const o = snap(sel); delete o.locked; move(o, 24 / kk, 24 / kk);   // la copie naît libre
+  const o = snap(sel); delete o.locked; delete o.uid; move(o, 24 / kk, 24 / kk);   // la copie naît libre, et neuve
   if (o.t === 'sym' && SHAPES[o.k].num) o.n = wpN++;
   objs.push(o); sel = o; commit();
 };
@@ -2071,6 +2094,49 @@ function drawLaser(){
 }
 $('present').onclick = () => present(true);
 
+/* ---------- animation entre phases (lot 7) ----------
+   En présentation, passer d'une planche à une autre joue la manœuvre : un objet présent
+   des deux côtés (même uid) glisse de sa place à la nouvelle, son cap tourne par le plus
+   court chemin ; ce qui n'existe que d'un côté paraît ou disparaît en fondu. Seulement
+   entre deux planches du même repère — même théâtre, ou toutes deux sans carte. */
+let anim = null;
+const ANIM_MS = 1600;
+const ease = k => k * k * (3 - 2 * k), HEX = /^#[0-9a-f]{6}$/i;
+const sameSpace = (A, B) => !A.map === !B.map && (!A.map || A.map.theatre === B.map.theatre);
+function animateTo(i){
+  if (i < 0 || i >= boards.length || i === cur) return;
+  anim = null;                                           // une transition en cours s'achève d'un coup
+  leaveGesture(); stash();
+  const A = boards[cur];
+  withUids(A.objs);
+  load(i); renderTabs(); commit();
+  if (!sameSpace(A, boards[i])) return;
+  anim = { t0: performance.now(), from: A.objs, camA: A.cam && { ...A.cam } };
+  requestDraw();
+}
+/* l'état de la transition à l'avancement k (0 : planche de départ, 1 : d'arrivée) */
+function tweenAt(k){
+  const from = new Map(anim.from.map(o => [o.uid, o])), out = [], lerp = (a, b) => a + (b - a) * k;
+  for (const b of objs){
+    const a = from.get(b.uid);
+    if (!a || a.t !== b.t || (a.v || 'm') !== (b.v || 'm')){ out.push({ ...b, __alpha: k }); continue; }
+    from.delete(b.uid);
+    const o = { ...b };
+    for (const key in b) if (key !== 'n' && typeof b[key] === 'number' && typeof a[key] === 'number') o[key] = lerp(a[key], b[key]);
+    if (typeof a.a === 'number' && typeof b.a === 'number'){
+      const d = ((b.a - a.a) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;   // le plus court chemin
+      o.a = a.a + d * k;
+    }
+    if (a.pts && b.pts && a.pts.length === b.pts.length) o.pts = b.pts.map((p, j) => [lerp(a.pts[j][0], p[0]), lerp(a.pts[j][1], p[1])]);
+    if (a.c !== b.c && HEX.test(a.c) && HEX.test(b.c))       // la couleur glisse aussi
+      o.c = '#' + [1, 3, 5].map(i => Math.round(lerp(parseInt(a.c.substr(i, 2), 16), parseInt(b.c.substr(i, 2), 16)))
+                                      .toString(16).padStart(2, '0')).join('');
+    out.push(o);
+  }
+  for (const a of from.values()) out.unshift({ ...a, __alpha: 1 - k });   // disparus : dessous, en fondu
+  return out;
+}
+
 $('hide').onclick = () => {
   document.body.classList.toggle('nopal');
   requestAnimationFrame(fit);
@@ -2082,9 +2148,9 @@ addEventListener('keydown', e => {
   if (presenting){                                           // rien ne s'édite : seules les phases
     const next = ['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key);
     const prev = ['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key);
-    if (next || prev){ e.preventDefault(); switchBoard(cur + (next ? 1 : -1)); }
-    else if (e.key === 'Home'){ e.preventDefault(); switchBoard(0); }
-    else if (e.key === 'End'){ e.preventDefault(); switchBoard(boards.length - 1); }
+    if (next || prev){ e.preventDefault(); animateTo(cur + (next ? 1 : -1)); }
+    else if (e.key === 'Home'){ e.preventDefault(); animateTo(0); }
+    else if (e.key === 'End'){ e.preventDefault(); animateTo(boards.length - 1); }
     else if (e.key === 'Escape') present(false);
     else if (e.key === 'F5') e.preventDefault();
     return;
@@ -2140,6 +2206,7 @@ addEventListener('keydown', e => {
 
 /* ---------- persistance (hors images) ---------- */
 function commit(){
+  withUids(objs);
   draw();
   $('scale').title = cam ? 'Échelle automatique : distances et caps viennent de la carte'
                   : nmPx ? `Échelle de la planche : 1 NM = ${nmPx.toFixed(1)} px — cliquer pour réétalonner`
@@ -2176,9 +2243,11 @@ function demoBoards(){
   const sym = (k, x, y, a, c, s = 1, extra = {}) =>
     ({ t:'sym', k, x, y, a, s: (SHAPES[k].s0 || 1) * s, c, w:4, n:0, ...extra });
   const ceil = 40000, range = 80;
+  /* d'une planche à l'autre, les mêmes objets portent le même uid : l'animation les suit */
+  const withUid = (p, list) => list.map((o, i) => ({ ...o, uid: p + i }));
   const yA = ft => groundY() - ft / ceil * (groundY() - PROF_TOP);
   const gx = nm => PROF_L + nm * (PROF_REF_W - PROF_L) / range;
-  const common = () => [
+  const common = () => withUid('c', [
     { t:'zone', pts:[[kx + d(20), ky - d(150)], [kx + d(200), ky - d(150)], [kx + d(200), ky + d(20)],
                      [kx + d(20), ky + d(20)]], c:R, w:3, ls:'dot', lbl:'MEZ SA-11' },
     { t:'terrain', v:'p', pts:[[PROF_L, groundY()], [gx(10), yA(2500)], [gx(24), yA(7000)], [gx(32), yA(3500)],
@@ -2190,20 +2259,20 @@ function demoBoards(){
     sym('wp', kx - d(60), ky + d(40), 0, G, 1, { n:3, alt:500 }),
     sym('sam', kx + d(90), ky - d(60), 0, R, 1, { lbl:'SA-11' }),
     sym('awacs', bx - d(160), by - d(230), 1.57, G, .8, { lbl:'MAGIC' }),
-  ];
+  ]);
   const ingress = [...common(),
-    sym('fighter', bx - d(150), by + d(40), .8, B, 1, { lbl:'UZI 1-1' }),      // en mer, en approche
+    sym('fighter', bx - d(150), by + d(40), .8, B, 1, { lbl:'UZI 1-1', uid:'uzi11' }),   // en mer, en approche
     sym('fighter', bx - d(115), by + d(75), .8, B, 1, { lbl:'UZI 1-2' }),
     { t:'arrow', x1:bx - d(125), y1:by + d(20), x2:sx - d(25), y2:sy - d(45), cx:bx - d(40),
       cy:(by + sy) / 2 - d(30), bent:true, c:B, w:4, ls:'dash', meas:true },
-    sym('fighter', gx(9), yA(5500), -.22, B, .9, { v:'p', lbl:'UZI 1-1' }),    // en montée vers le WP2
+    sym('fighter', gx(9), yA(5500), -.22, B, .9, { v:'p', lbl:'UZI 1-1', uid:'uzi11p' }),   // en montée vers le WP2
   ];
   const attaque = [...common(),
-    sym('fighter', kx - d(110), ky + d(20), 1.4, O, 1, { lbl:'UZI 1-1' }),
+    sym('fighter', kx - d(110), ky + d(20), 1.4, O, 1, { lbl:'UZI 1-1', uid:'uzi11' }),
     { t:'arrow', x1:kx - d(95), y1:ky + d(25), x2:kx + d(60), y2:ky - d(20), cx:kx, cy:ky + d(40),
       bent:true, c:O, w:5, ls:'solid', meas:true },
     sym('target', kx + d(70), ky - d(25), 0, O, 1.1, { lbl:'DÉPÔT' }),
-    sym('fighter', gx(66), yA(8000), -.6, O, .9, { v:'p', lbl:'Pop-up' }),
+    sym('fighter', gx(66), yA(8000), -.6, O, .9, { v:'p', lbl:'Pop-up', uid:'uzi11p' }),
     sym('bomb', gx(69), yA(5500), .8, O, .8, { v:'p' }),
     sym('blast', gx(71), groundY() - 10, 0, O, .7, { v:'p' }),
   ];
