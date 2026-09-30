@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.9.1', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.9.2', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -1186,7 +1186,10 @@ function backToSelect(){
    Hors d'une piste, la marque désigne un écho, comme au cockpit : un écho brut (brique,
    cible de recherche) devient la piste qui la porte ; ailleurs, une nouvelle piste
    (SHAPES[…].newTrack) la porte là où l'on touche. Jamais sur l'écran, la piste ou
-   l'écho d'un autre appareil. */
+   l'écho d'un autre appareil.
+   Une piste ne porte qu'une marque. Posée sur la piste qui porte l'autre, la marque
+   l'échange avec la piste qui la portait (F/A-18C p. 173) ; sans elle, la marque d'une
+   vignette `keep` (la L&S) ne se retire pas en silence : refus. */
 const radarGroup = g => Object.values(SHAPES).some(k => k.g === g && k.mark);
 function markTrack(x, y, mk){
   const sh = SHAPES[symKey], name = g => (GROUPS.find(([k]) => k === g) || [])[1];
@@ -1212,6 +1215,10 @@ function markTrack(x, y, mk){
     const scope = topmost(x, y, o => other(o) && kind(o).scope);
     if (scope){ toast(`${sh.label} est une marque du ${name(sh.g)} : pas sur l'écran du ${name(kind(scope).g)}`); return; }
   }
+  const prev = t && t.mark && t.mark !== mk ? t.mark : null;
+  const holder = prev && objs.find(o => o !== t && o.mark === mk && (o.v || 'm') === (t.v || 'm'));
+  const kept = prev && Object.values(SHAPES).find(k => k.mark === prev && k.keep);
+  if (kept && !holder){ toast(`Cette piste porte la ${kept.label} : ${sh.label} se pose sur une autre piste`); return; }
   snapshot();
   if (!t){                                             // un écho désigné : sa piste porte la marque
     const nk = SHAPES[sh.newTrack];
@@ -1226,6 +1233,7 @@ function markTrack(x, y, mk){
   }
   const on = t.mark !== mk;
   for (const o of objs) if (o.mark === mk && (o.v || 'm') === (t.v || 'm')) delete o.mark;
+  if (holder) holder.mark = prev;                      // échange : l'autre piste prend la marque de celle-ci
   if (on) t.mark = mk;
   commit();
 }

@@ -40,8 +40,10 @@ mélangent pas : une marque ne se pose que sur une piste de son appareil.
   près, le bout de sa tige suffit —, l'étoile ou le losange s'y inscrit. Touchée
   ailleurs, la marque désigne un écho, comme au cockpit : une brique devient la piste
   HAFU qui la porte, le fond de l'écran reçoit une nouvelle piste inconnue marquée. Une
-  seule L&S et une seule DT2 par planche, comme dans l'avion ; les reposer sur la même
-  piste les retire. Jamais sur l'écran ou une piste du F-16C.
+  seule L&S et une seule DT2 par planche, sur deux pistes différentes, comme dans
+  l'avion : l'une posée sur la piste de l'autre les échange, et la DT2 ne remplace
+  jamais la seule L&S. Les reposer sur leur propre piste les retire. Jamais sur l'écran
+  ou une piste du F-16C.
 - **Curseur TDC** : deux traits verticaux, posés par-dessus la piste ou la brique
   désignée.
 - Le rang de menace, la vitesse ou l'altitude d'une piste vont dans son étiquette

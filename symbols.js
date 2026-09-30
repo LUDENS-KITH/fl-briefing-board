@@ -575,8 +575,9 @@ Object.assign(SHAPES, {
   /* L&S, piste prioritaire, et DT2, deuxième piste désignée : des états de la piste,
      pas des objets. La vignette marque le HAFU touché (p. 173, 176-177). Hors d'une
      piste, elle désigne un écho : sa piste HAFU, inconnue faute d'identification, porte
-     la marque (p. 176) — newTrack */
-  fa18_ls: { g:'fa18', label:'L&S', mark:'ls', newTrack:'fa18_hafu_u', tile:.5, draw(c){
+     la marque (p. 176) — newTrack. Les deux ne partagent jamais une piste : désigner la
+     DT2 les échange (p. 173) ; keep : la L&S n'est jamais retirée par une autre marque */
+  fa18_ls: { g:'fa18', label:'L&S', mark:'ls', keep:true, newTrack:'fa18_hafu_u', tile:.5, draw(c){
     c.beginPath();
     for (let i = 0; i < 10; i++){
       const r = i % 2 ? .18 : .45, t = -Math.PI / 2 + i * Math.PI / 5;

@@ -64,7 +64,8 @@ deux barres 20°, 40°, 60°, 80° (p. 174).
 | Tige de cap d'un HAFU | trait issu du symbole, dans le sens du déplacement | p. 209, p. 173 |
 | L&S, piste prioritaire | étoile inscrite dans le HAFU ; une seule | p. 173, p. 176 |
 | DT2, deuxième piste | losange inscrit dans le HAFU ; une seule | p. 173, p. 176-177 |
-| Désigner un écho | sa piste HAFU porte la marque : une brique ou le fond de l'écran donnent une piste inconnue marquée | p. 176 (LTWS) |
+| Désigner un écho | sa piste HAFU porte la marque : une brique ou le fond de l'écran donnent une piste inconnue marquée | p. 173, p. 176 (LTWS) |
+| L&S et DT2 sur deux pistes | désigner la DT2 l'échange avec la L&S ; sans L&S ailleurs, la DT2 désignée devient la L&S | p. 173, p. 184 |
 | Curseur d'acquisition du TDC | deux traits verticaux parallèles | p. 158, p. 162 n° 21 |
 
 Couleurs d'identité : vert ami, jaune inconnu, rouge hostile (p. 209). Le kit prend le
