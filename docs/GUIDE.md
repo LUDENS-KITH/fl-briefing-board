@@ -19,11 +19,14 @@ Rien n'est une image : chaque forme est **paramétrique**. C'est ce qui la rend
 orientable, redimensionnable et **recolorable sans perte**. Pour en ajouter une :
 [docs/MODELE.md §8](MODELE.md).
 
-## Kit radar — F/A-18C
+## Kit radar — F/A-18C et F-16C
 
-Un groupe de la palette, **Radar F/A-18C**, pour expliquer la page d'attaque radar
-air-air (RDR ATTK) du Hornet. Tout est dessiné d'après le manuel ED, et chaque élément
-cite sa page : [RADAR.md](RADAR.md).
+Deux groupes de la palette, **Radar F/A-18C** et **Radar F-16C**, pour expliquer la
+page radar air-air de chaque appareil. Tout est dessiné d'après le manuel ED du module,
+et chaque élément cite sa page : [RADAR.md](RADAR.md). Les deux symbologies ne se
+mélangent pas : une marque ne se pose que sur une piste de son appareil.
+
+**F/A-18C — page RDR ATTK**
 
 - **Écrans RWS, TWS et STT** : l'écran de bord, ses 20 boutons et leurs libellés, le
   B-scope. Il se pose **sous** les autres objets et reste traversable : choisissez une
@@ -41,9 +44,21 @@ cite sa page : [RADAR.md](RADAR.md).
 - Le rang de menace, la vitesse ou l'altitude d'une piste vont dans son étiquette
   (double-clic).
 
+**F-16C — page FCR**
+
+- **Écrans FCR RWS et TWS** : libellés des boutons, échelle entre ses flèches, largeur
+  de balayage (`←` `→` : A6, A3, A1, dont les limites se tracent), échelle d'élévation
+  d'antenne, horizon, repères de distance.
+- **Cibles de recherche** chaude (trait dessous) ou froide (trait dessus).
+- **Pistes TWS** (jaunes) et **pistes système** (blanches) : le symbole entier tourne
+  avec le cap sol de la cible ; le geste de pose l'oriente.
+- **Cible désignée** (bugged) : une marque, un cercle autour de la piste, une seule par
+  planche.
+- **Curseur A-A**, **brouillage** (chevrons) et **bullseye**.
+
 Le radar se prépare de préférence sur une planche **sans carte** : sur une carte, un
-écran suivrait le terrain au gré du zoom. La démo en ligne en montre une (planche
-« Radar »).
+écran suivrait le terrain au gré du zoom. La démo en ligne en montre deux (planches
+« Radar F/A-18C » et « Radar F-16C »).
 
 ## Cartes
 

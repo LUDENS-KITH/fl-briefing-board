@@ -39,8 +39,9 @@
   du NOAA, ou saisie depuis la mission pour coller au cockpit.
 - **Un briefing en plusieurs planches** — ingress, attaque, egress ; chaque phase part
   de la précédente.
-- **Kit radar F/A-18C** — l'écran d'attaque radar en RWS, TWS et STT, briques, HAFU,
-  L&S, DT2 et curseur, dessinés d'après le manuel du module, page par page.
+- **Kit radar F/A-18C et F-16C** — les écrans radar air-air (RDR ATTK du Hornet, FCR du
+  Viper), leurs pistes, marques et curseurs, dessinés d'après le manuel de chaque module,
+  page par page.
 - **Export kneeboard DCS** — la planche, sa coupe et ses caps, au format du cockpit.
 
 Tout tient dans une page web : **aucune installation, aucun compte, rien à payer.**

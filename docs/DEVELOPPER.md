@@ -7,8 +7,8 @@ Zéro dépendance, zéro build : on modifie, on recharge la page. Le contrat du 
 ```
 FL Briefing Board/
 ├─ index.html        coquille : barre d'outils, palette, styles          (276 l.)
-├─ symbols.js        les 28 formes, vues de profil, kit radar           (568 l.)
-├─ board.js          le moteur : planches, carte, coupe, route, exports (1 837 l.)
+├─ symbols.js        les 28 formes, vues de profil, kit radar           (697 l.)
+├─ board.js          le moteur : planches, carte, coupe, route, exports (1 853 l.)
 ├─ theatres.js       14 théâtres DCS et 791 aérodromes (généré, ne pas retoucher)
 ├─ magnetic.js       modèle magnétique WMM2025 (généré, ne pas retoucher)
 ├─ assets/           exports du logo (écusson, icône, .ico du raccourci) — ne pas retoucher

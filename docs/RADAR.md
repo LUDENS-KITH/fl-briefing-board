@@ -1,6 +1,6 @@
 # Kit radar — sources
 
-> Document vivant, ouvert le **2026-09-30** avec la **v1.3**.
+> Document vivant, ouvert le **2026-09-30** avec la **v1.3** : F/A-18C et F-16C.
 > Chaque élément du kit radar cite ici sa source. Un symbole ou un libellé sans source
 > n'entre pas dans le kit ([PLAN.md](PLAN.md) §5.3).
 
@@ -81,7 +81,69 @@ jaune le plus proche de sa palette, l'or `#D1A94A`.
 - **La moitié basse du HAFU** (identification extérieure, p. 210-211) : prévue avec la
   page SA.
 
-## F-16C — page FCR
+## F-16C — page FCR air-air
 
-À venir (lot 2, second module) : *DCS F-16C Early Access Guide*, « APG-68 Fire Control
-Radar », p. 374 et suivantes.
+Source unique : *DCS F-16C Early Access Guide* (Eagle Dynamics, anglais, édition du
+2026-08-16), « APG-68 Fire Control Radar », p. 374-420. Lu pour lui-même : rien n'est
+repris du F/A-18C, dont la symbologie et la numérotation diffèrent.
+
+### L'écran
+
+| Élément | Dessin | Source |
+|---|---|---|
+| B-scope : appareil au bas de l'écran, distance vers le haut, azimut de gauche à droite | zone sans cadre, entre les deux traits du format | p. 394 |
+| Échelle entre ses deux flèches : 5, 10, 20, 40, 80 ou 160 NM en CRM | △ valeur ▽, boutons 20 et 19 | p. 395 n° 7, p. 410 |
+| Largeur de balayage : A6 = ±60°, A3 = ±30°, A1 = ±10° | libellé vertical, bouton 18 ; limites tracées en A3 et A1 | p. 395-396 n° 8 |
+| Barres en élévation | `4B` vertical, bouton 17 | p. 396 n° 9 |
+| Ligne d'horizon, deux repères tournés vers le sol à ses bouts | trait horizontal | p. 396 n° 10 |
+| Échelle d'élévation d'antenne : ±60°, repère majeur à 0°, mineurs tous les 10°, position en « T » couché | échelle verticale à gauche | p. 397 n° 20 |
+| Repères de distance à ¼, ½ et ¾ de l'échelle | trois traits au bord droit | p. 397 n° 21 |
+
+### Numérotation des boutons
+
+OSB 1 à 5 en haut, de gauche à droite ; OSB 6 à 10 à droite, de haut en bas ; OSB 16
+à 20 à gauche, de bas en haut. Recoupée par : OSB 1 à 5 sur la ligne du haut (figure
+p. 394, n° 1 à 5) ; OSB 6, premier à droite (n° 6) ; échelle aux OSB 19 et 20, azimut à
+l'OSB 18, barres à l'OSB 17 (p. 410, et figure p. 394 n° 7 à 9, du haut vers le bas à
+gauche). **Le rang du bas (OSB 11 à 15, de droite à gauche) n'est recoupé par aucun
+texte lu** : le dessin n'en dépend pas, il place ces libellés là où la figure p. 394 les
+montre.
+
+### Libellés des boutons
+
+| Page | Libellés | Source |
+|---|---|---|
+| RWS | OSB 1 `CRM` · OSB 2 `RWS` · OSB 3 `NORM` · OSB 4 `OVRD` · OSB 5 `CNTL` · OSB 6 `CONT` · OSB 20 et 19 échelle · OSB 18 azimut · OSB 17 `4B` · OSB 15 `SWAP` · OSB 14 `FCR` · OSB 13 `TEST` · OSB 12 `DTE` · OSB 11 `DCLT` | figure p. 394, p. 394-396 |
+| TWS | les mêmes, OSB 2 `TWS` | p. 413 |
+
+Les libellés du bas nomment les formats affectés aux boutons de l'écran ; la figure
+p. 394 montre `SWAP FCR TEST DTE DCLT`, d'autres figures `SWAP FCR FLCS TEST DCLT` (p. 410).
+Le kit reprend la première.
+
+### Les symboles
+
+| Symbole | Dessin | Source |
+|---|---|---|
+| Cible de recherche chaude | carré plein, « hot line » dessous : elle vient vers l'appareil | p. 404 |
+| Cible de recherche froide | carré plein, « hot line » dessus : elle s'éloigne | p. 404 |
+| Piste TWS | carré plein, jaune, qui tourne avec le cap sol, trait de nez | p. 404, p. 414 |
+| Piste système | la même, en blanc | p. 404, p. 414 |
+| Cible désignée (bugged, FCR TOI) | cercle autour de la piste ; une seule | p. 404, p. 415 |
+| Curseur d'acquisition A-A | deux traits verticaux parallèles | p. 396 n° 11 |
+| Brouillage | paire de chevrons jaunes, à l'azimut des émissions | p. 411 |
+| Bullseye | cercle et point | p. 397 n° 17 |
+
+### Laissé de côté, faute de source ou de place
+
+- **L'échelle d'azimut d'antenne** du bas (p. 397 n° 23) : l'espacement de ses repères
+  n'est pas donné.
+- **Les limites de balayage suivent le curseur** dans l'avion (p. 396) ; le kit les
+  trace centrées.
+- **Les champs de données** : relèvement et distance du curseur, IFF, état de l'arme,
+  niveau de désencombrement, données de la cible désignée (p. 396-397, 405). Ils
+  changent à chaque vol ; l'étiquette les porte au besoin.
+- **Les chiffres d'altitude du curseur** (p. 396 n° 11) et **l'altitude sous une piste**
+  (p. 404) : dans l'étiquette.
+- **Le symbole de steerpoint** (« wedding cake », p. 397 n° 18) : sa forme n'est pas
+  décrite, seulement montrée en petit.
+- **Les classes NCTR** et **la cible AIM-120** (p. 404) : prévues avec l'emploi des armes.

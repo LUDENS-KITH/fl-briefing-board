@@ -408,9 +408,10 @@ const GROUPS = [
      box      désignation carrée (demi-côté, en unités du repère) au lieu d'un disque
      smax     échelle maximale (6 par défaut)
      col      couleur donnée à la pose : identité d'un HAFU, encre d'un écran
-     hafu     une piste : peut porter une marque (`mark` sur l'objet)
-     mark     la vignette ne pose rien : elle marque la piste touchée (L&S, DT2)
+     track    une piste : peut porter une marque (`mark` sur l'objet) de son module
+     mark     la vignette ne pose rien : elle marque la piste touchée (L&S, DT2, cible désignée)
      over     se pose par-dessus ce qu'on touche, sans le saisir (curseur)
+     tileA    angle de la vignette, quand une forme se reconnaît à son inclinaison
      scope    écran : page, échelle et azimut par défaut, valeurs proposées au clavier,
               libellés des boutons */
 
@@ -443,7 +444,8 @@ function scopeText(c, s, x, y, al = 'center', size = .062){
   });
 }
 
-/* boîtier, boutons et verre : gris, indépendants de la couleur choisie */
+/* boîtier, boutons et verre : gris, indépendants de la couleur choisie. Le MFD du
+   F-16C a ses 20 boutons aux mêmes places, numérotés autrement (MFD_OSB). */
 function ddiBezel(c){
   const lw = c.lineWidth;
   c.save();
@@ -498,12 +500,13 @@ function fa18Attk(c, o){
   c.beginPath(); c.arc(dx, dy, .009, 0, 7); c.fill();
   /* libellés des boutons de la page */
   for (const [n, t] of Object.entries(sc.pb))
-    scopeText(c, t.replace('{az}', (o.az ?? sc.az) + '°'), DDI_PB[n].lx, DDI_PB[n].ly, DDI_PB[n].al);
+    scopeText(c, t.replace('{az}', o.az ?? sc.az), DDI_PB[n].lx, DDI_PB[n].ly, DDI_PB[n].al);
   c.restore();
 }
 
-/* marques d'une piste, inscrites dans son HAFU : étoile L&S, losange DT2 (p. 176) */
-const HAFU_MARK = {
+/* marques d'une piste : étoile L&S et losange DT2 inscrits dans le HAFU du F/A-18C
+   (p. 176), cercle de la cible désignée du F-16C (p. 404, 415) */
+const MARKS = {
   ls(c){
     c.beginPath();
     for (let i = 0; i < 10; i++){
@@ -513,10 +516,12 @@ const HAFU_MARK = {
     c.closePath(); c.fill();
   },
   dt2(c){ c.beginPath(); c.moveTo(0, -.47); c.lineTo(.27, -.2); c.lineTo(0, .07); c.lineTo(-.27, -.2); c.closePath(); c.stroke(); },
+  bug(c){ c.beginPath(); c.arc(0, 0, .72, 0, 7); c.stroke(); },
 };
+const withMark = (c, o) => { if (o && MARKS[o.mark]) MARKS[o.mark](c); };
 /* HAFU, moitié haute : l'identification par les capteurs de bord (p. 209-210) */
-const hafu = (label, col, draw) => ({ g:'fa18', label, col, hafu:true, upright:true, fixed:true, stem:[.2, 1.2],
-  s0:.55, tile:.5, draw(c, o){ draw(c); if (o && HAFU_MARK[o.mark]) HAFU_MARK[o.mark](c); } });
+const hafu = (label, col, draw) => ({ g:'fa18', label, col, track:true, upright:true, fixed:true, stem:[.2, 1.2],
+  s0:.55, tile:.5, draw(c, o){ draw(c); withMark(c, o); } });
 
 Object.assign(SHAPES, {
   /* ---------------- radar F/A-18C ---------------- */
@@ -524,12 +529,12 @@ Object.assign(SHAPES, {
     ldy:1.12, col:'#34D399', draw: fa18Attk,
     scope: { page:'rws', rng:40, az:140, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80, 140],
              pb: { 1:'HI\nINTL', 5:'RWS', 6:'4B 1', 7:'SIL', 8:'ERASE', 11:'↑', 12:'↓', 13:'SET',
-                   14:'RSET', 15:'NCTR', 16:'DATA', 17:'CHAN', 19:'{az}', 20:'MODE' } } },
+                   14:'RSET', 15:'NCTR', 16:'DATA', 17:'CHAN', 19:'{az}°', 20:'MODE' } } },
   fa18_tws: { g:'fa18', label:'Écran TWS', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
     ldy:1.12, col:'#34D399', draw: fa18Attk,
     scope: { page:'tws', rng:40, az:80, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80],
              pb: { 1:'HI\nINTL', 5:'TWS', 6:'2B 2', 7:'SIL', 8:'HITS', 9:'RAID', 11:'↑', 12:'↓',
-                   13:'AUTO\nMAN', 14:'RSET', 16:'DATA', 19:'{az}', 20:'EXP' } } },
+                   13:'AUTO\nMAN', 14:'RSET', 16:'DATA', 19:'{az}°', 20:'EXP' } } },
   fa18_stt: { g:'fa18', label:'Écran STT', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
     ldy:1.12, col:'#34D399', draw: fa18Attk,
     scope: { page:'stt', rng:40, ranges:[5, 10, 20, 40, 80, 160],
@@ -566,3 +571,127 @@ Object.assign(SHAPES, {
   }},
 });
 GROUPS.push(['fa18', 'Radar F/A-18C']);
+
+/* ---------------- radar F-16C ----------------
+   DCS F-16C Early Access Guide, « APG-68 Fire Control Radar », p. 374-420. Lu pour
+   lui-même : rien n'est repris du F/A-18C. */
+
+/* les 20 boutons d'un MFD de F-16C, numérotés comme dans le manuel ED : OSB 1 → 5 en
+   haut de gauche à droite, 6 → 10 à droite de haut en bas, 16 → 20 à gauche de bas en
+   haut (p. 394-396, 410). Le rang du bas, 11 → 15 de droite à gauche, n'est recoupé par
+   aucun texte : ses libellés sont placés comme sur la figure p. 394. */
+const MFD_OSB = (() => {
+  const p = {}, k = [-.52, -.26, 0, .26, .52];
+  k.forEach((v, i) => {
+    p[1 + i]  = { lx: v, ly: -.79, al: 'center' };
+    p[6 + i]  = { lx: .81, ly: v, al: 'right' };
+    p[15 - i] = { lx: v, ly: .8, al: 'center' };
+    p[20 - i] = { lx: -.81, ly: v, al: 'left' };
+  });
+  return p;
+})();
+
+/* page FCR air-air, en B-scope : l'appareil au bas de l'écran, la distance vers le
+   haut, l'azimut de gauche à droite (p. 394). Libellés en blanc, échelles à la couleur
+   de l'objet. */
+function f16Fcr(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth, ink = c.strokeStyle, WH = '#E6EDF5';
+  ddiBezel(c);
+  const L = -.55, R = .62, T = -.64, B = .6, X0 = (L + R) / 2, hy = (T + B) / 2;
+  c.save();
+  c.lineWidth = lw * .35;
+  c.strokeStyle = WH; c.fillStyle = WH;
+  c.beginPath(); c.moveTo(-.72, -.72); c.lineTo(.72, -.72); c.moveTo(-.72, .72); c.lineTo(.72, .72); c.stroke();
+  c.strokeStyle = ink; c.fillStyle = ink;
+  /* ligne d'horizon, deux repères tournés vers le sol à ses bouts (p. 396, n° 10) */
+  c.beginPath();
+  c.moveTo(X0 - .42, hy); c.lineTo(X0 + .42, hy);
+  c.moveTo(X0 - .42, hy); c.lineTo(X0 - .42, hy + .04); c.moveTo(X0 + .42, hy); c.lineTo(X0 + .42, hy + .04);
+  c.stroke();
+  if (o.mini){ c.restore(); return; }
+
+  /* échelle d'élévation d'antenne : ±60°, repère majeur à 0°, mineurs tous les 10°,
+     position en « T » couché (p. 397, n° 20) */
+  const ex = L - .06, eh = (B - T) / 2 - .04;
+  c.beginPath(); c.moveTo(ex, hy - eh); c.lineTo(ex, hy + eh); c.stroke();
+  for (let d = -60; d <= 60; d += 10){
+    const yy = hy - d / 60 * eh;
+    c.beginPath(); c.moveTo(ex, yy); c.lineTo(ex + (d ? .025 : .05), yy); c.stroke();
+  }
+  c.beginPath(); c.moveTo(ex - .035, hy); c.lineTo(ex + .06, hy); c.moveTo(ex + .06, hy - .025); c.lineTo(ex + .06, hy + .025); c.stroke();
+  /* repères de distance à ¼, ½ et ¾ de l'échelle, bord droit (p. 397, n° 21) */
+  for (const f of [.25, .5, .75]){
+    const yy = B - (B - T) * f;
+    c.beginPath(); c.moveTo(R, yy); c.lineTo(R - .05, yy); c.stroke();
+  }
+  /* largeur de balayage (p. 395-396, n° 8) : A6 = ±60°, toute la largeur ; A3 = ±30°
+     et A1 = ±10° tracent leurs limites. Ici centrées : dans l'avion, elles suivent le
+     curseur d'acquisition. */
+  const az = o.az ?? sc.az;
+  if (az < 6){
+    const hw = (R - L) / 2 * az / 6;
+    c.beginPath(); c.moveTo(X0 - hw, T); c.lineTo(X0 - hw, B); c.moveTo(X0 + hw, T); c.lineTo(X0 + hw, B); c.stroke();
+  }
+  /* libellés : échelle entre ses flèches OSB 20 et 19 (p. 395, n° 7), puis les boutons */
+  c.strokeStyle = WH; c.fillStyle = WH;
+  const tri = (yy, up) => {
+    const d = up ? -.03 : .03;
+    c.beginPath(); c.moveTo(-.8, yy - d); c.lineTo(-.72, yy - d); c.lineTo(-.76, yy + d); c.closePath(); c.stroke();
+  };
+  tri(-.58, true); tri(-.26, false);
+  scopeText(c, String(o.rng ?? sc.rng), -.81, -.42, 'left');
+  for (const [n, t] of Object.entries(sc.pb))
+    scopeText(c, t.replace('{az}', az), MFD_OSB[n].lx, MFD_OSB[n].ly, MFD_OSB[n].al);
+  c.restore();
+}
+
+/* piste TWS : le symbole entier tourne avec le cap sol de la cible, un trait figure
+   son nez (p. 404, 414) */
+function f16Track(c, o){
+  c.fillRect(-.32, -.32, .64, .64);
+  c.beginPath(); c.moveTo(0, -.32); c.lineTo(0, -.95); c.stroke();
+  withMark(c, o);
+}
+
+const f16Page = (label, sub) => ({ g:'f16', label, under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
+  ldy:1.12, col:'#4FC3F7', draw: f16Fcr,
+  scope: { page: sub.toLowerCase(), rng:40, az:6, ranges:[5, 10, 20, 40, 80, 160], azs:[1, 3, 6],
+           pb: { 1:'CRM', 2:sub, 3:'NORM', 4:'OVRD', 5:'CNTL', 6:'CONT', 18:'A\n{az}', 17:'4\nB',
+                 15:'SWAP', 14:'FCR', 13:'TEST', 12:'DTE', 11:'DCLT' } } });
+
+Object.assign(SHAPES, {
+  f16_rws: f16Page('Écran FCR RWS', 'RWS'),
+  f16_tws: f16Page('Écran FCR TWS', 'TWS'),
+  /* cible de recherche : carré plein ; la « hot line » dessous = chaude, elle vient
+     vers nous ; dessus = froide, elle s'éloigne (p. 404) */
+  f16_hot: { g:'f16', label:'Cible chaude', upright:true, fixed:true, s0:.5, tile:.55, col:'#E6EDF5', draw(c){
+    c.fillRect(-.3, -.3, .6, .6); c.beginPath(); c.moveTo(0, .3); c.lineTo(0, .8); c.stroke();
+  }},
+  f16_cold: { g:'f16', label:'Cible froide', upright:true, fixed:true, s0:.5, tile:.55, col:'#E6EDF5', draw(c){
+    c.fillRect(-.3, -.3, .6, .6); c.beginPath(); c.moveTo(0, -.3); c.lineTo(0, -.8); c.stroke();
+  }},
+  /* piste en jaune, piste système en blanc (p. 404) */
+  f16_track: { g:'f16', label:'Piste TWS', track:true, fixed:true, s0:.55, tile:.5, tileA:-.7, col:'#D1A94A', draw: f16Track },
+  f16_systrack: { g:'f16', label:'Piste système', track:true, fixed:true, s0:.55, tile:.5, tileA:-.7, col:'#E6EDF5', draw: f16Track },
+  /* cible désignée (bugged, FCR TOI) : un cercle autour de la piste, une seule (p. 404, 415) */
+  f16_bug: { g:'f16', label:'Désignée', mark:'bug', tile:.5, draw(c){
+    c.beginPath(); c.arc(0, 0, .72, 0, 7); c.stroke(); c.fillRect(-.3, -.3, .6, .6);
+  }},
+  /* curseur d'acquisition A-A : deux traits verticaux parallèles (p. 396, n° 11) */
+  f16_cursor: { g:'f16', label:'Curseur A-A', upright:true, fixed:true, over:true, s0:.6, tile:.55, col:'#E6EDF5', draw(c){
+    c.beginPath(); c.moveTo(-.16, -.5); c.lineTo(-.16, .5); c.moveTo(.16, -.5); c.lineTo(.16, .5); c.stroke();
+  }},
+  /* brouillage : une paire de chevrons jaunes, à l'azimut des émissions (p. 411) */
+  f16_jam: { g:'f16', label:'Brouillage', upright:true, fixed:true, s0:.55, tile:.5, col:'#D1A94A', draw(c){
+    c.beginPath();
+    c.moveTo(-.45, -.05); c.lineTo(0, -.45); c.lineTo(.45, -.05);
+    c.moveTo(-.45, .35); c.lineTo(0, -.05); c.lineTo(.45, .35);
+    c.stroke();
+  }},
+  /* bullseye (p. 397, n° 17) */
+  f16_bull: { g:'f16', label:'Bullseye', upright:true, fixed:true, s0:.5, tile:.5, col:'#4FC3F7', draw(c){
+    c.beginPath(); c.arc(0, 0, .5, 0, 7); c.stroke();
+    c.beginPath(); c.arc(0, 0, .14, 0, 7); c.fill();
+  }},
+});
+GROUPS.push(['f16', 'Radar F-16C']);

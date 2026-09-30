@@ -5,7 +5,8 @@ Les dates sont celles de la livraison effective. Chaque version note ce qui a é
 
 ## v1.3 — 2026-09-30
 
-Lot 2 du [plan d'action](docs/PLAN.md), premier module décidé par Vince : le F/A-18C.
+Lot 2 du [plan d'action](docs/PLAN.md) : le kit radar, F/A-18C puis F-16C comme décidé
+par Vince.
 
 ### Ajouté
 - **Kit radar F/A-18C**, un groupe de la palette : écrans RDR ATTK en **RWS, TWS et STT**
@@ -18,8 +19,15 @@ Lot 2 du [plan d'action](docs/PLAN.md), premier module décidé par Vince : le F
   échelle, `←` `→` son azimut balayé.
 - **L&S et DT2 sont des états de piste** : posés sur un HAFU, uniques par planche, comme
   dans l'avion.
-- Planche **« Radar »** dans la démo : un écran TWS ancré, ses pistes et sa légende.
-- Banc de saisie : 6 scénarios de plus, 21 en tout.
+- **Kit radar F-16C**, lu dans son propre manuel : écrans FCR en **RWS et TWS**
+  (libellés, échelle entre ses flèches, largeur de balayage A6, A3, A1 et ses limites,
+  échelle d'élévation d'antenne, horizon, repères de distance), cibles de recherche
+  **chaude** et **froide**, **pistes TWS** et **pistes système** qui tournent avec le cap
+  sol, **cible désignée**, **curseur A-A**, **brouillage**, **bullseye**.
+- Une marque ne se pose que sur une piste **du même appareil**.
+- Deux planches dans la démo, **« Radar F/A-18C »** et **« Radar F-16C »** : un écran TWS
+  ancré, ses pistes et sa légende.
+- Banc de saisie : 8 scénarios de plus, 23 en tout.
 
 ### Modifié
 - Une forme peut être **droite** (elle ne tourne pas, seule sa tige suit le cap),
@@ -27,7 +35,8 @@ Lot 2 du [plan d'action](docs/PLAN.md), premier module décidé par Vince : le F
   désignation, **posée dessous**, **posée par-dessus** ou porter une **couleur
   d'identité** : champs `upright`, `stem`, `fixed`, `box`, `under`, `over`, `col`
   ([MODELE.md](docs/MODELE.md) §8).
-- `draw(c, o)` reçoit l'objet.
+- `draw(c, o)` reçoit l'objet ; une vignette peut être inclinée (`tileA`) : sans cela,
+  une piste TWS du F-16C ressemblait à une cible froide.
 
 ### Constaté en construisant
 - **Un HAFU se saisissait au lieu de recevoir sa L&S** : avec une forme choisie, toucher
@@ -37,9 +46,14 @@ Lot 2 du [plan d'action](docs/PLAN.md), premier module décidé par Vince : le F
   plantait sur `draw(c)` sans objet : des échecs qui ne prouvaient rien. Le moteur a été
   modifié en deux temps pour qu'ils échouent sur le comportement.
 
+- Le scénario clavier du FCR passait dès que les formes existaient : le moteur était
+  déjà générique. Seules les marques par appareil ont demandé du code, et leur scénario
+  échouait avant.
+
 ### Vérifié en exécutant
-Banc 21/21 · rendu relu en image : pages RWS, TWS et STT, vignettes, planche de démo,
-kneeboard · démo publique v1.2 vérifiée après fusion du lot 1, aucune erreur console.
+Banc 23/23 · rendu relu en image : pages RWS, TWS et STT du F/A-18C, FCR RWS et TWS du
+F-16C, vignettes, planches de démo, kneeboard · démo publique v1.2 vérifiée après
+fusion du lot 1, aucune erreur console.
 
 ## v1.2 — 2026-09-30
 

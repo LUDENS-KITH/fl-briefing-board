@@ -20,7 +20,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | Lot | Contenu | Origine | Taille | Dépend de | Version | Statut |
 |---|---|---|---|---|---|---|
 | 1 | Ancrer une forme · clic droit et `Échap` ramènent à la sélection · ouverture sur la sélection · banc de saisie | demande | S | — | v1.2 | en ligne depuis le 2026-09-30 |
-| 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | F/A-18C livré, lecture à valider ; F-16C en cours |
+| 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | livré le 2026-09-30, lecture en jeu à valider par Vince |
 | 3 | Vue radar liée : ce que voit le radar de l'appareil désigné, en B-scope | demande | M | lot 2 | v1.4 | à faire |
 | 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | — | proposé |
 | 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | — | proposé |
@@ -198,11 +198,15 @@ IT-23) : ils restent hors du kit.
 - **Un groupe de palette par module** — « Radar F/A-18C », « Radar F-16C » — qui ne
   contient que les symboles de ce module. Hornet, livré : écrans RWS, TWS et STT,
   brique, HAFU ami, inconnu, hostile (moitié haute), L&S, DT2, curseur TDC. La moitié
-  basse du HAFU attend la page SA. Viper : la liste sort du manuel, symbole par symbole.
+  basse du HAFU attend la page SA. Viper, livré : écrans FCR RWS et TWS, cibles de
+  recherche chaude et froide, pistes TWS et système, cible désignée, curseur A-A,
+  brouillage, bullseye.
 - Les symboles restent **paramétriques** (MODELE §8) : recolorables, et **le geste de
   pose oriente la tige de cap** d'un HAFU, sans changer sa taille.
 - **L&S et DT2 sont des états de piste**, pas des objets : leur vignette marque le HAFU
   touché, une seule L&S et une seule DT2 par planche (manuel F/A-18C, p. 173 et 176).
+  La cible désignée du F-16C suit la même règle (manuel F-16C, p. 404 et 415) ; une
+  marque ne se pose que sur une piste de son appareil.
   *Écart au plan initial, trouvé en construisant : posés comme objets, ils saisissaient
   la piste au lieu de s'y inscrire.*
 - Un gabarit se pose de préférence **sur une planche sans carte** : sur une carte, un
@@ -229,11 +233,10 @@ IT-23) : ils restent hors du kit.
 - Lecture validée par Vince contre le jeu.
 - Une planche « radar » dans `?demo`.
 
-État au 2026-09-30 — **F/A-18C** : fait, sauf la lecture contre le jeu. Banc 21/21 ;
-rendu relu en image (pages, vignettes, démo, kneeboard) ; sources complètes dans
-[RADAR.md](RADAR.md). Au kneeboard, un écran seul sur sa planche sort à la taille
-utile ; une légende posée à côté le fait rapetisser (cadrage : lot 8). **F-16C** : en
-cours.
+État au 2026-09-30 — **F/A-18C et F-16C** : faits, sauf la lecture contre le jeu.
+Banc 23/23 ; rendu relu en image (pages, vignettes, démos, kneeboard) ; sources
+complètes dans [RADAR.md](RADAR.md). Au kneeboard, un écran seul sur sa planche sort à
+la taille utile ; une légende posée à côté le fait rapetisser (cadrage : lot 8).
 
 ## 6. Lot 3 — Vue radar liée
 
