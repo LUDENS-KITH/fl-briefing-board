@@ -23,7 +23,7 @@ orientable, redimensionnable et **recolorable sans perte**. Pour en ajouter une 
 
 La liste en haut à droite de la vue de dessus propose les **14 théâtres DCS**, en
 **topographique**, **satellite** ou **plan routier**. Une version locale peut y ajouter
-les aérodromes sous leur nom DCS (`python tools/build_theatres.py --aerodromes`). La carte est vivante : molette ou pincement pour zoomer ; clic droit, clic
+les aérodromes sous leur nom DCS (`python tools/build_theatres.py --aerodromes`). La carte est vivante : molette ou pincement pour zoomer ; clic droit glissé, clic
 molette, espace + glisser ou outil main (`H`) pour se déplacer. Tout ce qui est posé
 suit le terrain, et **l'échelle est automatique** : plus d'étalonnage.
 
@@ -45,6 +45,15 @@ d'une image reste possible.
   y compris **par le bout d'aile** ; l'outil sélection (`V`) attrape aussi flèches,
   traits et carte de fond ; la poignée bleue tourne et redimensionne ; `←` `→`
   tournent au degré près (`Maj` pour plus fin).
+- **Revenir à la sélection** : clic droit sans bouger, ou `Échap`. Le geste en cours est
+  abandonné (zone commencée, forme en cours de pose) et l'outil Sélection reprend la
+  main. Glissé, le clic droit déplace toujours la carte. L'application s'ouvre sur
+  l'outil Sélection : un premier clic dans le vide ne pose rien.
+- **Ancrer** (📌 ou `K`) : la sélection ne se déplace plus, ne tourne plus et ne s'efface
+  plus — ni gomme, ni `Suppr`. On pose et on saisit par-dessus sans la bousculer : zone
+  SAM, bullseye, image de fond. Couleur, trait et étiquette restent modifiables ; une
+  copie naît libre. Pour libérer : outil Sélection, toucher l'objet, puis 📌 ou `K`. Sur
+  une carte, glisser sur un objet ancré déplace la carte.
 - **Étiqueter** : double-clic sur une forme — « UZI 1-1 · FL250 · 450 kt ». L'étiquette
   suit la forme ; la vider la supprime.
 - **Courber une flèche** : la tracer droite, puis tirer la **poignée du milieu**.
@@ -79,7 +88,8 @@ d'une image reste possible.
 
 **Raccourcis** — `V` sélection · `A` flèche · `L` trait · `P` crayon · `C` cercle ·
 `R` rectangle · `Z` zone · `M` règle · `T` texte · `E` gomme · `H` main · `Ctrl+Z` /
-`Ctrl+Y` / `Ctrl+D` · `PgPréc` / `PgSuiv` planches · `+` / `−` zoom de la carte.
+`Ctrl+Y` / `Ctrl+D` · `PgPréc` / `PgSuiv` planches · `+` / `−` zoom de la carte · `K`
+ancrer · `Échap` ou clic droit : retour à la sélection.
 
 ## Ce qu'il ne fait pas
 

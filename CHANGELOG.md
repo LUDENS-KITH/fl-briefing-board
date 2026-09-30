@@ -3,6 +3,45 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.2 — 2026-09-30
+
+Lot 1 du [plan d'action](docs/PLAN.md), demandé par Vince : ancrer une forme, et
+retrouver l'outil de sélection d'un clic droit.
+
+### Ajouté
+- **Ancrer** (📌 ou `K`) : un objet ancré ne se déplace plus, ne tourne plus et ne
+  s'efface plus (gomme, `Suppr`) ; on pose et on saisit par-dessus sans le bousculer.
+  Couleur, trait et étiquette restent libres ; une copie naît libre. Sur une carte,
+  glisser sur un objet ancré déplace la carte. Annulable, conservé à la réouverture.
+- **Retour à la sélection** : un clic droit sans bouger, ou `Échap`, abandonne le geste
+  en cours (zone commencée, forme en cours de pose) et reprend l'outil Sélection.
+  Glissé, le clic droit déplace toujours la carte.
+- **Banc de saisie** (`tools/banc-saisie.html`) : premier filet automatique du moteur,
+  15 scénarios pilotés par de vrais événements pointeur et clavier.
+- Un refus n'est plus muet : message bref en haut du tableau.
+
+### Modifié
+- L'application **s'ouvre sur l'outil Sélection** : le premier clic dans le vide ne pose
+  plus de chasseur.
+- Le menu du navigateur n'apparaît plus sur le tableau.
+- Le clic molette ne sert plus qu'à déplacer la carte.
+
+### Corrigé — trouvé au banc
+- **Sans carte, un clic droit posait une forme** et ouvrait le menu du navigateur
+  par-dessus : le bouton de la souris n'était regardé qu'avec une carte. Le clic molette
+  posait aussi.
+
+### Vérifié en exécutant
+Banc : les 13 scénarios nouveaux échouent sur la v1.1.1, les 15 passent en v1.2 · souris
+réelle dans l'aperçu intégré : chasseur posé, clic droit, outil Sélection, rien de posé ·
+épingle dessinée à la sélection, absente sans sélection ; PNG et kneeboard identiques
+avec ou sans sélection · démo sans erreur console · WMM2025 100/100.
+
+### Constaté
+Le banc a d'abord jugé l'ancien code : les scripts sont chargés à une adresse versionnée
+(`board.js?v=1.1.1`) que le cache du navigateur gardait. Le paramètre passe à `v=1.2`, et
+le banc recharge désormais chaque script à l'adresse exacte que cite la page.
+
 ## v1.1.1 — 2026-09-23
 
 ### Ajouté
