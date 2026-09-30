@@ -378,8 +378,11 @@ test('L&S et DT2 se posent sur une piste HAFU, une seule de chaque par planche',
   ok(a.s('!objs[0].mark && objs[1].mark') === 'ls', 'deux L&S sur la planche');
   a.tile('fa18_dt2'); a.click(400, 300);
   ok(a.s('objs[0].mark') === 'dt2', `DT2 : ${a.s('objs[0].mark')}`);
+  /* hors d'une piste, la DT2 désigne un nouvel écho : une piste inconnue qui la porte
+     (v1.9.1 ; avant, un refus) */
   a.click(700, 500);
-  ok(a.s('objs.length') === 2 && /piste/i.test(a.toast()), `sur le vide : ${a.s('objs.length')} objets, message « ${a.toast()} »`);
+  ok(a.s('objs.length') === 3 && a.s('objs[2].k') === 'fa18_hafu_u' && a.s('objs[2].mark') === 'dt2' && !a.s('objs[0].mark'),
+     `sur le vide : ${a.s('objs.map(o => o.k + ":" + o.mark).join()')}`);
 });
 
 test('Curseur TDC : se pose par-dessus une piste sans la saisir', async (ok) => {
@@ -416,6 +419,38 @@ test('Piste TWS du F-16C : le geste oriente le symbole ; une seule cible désign
   ok(a.s('!objs[0].mark && objs[1].mark') === 'bug', 'deux cibles désignées');
   a.click(700, 300);
   ok(a.s('!objs[2].mark'), 'marque du F-16C posée sur une piste du F/A-18C');
+});
+
+/* ---------- v1.9.1 : L&S sur un écran du F/A-18C (signalé par Vince) ---------- */
+
+test("L&S sur l'écran : près d'une piste, la marque ; sur le fond, une piste inconnue ; sur une brique, sa piste", async (ok) => {
+  const a = await open();
+  a.tile('fa18_rws'); a.click(450, 330);
+  a.tile('fa18_hafu_h'); a.click(500, 380);
+  a.tile('fa18_brick'); a.click(420, 250);
+  const marks = () => a.s('objs.map(o => o.k + (o.mark ? "*" + o.mark : "") + "@" + Math.round(o.x) + "," + Math.round(o.y)).join(" ")');
+  a.tile('fa18_ls'); a.click(500, 356);                     // au bout de la tige du hostile
+  ok(a.s('objs[1].mark') === 'ls' && a.s('objs.length') === 3, `près de la piste : ${marks()}`);
+  a.click(470, 300);                                        // le fond de l'écran
+  ok(a.s('objs.length') === 4 && a.s('objs[3].k') === 'fa18_hafu_u' && a.s('objs[3].mark') === 'ls'
+     && a.s('objs[3].x') === 470 && !a.s('objs[1].mark'), `sur le fond : ${marks()}`);
+  a.click(420, 250);                                        // la brique
+  ok(!a.s('objs.some(o => o.k === "fa18_brick")') && a.s('objs.filter(o => o.mark === "ls").length') === 1
+     && a.s('(t => t && t.k === "fa18_hafu_u" && t.x === 420 && t.y === 250)(objs.find(o => o.mark === "ls"))'),
+     `sur la brique : ${marks()}`);
+  a.key('z', { ctrlKey: true });
+  ok(a.s('objs.some(o => o.k === "fa18_brick")'), `Ctrl+Z : ${marks()}`);
+});
+
+test("Une marque ne va pas sur l'écran d'un autre appareil ; la cible désignée du F-16C fait d'une cible de recherche une piste système", async (ok) => {
+  const a = await open();
+  a.tile('f16_rws'); a.click(450, 330);
+  a.tile('fa18_ls'); a.click(450, 330);
+  ok(a.s('objs.length') === 1 && /F-16C/.test(a.toast()) && /F\/A-18C/.test(a.toast()), `L&S sur l'écran du F-16C : ${a.s('objs.length')} objets, « ${a.toast()} »`);
+  a.tile('f16_hot'); a.click(480, 360);
+  a.tile('f16_bug'); a.click(480, 360);
+  ok(a.s('objs[1].k') === 'f16_systrack' && a.s('objs[1].mark') === 'bug' && Math.abs(a.s('objs[1].a') - Math.PI) < 1e-9,
+     `cible chaude désignée : ${a.s('JSON.stringify(objs[1])')}`);
 });
 
 /* ---------- lot 3 : vue radar liée ---------- */

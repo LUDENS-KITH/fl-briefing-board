@@ -64,6 +64,7 @@ deux barres 20°, 40°, 60°, 80° (p. 174).
 | Tige de cap d'un HAFU | trait issu du symbole, dans le sens du déplacement | p. 209, p. 173 |
 | L&S, piste prioritaire | étoile inscrite dans le HAFU ; une seule | p. 173, p. 176 |
 | DT2, deuxième piste | losange inscrit dans le HAFU ; une seule | p. 173, p. 176-177 |
+| Désigner un écho | sa piste HAFU porte la marque : une brique ou le fond de l'écran donnent une piste inconnue marquée | p. 176 (LTWS) |
 | Curseur d'acquisition du TDC | deux traits verticaux parallèles | p. 158, p. 162 n° 21 |
 
 Couleurs d'identité : vert ami, jaune inconnu, rouge hostile (p. 209). Le kit prend le
@@ -145,6 +146,7 @@ Le kit reprend la première.
 | Piste TWS | carré plein, jaune, qui tourne avec le cap sol, trait de nez | p. 404, p. 414 |
 | Piste système | la même, en blanc | p. 404, p. 414 |
 | Cible désignée (bugged, FCR TOI) | cercle autour de la piste ; une seule | p. 404, p. 415 |
+| Désigner une cible de recherche | elle monte à la piste système désignée, cap gardé | p. 416 (recherche → piste → système → désignée) |
 | Curseur d'acquisition A-A | deux traits verticaux parallèles | p. 396 n° 11 |
 | Brouillage | paire de chevrons jaunes, à l'azimut des émissions | p. 411 |
 | Bullseye | cercle et point | p. 397 n° 17 |

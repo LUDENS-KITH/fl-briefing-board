@@ -36,9 +36,12 @@ mélangent pas : une marque ne se pose que sur une piste de son appareil.
 - **Pistes** : brique (contact brut), HAFU ami, inconnu ou hostile, posés à leur couleur
   d'identité. Le geste de pose oriente la **tige de cap** sans changer la taille ; la
   poignée tourne et redimensionne.
-- **L&S et DT2** ne sont pas des objets mais l'état d'une piste : choisissez-les, puis
-  touchez un HAFU — l'étoile ou le losange s'y inscrit. Une seule L&S et une seule DT2
-  par planche, comme dans l'avion ; les reposer sur la même piste les retire.
+- **L&S et DT2** marquent une piste : choisissez-les, puis touchez un HAFU — ou tout
+  près, le bout de sa tige suffit —, l'étoile ou le losange s'y inscrit. Touchée
+  ailleurs, la marque désigne un écho, comme au cockpit : une brique devient la piste
+  HAFU qui la porte, le fond de l'écran reçoit une nouvelle piste inconnue marquée. Une
+  seule L&S et une seule DT2 par planche, comme dans l'avion ; les reposer sur la même
+  piste les retire. Jamais sur l'écran ou une piste du F-16C.
 - **Curseur TDC** : deux traits verticaux, posés par-dessus la piste ou la brique
   désignée.
 - Le rang de menace, la vitesse ou l'altitude d'une piste vont dans son étiquette
@@ -53,7 +56,8 @@ mélangent pas : une marque ne se pose que sur une piste de son appareil.
 - **Pistes TWS** (jaunes) et **pistes système** (blanches) : le symbole entier tourne
   avec le cap sol de la cible ; le geste de pose l'oriente.
 - **Cible désignée** (bugged) : une marque, un cercle autour de la piste, une seule par
-  planche.
+  planche. Posée sur une cible de recherche ou sur le fond de l'écran, elle en fait une
+  piste système désignée — une cible chaude garde son cap, vers l'appareil.
 - **Curseur A-A**, **brouillage** (chevrons) et **bullseye**.
 
 Le radar se prépare de préférence sur une planche **sans carte** : sur une carte, un

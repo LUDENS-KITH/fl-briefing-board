@@ -507,19 +507,33 @@ function fa18Attk(c, o){
 }
 
 /* marques d'une piste : étoile L&S et losange DT2 inscrits dans le HAFU du F/A-18C
-   (p. 176), cercle de la cible désignée du F-16C (p. 404, 415) */
+   (p. 176), cercle de la cible désignée du F-16C (p. 404, 415). Au trait d'un tableau,
+   bien plus épais que celui de l'écran, les jambes d'un chevron hostile couvraient
+   l'étoile et le losange : un liseré de la couleur du fond d'écran les en détache. */
+const HALO = '#040806';
+function inked(c, path, fill){
+  const lw = c.lineWidth;
+  c.save(); path(); c.strokeStyle = HALO; c.lineWidth = lw * (fill ? .9 : 1.5); c.stroke(); c.restore();
+  path();
+  if (fill) c.fill(); else { c.save(); c.lineWidth = lw * .6; c.stroke(); c.restore(); }
+}
 const MARKS = {
   ls(c){
-    c.beginPath();
-    for (let i = 0; i < 10; i++){
-      const r = i % 2 ? .12 : .3, t = -Math.PI / 2 + i * Math.PI / 5;
-      c.lineTo(Math.cos(t) * r, -.2 + Math.sin(t) * r);
-    }
-    c.closePath(); c.fill();
+    inked(c, () => {
+      c.beginPath();
+      for (let i = 0; i < 10; i++){
+        const r = i % 2 ? .12 : .29, t = -Math.PI / 2 + i * Math.PI / 5;
+        c.lineTo(Math.cos(t) * r, -.14 + Math.sin(t) * r);
+      }
+      c.closePath();
+    }, true);
   },
-  dt2(c){ c.beginPath(); c.moveTo(0, -.47); c.lineTo(.27, -.2); c.lineTo(0, .07); c.lineTo(-.27, -.2); c.closePath(); c.stroke(); },
+  dt2(c){
+    inked(c, () => { c.beginPath(); c.moveTo(0, -.41); c.lineTo(.27, -.14); c.lineTo(0, .13); c.lineTo(-.27, -.14); c.closePath(); });
+  },
   bug(c){ c.beginPath(); c.arc(0, 0, .72, 0, 7); c.stroke(); },
 };
+/* posée par paintSym en dernier, par-dessus la tige de cap */
 const withMark = (c, o) => { if (o && MARKS[o.mark]) MARKS[o.mark](c); };
 /* le B-scope du F/A-18C couvre le cône de 140° que l'antenne peut balayer (p. 172) ;
    un réglage d'azimut en donne la largeur totale (p. 163, n° 15) */
@@ -527,7 +541,7 @@ const FA18_B = { area: [-.6, -.62, .6, .6], span: 70, cone: az => az / 2 };
 
 /* HAFU, moitié haute : l'identification par les capteurs de bord (p. 209-210) */
 const hafu = (label, col, draw) => ({ g:'fa18', label, col, track:true, upright:true, fixed:true, stem:[.2, 1.2],
-  s0:.55, tile:.5, draw(c, o){ draw(c); withMark(c, o); } });
+  s0:.55, tile:.5, draw(c){ draw(c); } });
 
 Object.assign(SHAPES, {
   /* ---------------- radar F/A-18C ---------------- */
@@ -546,8 +560,8 @@ Object.assign(SHAPES, {
     scope: { ...FA18_B, page:'stt', rng:40, ranges:[5, 10, 20, 40, 80, 160],
              pb: { 1:'HI\nINTL', 5:'RWS', 6:'2B 1', 8:'ERASE', 15:'NCTR', 16:'DATA', 17:'CHAN', 20:'MODE' } } },
 
-  /* contact brut : une brique pleine (p. 158) */
-  fa18_brick: { g:'fa18', label:'Brique', upright:true, fixed:true, s0:.5, tile:.7, col:'#34D399', draw(c){
+  /* contact brut : une brique pleine (p. 158). raw : désigné, il devient une piste */
+  fa18_brick: { g:'fa18', label:'Brique', raw:true, upright:true, fixed:true, s0:.5, tile:.7, col:'#34D399', draw(c){
     c.fillRect(-.45, -.22, .9, .44);
   }},
   /* hémisphère = ami, crochet = inconnu, chevron = hostile ; la tige donne le cap (p. 209) */
@@ -559,8 +573,10 @@ Object.assign(SHAPES, {
     c.beginPath(); c.moveTo(-.55, .05); c.lineTo(0, -.6); c.lineTo(.55, .05); c.stroke();
   }),
   /* L&S, piste prioritaire, et DT2, deuxième piste désignée : des états de la piste,
-     pas des objets. La vignette marque le HAFU touché (p. 173, 176-177). */
-  fa18_ls: { g:'fa18', label:'L&S', mark:'ls', tile:.5, draw(c){
+     pas des objets. La vignette marque le HAFU touché (p. 173, 176-177). Hors d'une
+     piste, elle désigne un écho : sa piste HAFU, inconnue faute d'identification, porte
+     la marque (p. 176) — newTrack */
+  fa18_ls: { g:'fa18', label:'L&S', mark:'ls', newTrack:'fa18_hafu_u', tile:.5, draw(c){
     c.beginPath();
     for (let i = 0; i < 10; i++){
       const r = i % 2 ? .18 : .45, t = -Math.PI / 2 + i * Math.PI / 5;
@@ -568,7 +584,7 @@ Object.assign(SHAPES, {
     }
     c.closePath(); c.fill();
   }},
-  fa18_dt2: { g:'fa18', label:'DT2', mark:'dt2', tile:.5, draw(c){
+  fa18_dt2: { g:'fa18', label:'DT2', mark:'dt2', newTrack:'fa18_hafu_u', tile:.5, draw(c){
     c.beginPath(); c.moveTo(0, -.42); c.lineTo(.42, 0); c.lineTo(0, .42); c.lineTo(-.42, 0); c.closePath(); c.stroke();
   }},
   /* curseur d'acquisition du TDC : deux traits verticaux parallèles (p. 158) */
@@ -653,10 +669,9 @@ function f16Fcr(c, o){
 
 /* piste TWS : le symbole entier tourne avec le cap sol de la cible, un trait figure
    son nez (p. 404, 414) */
-function f16Track(c, o){
+function f16Track(c){
   c.fillRect(-.32, -.32, .64, .64);
   c.beginPath(); c.moveTo(0, -.32); c.lineTo(0, -.95); c.stroke();
-  withMark(c, o);
 }
 
 const f16Page = (label, sub) => ({ g:'f16', label, under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
@@ -672,17 +687,20 @@ Object.assign(SHAPES, {
   f16_tws: f16Page('Écran FCR TWS', 'TWS'),
   /* cible de recherche : carré plein ; la « hot line » dessous = chaude, elle vient
      vers nous ; dessus = froide, elle s'éloigne (p. 404) */
-  f16_hot: { g:'f16', label:'Cible chaude', upright:true, fixed:true, s0:.5, tile:.55, col:'#E6EDF5', draw(c){
+  f16_hot: { g:'f16', label:'Cible chaude', raw:true, rawA:Math.PI, upright:true, fixed:true, s0:.5, tile:.55, col:'#E6EDF5', draw(c){
     c.fillRect(-.3, -.3, .6, .6); c.beginPath(); c.moveTo(0, .3); c.lineTo(0, .8); c.stroke();
   }},
-  f16_cold: { g:'f16', label:'Cible froide', upright:true, fixed:true, s0:.5, tile:.55, col:'#E6EDF5', draw(c){
+  f16_cold: { g:'f16', label:'Cible froide', raw:true, rawA:0, upright:true, fixed:true, s0:.5, tile:.55, col:'#E6EDF5', draw(c){
     c.fillRect(-.3, -.3, .6, .6); c.beginPath(); c.moveTo(0, -.3); c.lineTo(0, -.8); c.stroke();
   }},
   /* piste en jaune, piste système en blanc (p. 404) */
   f16_track: { g:'f16', label:'Piste TWS', track:true, fixed:true, s0:.55, tile:.5, tileA:-.7, col:'#D1A94A', draw: f16Track },
   f16_systrack: { g:'f16', label:'Piste système', track:true, fixed:true, s0:.55, tile:.5, tileA:-.7, col:'#E6EDF5', draw: f16Track },
-  /* cible désignée (bugged, FCR TOI) : un cercle autour de la piste, une seule (p. 404, 415) */
-  f16_bug: { g:'f16', label:'Désignée', mark:'bug', tile:.5, draw(c){
+  /* cible désignée (bugged, FCR TOI) : un cercle autour de la piste, une seule (p. 404, 415).
+     Désignée hors d'une piste, une cible de recherche monte à la piste système qui la
+     porte (p. 416 : recherche → piste → système → désignée) ; rawA, son cap : une cible
+     chaude vient vers l'appareil */
+  f16_bug: { g:'f16', label:'Désignée', mark:'bug', newTrack:'f16_systrack', tile:.5, draw(c){
     c.beginPath(); c.arc(0, 0, .72, 0, 7); c.stroke(); c.fillRect(-.3, -.3, .6, .6);
   }},
   /* curseur d'acquisition A-A : deux traits verticaux parallèles (p. 396, n° 11) */

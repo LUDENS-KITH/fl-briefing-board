@@ -36,9 +36,12 @@ only goes on a track of its own aircraft.
 - **Tracks:** brick (raw hit), friendly, unknown or hostile HAFU, placed in their
   identification color. The placing gesture orients the **heading stem** without
   resizing; the handle rotates and resizes.
-- **L&S and DT2** are not objects but a track state: choose one, then touch a HAFU — the
-  star or the diamond is inscribed in it. One L&S and one DT2 per board, as in the
-  aircraft; placing the same mark on the same track removes it.
+- **L&S and DT2** mark a track: choose one, then touch a HAFU — or close to it, the tip
+  of its stem is enough —, the star or the diamond is inscribed in it. Touched anywhere
+  else, the mark designates a return, as in the cockpit: a brick becomes the HAFU track
+  that carries it, the display background gets a new marked unknown track. One L&S and
+  one DT2 per board, as in the aircraft; placing the same mark on the same track removes
+  it. Never on an F-16C display or track.
 - **TDC cursor:** two vertical lines, placed over the designated track or brick.
 - Threat rank, speed or altitude of a track go into its label (double-click).
 
@@ -50,7 +53,9 @@ only goes on a track of its own aircraft.
 - **Search targets**, hot (line below) or cold (line above).
 - **TWS tracks** (yellow) and **system tracks** (white): the whole symbol turns with
   the target's ground track; the placing gesture orients it.
-- **Bugged target:** a mark, a circle around the track, one per board.
+- **Bugged target:** a mark, a circle around the track, one per board. Placed on a
+  search target or on the display background, it makes it a bugged system track — a hot
+  target keeps its heading, toward the aircraft.
 - **A-A cursor**, **jamming** chevrons and **bullseye**.
 
 Prepare radar boards **without a map**: on a map, a display would follow the terrain

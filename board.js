@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.9', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.9.1', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -930,9 +930,11 @@ function paintSym(c, o){
   c.lineJoin = 'round'; c.lineCap = 'round';
   if (side) sh.side(c); else sh.draw(c, o);
   if (sh.stem){                              // seule sa tige suit le cap
-    c.rotate(o.a || 0);
+    c.save(); c.rotate(o.a || 0);
     c.beginPath(); c.moveTo(0, -sh.stem[0]); c.lineTo(0, -sh.stem[1]); c.stroke();
+    c.restore();
   }
+  if (!side) withMark(c, o);                 // L&S, DT2 : par-dessus la tige, pour rester lisibles
   c.restore();
   /* dans la coupe, tout s'écrit au-dessus : dessous, c'est le sol. Un aéronef ou une
      munition y ajoute son altitude — « HAWG 1-1 · 1 000 ft » */
@@ -1180,12 +1182,48 @@ function backToSelect(){
 /* marques de piste — L&S et DT2 du F/A-18C (p. 173, 176), cible désignée du F-16C
    (p. 404, 415) : une seule de chaque par vue, sur une piste du même appareil. Reposer
    la même marque sur la même piste l'enlève. Une piste ancrée l'accepte : c'est un
-   état, pas une géométrie. */
+   état, pas une géométrie.
+   Hors d'une piste, la marque désigne un écho, comme au cockpit : un écho brut (brique,
+   cible de recherche) devient la piste qui la porte ; ailleurs, une nouvelle piste
+   (SHAPES[…].newTrack) la porte là où l'on touche. Jamais sur l'écran, la piste ou
+   l'écho d'un autre appareil. */
+const radarGroup = g => Object.values(SHAPES).some(k => k.g === g && k.mark);
 function markTrack(x, y, mk){
-  const sh = SHAPES[symKey];
-  const t = topmost(x, y, o => o.t === 'sym' && (SHAPES[o.k] || {}).track && SHAPES[o.k].g === sh.g);
-  if (!t){ toast(`${sh.label} se pose sur une piste du groupe « ${(GROUPS.find(([g]) => g === sh.g) || [])[1]} »`); return; }
+  const sh = SHAPES[symKey], name = g => (GROUPS.find(([k]) => k === g) || [])[1];
+  const kind = o => o.t === 'sym' && SHAPES[o.k] || {};
+  const mine = o => kind(o).g === sh.g, other = o => kind(o).g !== sh.g && radarGroup(kind(o).g);
+  let t = topmost(x, y, o => kind(o).track && mine(o)), raw = null;
+  if (!t){
+    const foreign = topmost(x, y, o => other(o) && (kind(o).track || kind(o).raw));
+    if (foreign){ toast(`${sh.label} est une marque du ${name(sh.g)} : pas sur une piste du ${name(kind(foreign).g)}`); return; }
+    raw = topmost(x, y, o => kind(o).raw && mine(o) && !o.locked);
+  }
+  /* à portée de doigt d'une piste : c'est elle — le bout d'une tige compte */
+  if (!t && !raw){
+    const [sx, sy] = view === 'm' ? w2s(x, y) : [x, y];
+    let best = Infinity;
+    for (const o of objs){
+      if (!inView(o) || !kind(o).track || !mine(o)) continue;
+      const p = toScreen(o), d = Math.hypot(p.x - sx, p.y - sy);
+      if (d < Math.max(40, SIZE * (o.s || 1) * 1.15 + 16) && d < best){ best = d; t = o; }
+    }
+  }
+  if (!t){
+    const scope = topmost(x, y, o => other(o) && kind(o).scope);
+    if (scope){ toast(`${sh.label} est une marque du ${name(sh.g)} : pas sur l'écran du ${name(kind(scope).g)}`); return; }
+  }
   snapshot();
+  if (!t){                                             // un écho désigné : sa piste porte la marque
+    const nk = SHAPES[sh.newTrack];
+    t = { t:'sym', k:sh.newTrack, x, y, a:0, s:nk.s0 || 1, c:nk.col || color, w:width, n:0 };
+    if (view === 'p') t.v = 'p';
+    if (raw){
+      Object.assign(t, { x: raw.x, y: raw.y, a: SHAPES[raw.k].rawA ?? raw.a ?? 0, uid: raw.uid });
+      if (raw.lbl) t.lbl = raw.lbl;
+      objs[objs.indexOf(raw)] = t;
+    }
+    else objs.push(t);
+  }
   const on = t.mark !== mk;
   for (const o of objs) if (o.mark === mk && (o.v || 'm') === (t.v || 'm')) delete o.mark;
   if (on) t.mark = mk;

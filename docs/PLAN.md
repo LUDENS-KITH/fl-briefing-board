@@ -408,6 +408,7 @@ avis contraire :
 | À l'outil Sélection, un objet libre passe devant un objet ancré qui le recouvre | on ancre pour poser et saisir par-dessus |
 | Page du kneeboard aux proportions de la planchette DCS, 0,142 × 0,214, et non en 3:4 | le jeu étire toute image à sa planchette ; lu dans ses fichiers |
 | Le cadre du kneeboard garde sa largeur ; sa hauteur suit la zone du plan de la page | ce que montre le cadre est exactement ce que montre la page |
+| Une marque de piste posée hors d'une piste désigne un écho (piste inconnue du F/A-18C, piste système du F-16C) au lieu d'être refusée | comme au cockpit (F/A-18C p. 176, F-16C p. 416) ; le refus passait pour une panne, signalée par Vince |
 
 **Décidé par Vince :**
 
