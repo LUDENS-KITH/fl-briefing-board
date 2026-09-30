@@ -175,6 +175,9 @@
   <button id="decl"  title="Déclinaison magnétique de la planche">Décl. ?</button>
   <button id="unit"  title="Unité des distances : milles nautiques ou kilomètres">NM</button>
   <button id="scale" title="Échelle de la planche">Échelle</button>
+  <button id="save"  title="Enregistrer le briefing (Ctrl+S) : toutes les planches, images comprises, dans un fichier .json à ouvrir sur un autre poste">⇩ Briefing</button>
+  <button id="open"  title="Ouvrir un briefing enregistré (Ctrl+O) — remplace le tableau affiché ; un fichier .json se glisse aussi sur la page">⇧ Ouvrir</button>
+  <input type="file" id="openfile" accept=".json,application/json" hidden>
   <button id="png"   title="Exporter la planche en PNG, telle qu'à l'écran">⇩ PNG</button>
   <button id="knee"  title="Exporter la planche au format kneeboard DCS (portrait 768 × 1024), à copier dans Saved Games\DCS\Kneeboard">⇩ Kneeboard</button>
   <button id="clear" title="Effacer la planche affichée">Effacer</button>
@@ -281,7 +284,7 @@
 <script src="magnetic.js?v=1.0"></script>
 <script src="symbols.js?v=0.9"></script>
 <script src="radar.js?v=1.0"></script>
-<script src="board.js?v=1.4"></script>
+<script src="board.js?v=1.5"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

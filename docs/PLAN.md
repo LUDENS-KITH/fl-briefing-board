@@ -22,7 +22,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | 1 | Ancrer une forme · clic droit et `Échap` ramènent à la sélection · ouverture sur la sélection · banc de saisie | demande | S | — | v1.2 | en ligne depuis le 2026-09-30 |
 | 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | en ligne le 2026-09-30 |
 | 3 | Vue radar liée : ce que voit le radar de l'appareil désigné, en B-scope | demande | M | lot 2 | v1.4 | livré le 2026-09-30 |
-| 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | — | proposé |
+| 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | v1.5 | engagé le 2026-09-30, livré |
 | 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | — | proposé |
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | — | proposé — une inconnue à lever d'abord |
 | 7 | Animation entre phases | proposition | M | — | — | proposé |
@@ -300,6 +300,10 @@ passent en IndexedDB pour survivre au rechargement (ETAT §8, point 1).
 *Fait quand :* un briefing enregistré puis ouvert dans un autre profil de navigateur
 est identique, images comprises.
 
+État au 2026-09-30 : fait. Vérifié dans Brave sans interface, en `file://` : briefing
+enregistré dans un profil, ouvert dans un second profil vierge, identique ; image relue
+après rechargement. Banc 31/31.
+
 ### Lot 5 — Mode présentation
 
 **Objectif :** mener un briefing en partage d'écran Discord sans que l'interface gêne.
@@ -384,9 +388,10 @@ avis contraire :
 |---|---|
 | 2026-09-30 | Kit radar : **F/A-18C d'abord, puis F-16C** |
 | 2026-09-30 | Lancement du lot 1 |
+| 2026-09-30 | Fusions des lots 1 à 3 ; lancement du lot 4 |
 
 **À trancher par Vince :**
 
 | Question | Proposition | Bloque |
 |---|---|---|
-| Lots 4 à 8 : lesquels engager, dans quel ordre | l'ordre du tableau §2 | rien avant la fin du lot 3 |
+| Lots 5 à 8 : lesquels engager, dans quel ordre | l'ordre du tableau §2 | rien |

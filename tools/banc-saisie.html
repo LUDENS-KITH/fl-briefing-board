@@ -34,8 +34,10 @@ const KEY = 'fl-briefing-board-v3';
 const host = document.getElementById('host');
 const BITS = [1, 4, 2];                    // boutons gauche, molette, droit → masque `buttons`
 
-async function open(){                     // application neuve, tableau vide
+const IDB_NAME = 'fl-briefing-board';      // octets des images de fond
+async function open(){                     // application neuve, tableau vide, aucune image gardée
   localStorage.removeItem(KEY);
+  await new Promise(r => { const q = indexedDB.deleteDatabase(IDB_NAME); q.onsuccess = q.onerror = q.onblocked = () => r(); });
   return reload();
 }
 async function reload(){                   // relit le stockage, comme une réouverture
@@ -85,6 +87,28 @@ function app(f){
     /* une liste déroulante, comme la choisit le pilote : la valeur puis l'événement change */
     choose(q, v){ const s = d.querySelector(q); s.value = v; s.dispatchEvent(new w.Event('change')); },
     toast: () => { const t = d.getElementById('toast'); return t && !t.hidden ? t.textContent : ''; },
+    /* une image PNG fabriquée dans le cadre, comme un fichier du poste */
+    png(name, wd, ht){
+      const c = d.createElement('canvas'); c.width = wd; c.height = ht;
+      const g = c.getContext('2d'); g.fillStyle = '#c33'; g.fillRect(0, 0, wd, ht);
+      return new Promise(r => c.toBlob(b => r(new w.File([b], name, { type:'image/png' })), 'image/png'));
+    },
+    /* un fichier lâché sur la page, ou choisi par le bouton Ouvrir */
+    drop(file){
+      const dt = new w.DataTransfer(); dt.items.add(file);
+      d.body.dispatchEvent(new w.DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    },
+    openFile(file){
+      const i = d.getElementById('openfile'), dt = new w.DataTransfer(); dt.items.add(file);
+      i.files = dt.files; i.dispatchEvent(new w.Event('change'));
+    },
+    /* le téléchargement intercepté : son nom et son texte */
+    async saved(){
+      const got = []; w.download = (url, name) => got.push({ url, name });
+      this.button('#save'); await pause(400);
+      return got.length ? { name: got[0].name, text: await (await w.fetch(got[0].url)).text() } : null;
+    },
+    json: (obj, name = 'briefing.json') => new w.File([JSON.stringify(obj)], name, { type:'application/json' }),
   };
 }
 
@@ -428,6 +452,61 @@ test('Vue radar : un clic dans le panneau ne pose rien ; la coupe revient', asyn
   ok(!a.s('prof.pane'), `vue du panneau : ${a.s('prof.pane')}`);
 });
 
+/* ---------- lot 4 : fichier de briefing ---------- */
+
+test('Image de fond glissée : relue après réouverture', async (ok) => {
+  let a = await open();
+  a.drop(await a.png('carte.png', 80, 50)); await pause(300);
+  ok(a.s('objs.length === 1 && objs[0].t') === 'img', `objets après le dépôt : ${a.s('objs.map(o => o.t).join()')}`);
+  a = await reload(); await pause(500);
+  ok(a.s('objs.length === 1 && objs[0].t === "img" && !!objs[0].el && objs[0].el.naturalWidth') === 80,
+     `après réouverture : ${a.s('objs.map(o => o.t).join()')}`);
+});
+
+test('Enregistrer puis ouvrir sur un poste vierge : même briefing, image comprise', async (ok) => {
+  let a = await open();
+  a.drop(await a.png('carte.png', 80, 50)); await pause(300);
+  a.tile('fighter'); a.click(400, 300);
+  a.button('.tab.add');                                     // une deuxième planche
+  const f1 = await a.saved();
+  ok(f1 && /\.json$/.test(f1.name), `fichier enregistré : ${f1 && f1.name}`);
+  if (!f1) return;
+  const b = await open();                                   // stockage et images vidés
+  b.openFile(new b.w.File([f1.text], f1.name, { type:'application/json' })); await pause(500);
+  ok(b.s('boards.length') === 2, `planches : ${b.s('boards.length')}`);
+  ok(b.s('objs.some(o => o.t === "img" && o.el && o.el.naturalWidth === 80)'), 'image absente après ouverture');
+  const f2 = await b.saved();
+  const strip = t => { const j = JSON.parse(t); delete j.saved; return JSON.stringify(j); };
+  ok(f2 && strip(f1.text) === strip(f2.text), "le briefing rouvert diffère de l'original");
+  const c = await reload(); await pause(500);               // et il est gardé pour la réouverture
+  ok(c.s('boards.length === 2 && objs.some(o => o.t === "img" && o.el && o.el.naturalWidth === 80)'),
+     'briefing ouvert perdu à la réouverture');
+});
+
+test("Un fichier qui n'est pas un briefing est refusé ; le tableau reste", async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.w.confirm = () => true;
+  a.openFile(a.json({ hello: 1 }, 'autre.json')); await pause(300);
+  ok(a.s('objs.length') === 1, `objets : ${a.s('objs.length')}`);
+  ok(/briefing/i.test(a.toast()), `message : « ${a.toast()} »`);
+});
+
+test('Ouvrir sur un tableau non vide demande confirmation ; un nom piégé reste du texte', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  const piege = '<img src=x onerror="window.__pwn=1">';
+  const file = a.json({ format:'fl-briefing-board', version:1, boards:[{ name: piege, objs:[] }], images:{} });
+  let asked = 0;
+  a.w.confirm = () => (asked++, false);
+  a.openFile(file); await pause(300);
+  ok(asked === 1 && a.s('objs.length') === 1, `refus : ${asked} question(s), ${a.s('objs.length')} objet(s)`);
+  a.w.confirm = () => true;
+  a.openFile(file); await pause(300);
+  ok(a.s('boards.length === 1 && objs.length') === 0, `après accord : ${a.s('boards.length')} planche(s), ${a.s('objs.length')} objet(s)`);
+  ok(a.d.querySelector('.tab').textContent === piege && !a.w.__pwn, 'le nom de planche a été interprété');
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc
@@ -449,6 +528,7 @@ test('Vue radar : un clic dans le panneau ne pose rien ; la coupe revient', asyn
   }
   host.innerHTML = '';
   localStorage.removeItem(KEY);
+  indexedDB.deleteDatabase(IDB_NAME);
   const n = res.filter(r => r.ok).length;
   sum.textContent = n === res.length ? `OK ${n}/${res.length}` : `ÉCHEC ${res.length - n}/${res.length}`;
   sum.className = n === res.length ? 'ok' : 'ko';

@@ -340,9 +340,22 @@ en v0.1 (voir [ETAT.md](ETAT.md) §6).
 | | |
 |---|---|
 | Clé | `fl-briefing-board-v3` |
-| Contenu | `{ cur, unit, split, showAF, headRef, boards: [{ name, wpN, nmPx, prof, map, cam, magDec, objs }] }`, **images exclues** (non sérialisables) ; l'historique n'est pas conservé |
+| Contenu | `{ cur, unit, split, showAF, headRef, boards: [{ name, wpN, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
+| Images de fond | un objet `img` garde sa place, sa taille et son `id` ; ses octets vivent en **IndexedDB** (base `fl-briefing-board`, magasin `images`, clé = `id`). Au démarrage, `restoreImages()` les relit, retire les images introuvables en le disant, puis n'y garde que les `id` encore cités |
 | Écriture | à chaque `commit()` |
 | Échec | capturé et ignoré — le tableau reste utilisable, il ne se souvient pas |
+
+La démo n'écrit ni en localStorage ni en IndexedDB.
+
+### Fichier de briefing
+
+`⇩ Briefing` écrit un `.json` : `{ format: 'fl-briefing-board', version: 1, app, saved,
+cur, unit, split, headRef, boards, images }`, où `boards` suit l'écriture de la sauvegarde
+locale (`boardsRecord()`) et `images` associe chaque `id` à sa data URL. `openBriefing()`
+vérifie `format` et `version`, puis ne garde que ce que le moteur sait dessiner : types
+d'objets connus, formes présentes dans `SHAPES`, théâtres connus, images en PNG, JPEG,
+WebP ou GIF. Un fichier reçu vient d'ailleurs ; les noms de planches passent par
+`textContent`, les étiquettes par le canvas.
 
 La clé porte la version du format. `v1` (jusqu'au 2026-09-17) ignorait `a`, `s`,
 `cx`, `cy` : elle n'est **pas** relue, un ancien tableau est simplement oublié plutôt

@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.4**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.5**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 27 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 31 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
@@ -93,6 +93,8 @@ par événements pointeur réels, pas en relisant le code.
 | Kit radar F-16C | rendu relu en image : FCR RWS et TWS, limites de balayage A3, vignettes, planche de démo ; aucune erreur console | conforme | 2026-09-30 |
 | Vue radar liée | géométrie : 26 vérifications calculées à la main ; le test attrape quatre calculs faussés (sens du gisement, côtés, aspect pris du nez, abscisse sur le balayage) | conforme | 2026-09-30 |
 | Vue radar liée | 4 scénarios au banc, rouges avant le code : message sans porteur, porteur désigné, cible déplacée, porteur tourné de 30°, sans échelle rien d'inventé, panneau non éditable ; 27/27 | conforme | 2026-09-30 |
+| Fichier de briefing | 4 scénarios au banc, rouges avant le code : image relue après réouverture ; enregistrer puis ouvrir sur un poste vierge, fichier identique, image comprise, gardé à la réouverture ; fichier étranger refusé ; confirmation avant de remplacer ; nom de planche piégé resté du texte ; 31/31 | conforme | 2026-09-30 |
+| Fichier de briefing | Brave sans interface, en `file://` comme le raccourci : image déposée relue après rechargement ; briefing de 2 planches enregistré dans un profil, ouvert dans un second profil vierge : identique | conforme | 2026-09-30 |
 | Vue radar liée | interception au Caucase : de face 18 · 100 %, au travers 9D · 0 %, qui s'éloigne 3D · 88 % ; tiges et traits de nez dans le bon sens, relus en image agrandie ; kneeboard avec l'écran sous le plan | conforme | 2026-09-30 |
 
 ## 3. Ce qui n'est pas vérifié
@@ -111,8 +113,6 @@ par événements pointeur réels, pas en relisant le code.
   aucune séance réelle n'a eu lieu ;
 - **le comportement multi-navigateurs** : seul le moteur de l'aperçu intégré
   (Chromium) a servi ;
-- **la persistance en `file://`** (double-clic) : elle est désormais observée quand
-  la page est servie en HTTP, pas quand elle est ouverte comme fichier local ;
 - **le kneeboard dans DCS** : le PNG sort au format 768 × 1024, mais personne ne l'a
   encore chargé dans le cockpit. Le dossier `Saved Games\DCS\Kneeboard\` est cité
   de mémoire, pas vérifié ;
@@ -165,7 +165,8 @@ sélection par clic droit ou `Échap`.
 
 **Tableau** : image de fond par glisser-déposer ou collage, fond sombre ou clair,
 palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
-reprise locale hors images.
+reprise locale **images comprises** (IndexedDB) ; **fichier de briefing** `.json` à
+enregistrer et ouvrir, images comprises.
 
 ## 5. Hors périmètre — décidé, pas oublié
 
@@ -253,7 +254,7 @@ statistique.
 Elles sont tenues dans [PLAN.md](PLAN.md) (ouvert le 2026-09-30) : lots, ordre,
 critères de fin et décisions. Les trois pistes notées ici jusque-là y figurent :
 
-1. Conserver les images glissées d'une ouverture à l'autre → PLAN, lot 4.
+1. Conserver les images glissées d'une ouverture à l'autre → fait (v1.5, PLAN lot 4).
 2. Alerte de franchissement du relief par la route liée → PLAN §8, en attente.
 3. Debriefing sur trace réelle : poser ces symboles par-dessus la trajectoire
    effectivement volée (ACMI / Tacview) — le seul angle que ni e-Brief ni Excalidraw
