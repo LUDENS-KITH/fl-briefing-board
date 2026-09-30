@@ -20,7 +20,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | Lot | Contenu | Origine | Taille | Dépend de | Version | Statut |
 |---|---|---|---|---|---|---|
 | 1 | Ancrer une forme · clic droit et `Échap` ramènent à la sélection · ouverture sur la sélection · banc de saisie | demande | S | — | v1.2 | en ligne depuis le 2026-09-30 |
-| 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | livré le 2026-09-30, lecture en jeu à valider par Vince |
+| 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | en ligne le 2026-09-30 ; lecture en jeu à faire |
 | 3 | Vue radar liée : ce que voit le radar de l'appareil désigné, en B-scope | demande | M | lot 2 | v1.4 | à faire |
 | 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | — | proposé |
 | 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | — | proposé |
@@ -233,7 +233,9 @@ IT-23) : ils restent hors du kit.
 - Lecture validée par Vince contre le jeu.
 - Une planche « radar » dans `?demo`.
 
-État au 2026-09-30 — **F/A-18C et F-16C** : faits, sauf la lecture contre le jeu.
+État au 2026-09-30 — **F/A-18C et F-16C** : faits, sauf la lecture contre le jeu. Vince
+a demandé la fusion avant cette lecture : elle se fera sur la version en ligne, et ses
+écarts ouvriront une correction.
 Banc 23/23 ; rendu relu en image (pages, vignettes, démos, kneeboard) ; sources
 complètes dans [RADAR.md](RADAR.md). Au kneeboard, un écran seul sur sa planche sort à
 la taille utile ; une légende posée à côté le fait rapetisser (cadrage : lot 8).

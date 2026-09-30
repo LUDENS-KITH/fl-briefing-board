@@ -119,7 +119,8 @@ par événements pointeur réels, pas en relisant le code.
   il passe par le bouton Sélection (⬈). L'appui long n'a pas été essayé ;
 - **la lecture des écrans radar contre le jeu** : chaque libellé et chaque symbole est
   sourcé dans le manuel ([RADAR.md](RADAR.md)), mais la comparaison à la page en vol
-  revient à Vince, élément par élément, avant la fusion ;
+  revient à Vince, élément par élément. Fusion avancée à sa demande le 2026-09-30 : la
+  lecture se fera sur la version en ligne ;
 - **les réglages des écrans radar au doigt** : échelle et azimut se changent au clavier.
 
 ## 4. Périmètre livré
