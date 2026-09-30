@@ -196,8 +196,16 @@ drag and drop your own background image.
   on screen, after confirmation. A file that is not a briefing is refused, and the board
   stays as it is.
 - Undo / redo, timestamped PNG export, dark or light background, hideable palette.
-- **DCS kneeboard:** portrait PNG, 768 × 1024, to copy into
-  `Saved Games\DCS\Kneeboard\` (not yet verified in DCS).
+- **DCS kneeboard** (⇩ Kneeboard): portrait PNG, 768 × 1157, to copy into
+  `Saved Games\DCS\Kneeboard\`. These are the proportions of the in-game kneeboard,
+  which stretches any image to its own size: a page with other proportions would come
+  out distorted. Without a frame, the page shows the whole board.
+- **Frame the kneeboard** (⬚ Cadre): a dotted gold frame, with the page's proportions,
+  is placed in the middle of the map. Move it by its edge or its title, enlarge it with
+  its handle; inside it, you keep working on the map. The export then takes only what
+  it contains, across the whole page. One frame per board, copied by "+ phase"; it never
+  appears in the PNG or while presenting. A second click on ⬚ Cadre removes it. The page
+  has not been seen in the cockpit yet.
 
 **Shortcuts:** `V` select · `A` arrow · `L` line · `P` pencil · `C` circle ·
 `R` rectangle · `Z` zone · `M` ruler · `T` text · `E` eraser · `H` hand ·

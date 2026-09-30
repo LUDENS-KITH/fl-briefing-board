@@ -26,7 +26,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | v1.6 | engagé le 2026-09-30, livré |
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | v1.7 | engagé le 2026-09-30, livré |
 | 7 | Animation entre phases | proposition | M | — | v1.8 | engagé le 2026-09-30, livré |
-| 8 | Cadrage manuel du kneeboard | proposition | S | — | — | proposé |
+| 8 | Cadrage manuel du kneeboard | proposition | S | — | v1.9 | engagé le 2026-09-30, livré |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -373,6 +373,16 @@ Un cadre portrait 3:4, posé et déplacé sur le plan ; l'export prend ce cadre.
 *Fait quand :* un kneeboard cadré occupe toute la page, reste lisible, et a été ouvert
 une fois dans DCS — ce qui n'a jamais été fait (ETAT §3).
 
+État au 2026-09-30 : livré, sauf l'ouverture dans DCS, qui demande de lancer le jeu.
+- Le 3:4 prévu était faux. Les fichiers du jeu (`Scripts/Aircrafts/_Common/Cockpit/KNEEBOARD`)
+  montrent qu'une image du dossier est étirée sur toute la planchette, de proportions
+  0,142 × 0,214. La page sort donc en 768 × 1157 ; en 768 × 1024, elle était comprimée
+  d'environ 11 % en largeur.
+- Le cadre prend les proportions de la zone du plan de la page, sous l'en-tête et
+  au-dessus de la coupe : ce qu'il montre est exactement ce que montre la page.
+- Banc 44/44. Dans Brave, un cadre posé, déplacé et réduit à la souris donne une page
+  qui montre son contenu, lisible, sans le cadre.
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -396,6 +406,8 @@ avis contraire :
 | La vue radar montre la géométrie, elle ne simule pas la détection | un faux verdict est pire qu'une absence |
 | Kit radar dessiné d'après les manuels, chaque symbole sourcé, aucune capture | dépôt public |
 | À l'outil Sélection, un objet libre passe devant un objet ancré qui le recouvre | on ancre pour poser et saisir par-dessus |
+| Page du kneeboard aux proportions de la planchette DCS, 0,142 × 0,214, et non en 3:4 | le jeu étire toute image à sa planchette ; lu dans ses fichiers |
+| Le cadre du kneeboard garde sa largeur ; sa hauteur suit la zone du plan de la page | ce que montre le cadre est exactement ce que montre la page |
 
 **Décidé par Vince :**
 
@@ -407,9 +419,6 @@ avis contraire :
 | 2026-09-30 | Fusion du lot 4 ; lancement du lot 5 |
 | 2026-09-30 | Fusion du lot 5 ; lancement du lot 6 |
 | 2026-09-30 | Fusion du lot 6 ; lancement du lot 7 |
+| 2026-09-30 | Fusion du lot 7 ; lancement du lot 8 |
 
-**À trancher par Vince :**
-
-| Question | Proposition | Bloque |
-|---|---|---|
-| Lot 8 : l'engager | — | rien |
+**À trancher par Vince :** rien. Les huit lots du plan sont livrés.

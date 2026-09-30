@@ -199,8 +199,16 @@ d'une image reste possible.
   un briefing est refusé, et le tableau reste tel quel.
 - Annuler / rétablir, export **PNG** horodaté, fond sombre ou clair, palette
   masquable.
-- **Kneeboard DCS** : PNG portrait 768 × 1024 à copier dans
-  `Saved Games\DCS\Kneeboard\` (non vérifié en jeu à ce jour).
+- **Kneeboard DCS** (⇩ Kneeboard) : PNG portrait 768 × 1157, à copier dans
+  `Saved Games\DCS\Kneeboard\`. Ce sont les proportions de la planchette du jeu, qui
+  étire toute image à sa taille : une page d'autres proportions y sortirait déformée.
+  Sans cadre, la page montre toute la planche.
+- **Cadrer le kneeboard** (⬚ Cadre) : un cadre pointillé doré, aux proportions de la
+  page, se pose au milieu du plan. On le déplace par son bord ou son titre, on
+  l'agrandit par sa poignée ; dedans, on continue de travailler sur le plan. L'export
+  ne prend alors que ce qu'il contient, sur toute la page. Un cadre par planche,
+  recopié par « + phase » ; il ne sort ni dans le PNG ni en présentation. Un second
+  clic sur ⬚ Cadre l'ôte. La page n'a pas encore été vue dans le cockpit.
 
 **Raccourcis** — `V` sélection · `A` flèche · `L` trait · `P` crayon · `C` cercle ·
 `R` rectangle · `Z` zone · `M` règle · `T` texte · `E` gomme · `H` main · `Ctrl+Z` /

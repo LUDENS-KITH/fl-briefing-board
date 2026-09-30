@@ -3,6 +3,27 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.9 — 2026-09-30
+
+Lot 8 du [plan d'action](docs/PLAN.md), engagé par Vince : le cadrage du kneeboard.
+
+### Ajouté
+- **⬚ Cadre** pose sur le plan un cadre aux proportions de la page du kneeboard. On le
+  déplace par son bord, on l'agrandit par sa poignée, et l'export ne prend que ce qu'il
+  contient, sur toute la page. Un cadre par planche, recopié par « + phase », jamais
+  dans le PNG ni en présentation.
+- Banc de saisie : 4 scénarios de plus, 44 en tout.
+
+### Corrigé — trouvé en lisant les fichiers du jeu
+- La page du kneeboard sortait en 768 × 1024 (3:4). DCS étire toute image du dossier
+  sur sa planchette, de proportions 0,142 × 0,214 : la page y était comprimée d'environ
+  11 % en largeur. Elle sort désormais en **768 × 1157**.
+
+### Vérifié en exécutant
+Banc 44/44, les nouveaux scénarios rouges avant le code · démo dans Brave, vrais
+événements : cadre posé, déplacé, réduit, la page montre exactement son contenu. Aucune
+page n'a encore été vue dans le cockpit.
+
 ## v1.8 — 2026-09-30
 
 Lot 7 du [plan d'action](docs/PLAN.md), engagé par Vince : l'animation entre phases.
