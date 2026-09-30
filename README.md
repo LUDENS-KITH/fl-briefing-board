@@ -49,6 +49,8 @@
   et à mener sur un autre, ou à passer au meneur suivant.
 - **Un mode présentation** — plein écran, phases au clavier, pointeur laser : pour mener
   le briefing en partage d'écran.
+- **L'import d'une mission DCS** — glissez le `.miz` : la route du vol, le bullseye, les
+  défenses aériennes et les navires se posent sur la carte, au mètre près.
 
 Tout tient dans une page web : **aucune installation, aucun compte, rien à payer.**
 

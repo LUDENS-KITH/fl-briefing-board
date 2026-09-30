@@ -151,7 +151,7 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 | `headRef` | `true` `mag` | référence des caps affichés ; persistée |
 | `magDec` | nombre ou `null` | déclinaison saisie pour la planche (° Est positif) ; dans l'historique |
 | `split` | booléen | écran partagé plan / coupe ; persisté |
-| `prof` | `{ ceil, range, linked, pane, rrng, raz }` | plafond (ft), largeur (NM) et route liée de la planche montée ; vue du panneau du bas (`fa18`, `f16`, absente = coupe), échelle et balayage de la vue radar ; dans l'historique |
+| `prof` | `{ ceil, range, linked, pane, rrng, raz, grid }` | plafond (ft), largeur (NM) et route liée de la planche montée ; vue du panneau du bas (`fa18`, `f16`, absente = coupe), échelle et balayage de la vue radar ; `grid` : mission importée sans carte, caps de grille ; dans l'historique |
 | `view` | `m` `p` | vue du geste en cours, fixée au `pointerdown` et gardée jusqu'au relâché |
 | `symKey` | clé de `SHAPES` | forme que posera l'outil `sym` |
 | `color`, `width` | couleur FL, 2 / 4 / 8 | valeurs des **prochains** objets — et repeignent la sélection si elle existe |
@@ -216,6 +216,23 @@ bouton droit enfoncé pendant un geste du gauche — `pointermove` avec `button 
 un second bouton n'émet pas de `pointerdown`. Un clic droit sur une carte ne déplace
 pas la vue : la caméra est remise où elle était. Le menu du navigateur est toujours
 bloqué sur le tableau.
+
+### Import d'une mission
+
+`miz.js` lit une `.miz` sans dépendance : répertoire central de l'archive zip, entrées
+stockées ou décompressées par `DecompressionStream('deflate-raw')`, puis la table Lua
+`mission` (et le dictionnaire `l10n/DEFAULT`) par un petit analyseur. Il en tire le
+théâtre, les bullseyes, les vols pilotables et leurs points, les défenses aériennes
+(reconnues au type DCS de leurs unités) et les navires. `openMission()` fait choisir le
+vol s'il y en a plusieurs ; `importMission()` bâtit une nouvelle planche.
+
+Les positions DCS sont en mètres, x vers le nord, y vers l'est. `MIZ.toGeo()` les porte
+en latitude/longitude par la projection du théâtre, **mesurée** et non recopiée :
+`tools/build_projections.py` ajuste une Mercator transverse WGS84 sur les balises de
+l'installation du jeu (`projections.js`, écart de l'ordre de 4 cm). La projection et
+son inverse (série de Krüger, Newton) sont testés contre pyproj par
+`node tools/test_miz.js`. Sans projection mesurée, la planche est sans carte, `nmPx`
+tiré des mètres, et `prof.grid` fait écrire les caps « G ».
 
 ### Mode présentation
 

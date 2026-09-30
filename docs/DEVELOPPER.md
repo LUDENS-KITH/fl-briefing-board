@@ -8,10 +8,12 @@ Zéro dépendance, zéro build : on modifie, on recharge la page. Le contrat du 
 FL Briefing Board/
 ├─ index.html        coquille : barre d'outils, palette, styles          (276 l.)
 ├─ symbols.js        les 28 formes, vues de profil, kit radar           (705 l.)
-├─ board.js          le moteur : planches, carte, coupe, route, exports (2 201 l.)
+├─ board.js          le moteur : planches, carte, coupe, route, exports (2 290 l.)
 ├─ theatres.js       14 théâtres DCS et 791 aérodromes (généré, ne pas retoucher)
 ├─ magnetic.js       modèle magnétique WMM2025 (généré, ne pas retoucher)
 ├─ radar.js          vue radar liée : géométrie du B-scope, fonctions pures
+├─ miz.js            lire une mission .miz : zip, table Lua, projection ; fonctions pures
+├─ projections.js    projection de chaque théâtre DCS (généré, ne pas retoucher)
 ├─ assets/           exports du logo (écusson, icône, .ico du raccourci) — ne pas retoucher
 ├─ tools/
 │  ├─ creer-raccourci.ps1  crée le raccourci bureau (mode application)
@@ -19,6 +21,8 @@ FL Briefing Board/
 │  ├─ build_magnetic.py régénère magnetic.js depuis tools/data/WMM2025.COF (NOAA)
 │  ├─ test_magnetic.js  vérifie la déclinaison contre les 100 valeurs de test du NOAA
 │  ├─ test_radar.js     vérifie la géométrie de la vue radar liée
+│  ├─ test_miz.js       vérifie la projection (contre pyproj), la table Lua et une .miz
+│  ├─ build_projections.py mesure la projection des théâtres sur les balises du jeu (pyproj, numpy)
 │  ├─ banc-saisie.html  banc de saisie : l'application pilotée par de vrais événements
 │  ├─ build_logo.py     régénère le logo : maîtres dans FlightLedger_BRAND, exports ici
 │  ├─ build_social_preview.py image d'aperçu du dépôt (assets/readme/)
@@ -37,7 +41,7 @@ FL Briefing Board/
 ```
 
 Les scripts restent à la racine délibérément : un sous-dossier `src/`
-n'apporterait rien à 2 800 lignes et brouillerait le « double-clic sur `index.html` »
+n'apporterait rien à 3 200 lignes et brouillerait le « double-clic sur `index.html` »
 qui fait l'intérêt de l'outil.
 
 ## Logo
@@ -52,10 +56,14 @@ modifier : `python tools/build_logo.py`, jamais le SVG à la main.
 ```bash
 node tools/test_magnetic.js
 node tools/test_radar.js
+node tools/test_miz.js
 ```
 
 Le premier vérifie la déclinaison magnétique contre les 100 valeurs de test officielles
-du NOAA ; le second, la géométrie de la vue radar liée sur des cas calculés à la main.
+du NOAA ; le deuxième, la géométrie de la vue radar liée sur des cas calculés à la main ;
+le troisième, la projection des théâtres contre pyproj, la table Lua et une vraie
+archive `.miz`. `projections.js` se régénère par `python tools/build_projections.py`,
+sur une installation de DCS World (option `--dcs` pour son dossier).
 
 ```bash
 python -m http.server 8765

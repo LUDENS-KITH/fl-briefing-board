@@ -36,6 +36,7 @@ pas d'identifiant Discord complet et pas de montant versé sans accord explicite
 | Plan routier | [OpenStreetMap](https://www.openstreetmap.org) | ODbL, attribution affichée ; [politique d'usage des tuiles](https://operations.osmfoundation.org/policies/tiles/) |
 | Satellite | Esri World Imagery — Esri, Maxar, Earthstar Geographics | conditions d'Esri, attribution affichée |
 | Déclinaison magnétique | Modèle magnétique mondial [WMM2025](https://www.ncei.noaa.gov/products/world-magnetic-model), NOAA | domaine public |
+| Projection des théâtres (`projections.js`) | quatre valeurs par théâtre, **mesurées** par `tools/build_projections.py` sur les balises d'une installation de DCS World, qui portent leur position DCS et leur latitude/longitude ; le fichier du jeu qui déclare la projection est chiffré et n'est pas lu | mesures ; aucune position de balise n'est publiée |
 | Emprise des théâtres (`theatres.js`) | quatre coordonnées par théâtre, calculées depuis les positions d'aérodromes du projet [DCS Web Viewer](https://github.com/DCS-Web-Editor/dcs-web-viewer-deploy) | bornes géographiques seulement ; **aucune donnée d'aérodrome n'est publiée** |
 
 Les tuiles de carte sont chargées depuis ces services au moment de l'affichage ; aucune

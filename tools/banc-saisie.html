@@ -109,6 +109,26 @@ function app(f){
       return got.length ? { name: got[0].name, text: await (await w.fetch(got[0].url)).text() } : null;
     },
     json: (obj, name = 'briefing.json') => new w.File([JSON.stringify(obj)], name, { type:'application/json' }),
+    /* une vraie archive zip, entrées stockées : ce qu'est une .miz */
+    miz(name, files){
+      const enc = new w.TextEncoder(), parts = [], dir = [];
+      const u16 = v => [v & 255, v >> 8], u32 = v => [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >>> 24) & 255];
+      let off = 0;
+      for (const [fn, text] of files){
+        const nm = enc.encode(fn), data = enc.encode(text);
+        const loc = new Uint8Array([...u32(0x04034b50), ...u16(20), ...u16(0), ...u16(0), ...u16(0), ...u16(0),
+                                    ...u32(0), ...u32(data.length), ...u32(data.length), ...u16(nm.length), ...u16(0)]);
+        dir.push(new Uint8Array([...u32(0x02014b50), ...u16(20), ...u16(20), ...u16(0), ...u16(0), ...u16(0), ...u16(0),
+                                 ...u32(0), ...u32(data.length), ...u32(data.length), ...u16(nm.length), ...u16(0), ...u16(0),
+                                 ...u16(0), ...u16(0), ...u32(0), ...u32(off)]), nm);
+        parts.push(loc, nm, data);
+        off += loc.length + nm.length + data.length;
+      }
+      const size = dir.reduce((t, b) => t + b.length, 0);
+      const end = new Uint8Array([...u32(0x06054b50), ...u16(0), ...u16(0), ...u16(files.length), ...u16(files.length),
+                                  ...u32(size), ...u32(off), ...u16(0)]);
+      return new w.File([...parts, ...dir, end], name);
+    },
   };
 }
 
@@ -547,6 +567,78 @@ test("Présentation : le pointeur laisse une trace éphémère, hors objets et h
   ok(a.s('laserTrail().length') > 3, `points de la trace : ${a.s('laserTrail().length')}`);
   await pause(1800);
   ok(a.s('laserTrail().length') === 0, `trace encore là après 1,8 s : ${a.s('laserTrail().length')} points`);
+});
+
+/* ---------- lot 6 : import d'une mission .miz ---------- */
+
+/* une mission : deux vols pilotables, un vol IA, un SAM rouge, les deux bullseyes */
+const MISSION = theatre => `mission =
+{
+  ["theatre"] = "${theatre}",
+  ["coalition"] =
+  {
+    ["blue"] =
+    {
+      ["bullseye"] = { ["x"] = -291014, ["y"] = 617414, },
+      ["country"] = { [1] = { ["name"] = "USA", ["plane"] = { ["group"] = {
+        [1] = { ["name"] = "UZI 1", ["units"] = { [1] = { ["type"] = "FA-18C_hornet", ["skill"] = "Client", }, },
+                ["route"] = { ["points"] = {
+                  [1] = { ["x"] = -356437, ["y"] = 618211, ["alt"] = 13, ["alt_type"] = "BARO", ["name"] = "", },
+                  [2] = { ["x"] = -330000, ["y"] = 640000, ["alt"] = 7620, ["alt_type"] = "BARO", ["name"] = "CAP", }, }, }, },
+        [2] = { ["name"] = "COLT 2", ["units"] = { [1] = { ["type"] = "F-16C_50", ["skill"] = "Client", }, [2] = { ["type"] = "F-16C_50", ["skill"] = "Client", }, },
+                ["route"] = { ["points"] = {
+                  [1] = { ["x"] = -356437, ["y"] = 618211, ["alt"] = 13, ["alt_type"] = "BARO", ["name"] = "", },
+                  [2] = { ["x"] = -320000, ["y"] = 650000, ["alt"] = 7620, ["alt_type"] = "BARO", ["name"] = "IP", },
+                  [3] = { ["x"] = -300000, ["y"] = 680000, ["alt"] = 150, ["alt_type"] = "RADIO", ["name"] = "CIBLE", }, }, }, },
+        [3] = { ["name"] = "Tanker", ["units"] = { [1] = { ["type"] = "KC135MPRS", ["skill"] = "High", }, },
+                ["route"] = { ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, ["alt"] = 6000, }, }, }, },
+      }, }, }, },
+    },
+    ["red"] =
+    {
+      ["bullseye"] = { ["x"] = -250000, ["y"] = 700000, },
+      ["country"] = { [1] = { ["name"] = "Russia", ["vehicle"] = { ["group"] = {
+        [1] = { ["name"] = "SA-11 Kutaïssi", ["x"] = -284000, ["y"] = 683000, ["units"] = { [1] = { ["type"] = "SA-11 Buk LN 9A310M1", }, }, },
+      }, }, }, },
+    },
+  },
+}`;
+
+test('Mission .miz déposée : choix du vol, puis route, altitudes, bullseye et menaces sur une planche carte', async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]])); await pause(400);
+  ok(!a.d.getElementById('mizbox').hidden, 'pas de choix du vol pour deux vols pilotables');
+  const choix = [...a.d.querySelectorAll('#mizlist button')].map(b => b.textContent);
+  ok(choix.length === 2 && /COLT 2/.test(choix[1]), `vols proposés : ${choix.join(' | ')}`);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(200);
+  ok(a.s('boards.length === 2 && cur') === 1, `planches : ${a.s('boards.length')}, affichée : ${a.s('cur') + 1}`);
+  ok(a.s('boards[cur].name') === 'Rioni Gate', `nom de la planche : ${a.s('boards[cur].name')}`);
+  ok(a.s('mapCfg && mapCfg.theatre') === 'Caucasus' && a.s('!!cam'), `carte : ${a.s('JSON.stringify(mapCfg)')}`);
+  const wps = JSON.parse(a.s('JSON.stringify(objs.filter(o => o.k === "wp").map(o => [o.n, o.alt, o.lbl || ""]))'));
+  ok(JSON.stringify(wps) === JSON.stringify([[1, 40, 'COLT 2'], [2, 25000, 'IP'], [3, 490, 'CIBLE · alt. sol']]), `waypoints : ${JSON.stringify(wps)}`);
+  ok(a.s('objs.some(o => o.k === "bullseye")') && a.s('objs.some(o => o.k === "sam" && o.lbl === "SA-11 Kutaïssi")'), 'bullseye ou SAM absent');
+  ok(a.s('split && prof.linked'), 'route liée non ouverte');
+  ok(a.s('route.pts.length') === 3, `route liée : ${a.s('route.pts.length')} points`);
+});
+
+test("Mission sur un théâtre sans projection mesurée : planche sans carte, à l'échelle, caps de grille", async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Overlord.miz', [['mission', MISSION('Normandy')]])); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[0].click(); await pause(200);
+  ok(a.s('!mapCfg && !cam && nmPx > 0'), `carte ${a.s('JSON.stringify(mapCfg)')}, échelle ${a.s('nmPx')}`);
+  const w = JSON.parse(a.s('JSON.stringify(objs.filter(o => o.k === "wp").map(o => [o.x, o.y]))'));
+  const nm = Math.hypot(w[1][0] - w[0][0], w[1][1] - w[0][1]) / a.s('nmPx');
+  const want = Math.hypot(-330000 + 356437, 640000 - 618211) / 1852;
+  ok(Math.abs(nm - want) < .01, `distance entre les deux points : ${nm.toFixed(2)} NM, attendu ${want.toFixed(2)}`);
+  ok(/G$/.test(a.s('bearing(0, 0, 0, -10)')), `cap : ${a.s('bearing(0, 0, 0, -10)')}`);
+});
+
+test('Un .miz illisible est refusé ; le tableau reste', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.drop(new a.w.File(['pas une archive'], 'faux.miz')); await pause(300);
+  ok(a.s('boards.length === 1 && objs.length') === 1, `planches ${a.s('boards.length')}, objets ${a.s('objs.length')}`);
+  ok(/mission|archive/i.test(a.toast()), `message : « ${a.toast()} »`);
 });
 
 (async () => {
