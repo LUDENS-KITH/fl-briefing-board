@@ -3,6 +3,30 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.8 — 2026-09-30
+
+Lot 7 du [plan d'action](docs/PLAN.md), engagé par Vince : l'animation entre phases.
+
+### Ajouté
+- En présentation, **passer d'une phase à l'autre joue la manœuvre** : chaque objet
+  présent des deux côtés glisse de sa place à la nouvelle — position, cap par le plus
+  court chemin, couleur, points d'un tracé —, ce qui n'existe que d'un côté paraît ou
+  disparaît en fondu ; la carte, la route liée et la vue radar suivent. 1,6 s, entre
+  deux planches du même repère.
+- Chaque objet porte un **identifiant stable**, gardé par « + phase », neuf pour une
+  copie Ctrl+D : c'est par lui qu'un appareil se reconnaît d'une planche à l'autre.
+- La démo le joue : Ingress → Attaque.
+- Banc de saisie : 3 scénarios de plus, 40 en tout.
+
+### Corrigé — trouvé en regardant
+- Un appareil recoloré entre deux phases changeait de couleur d'un coup : sa couleur
+  glisse désormais aussi.
+
+### Vérifié en exécutant
+Banc 40/40, les 3 nouveaux rouges avant le code · démo dans Brave, vrais événements,
+trois captures pendant la transition · vue radar liée : un contact passe de 40,x NM à
+11° puis 0° pendant la transition.
+
 ## v1.7 — 2026-09-30
 
 Lot 6 du [plan d'action](docs/PLAN.md), engagé par Vince : importer une mission DCS.

@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.7**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.8**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 37 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 40 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
@@ -95,6 +95,8 @@ par événements pointeur réels, pas en relisant le code.
 | Vue radar liée | géométrie : 26 vérifications calculées à la main ; le test attrape quatre calculs faussés (sens du gisement, côtés, aspect pris du nez, abscisse sur le balayage) | conforme | 2026-09-30 |
 | Vue radar liée | 4 scénarios au banc, rouges avant le code : message sans porteur, porteur désigné, cible déplacée, porteur tourné de 30°, sans échelle rien d'inventé, panneau non éditable ; 27/27 | conforme | 2026-09-30 |
 | Fichier de briefing | 4 scénarios au banc, rouges avant le code : image relue après réouverture ; enregistrer puis ouvrir sur un poste vierge, fichier identique, image comprise, gardé à la réouverture ; fichier étranger refusé ; confirmation avant de remplacer ; nom de planche piégé resté du texte ; 31/31 | conforme | 2026-09-30 |
+| Animation entre phases | 3 scénarios au banc, rouges avant le code : uid gardé par « + phase », neuf par Ctrl+D ; à mi-transition, un chasseur à mi-chemin et à une couleur intermédiaire, un bombardier apparu à mi-fondu ; hors présentation, changement instantané ; 40/40 | conforme | 2026-09-30 |
+| Animation entre phases | démo dans Brave, vrais événements d'entrée : Ingress → Attaque, trois captures à 22 %, 61 % et fin — UZI 1-1 glisse de la mer vers l'objectif, UZI 1-2 et la flèche d'ingress s'effacent, la cible et la flèche d'attaque entrent en fondu ; vue radar liée : un bandit passe de 40,x NM (au-delà) à 11° puis 0° | conforme | 2026-09-30 |
 | Import de mission | projection des théâtres mesurée sur les balises de l'installation DCS : 7 théâtres, écart moyen 4 cm, 8 cm au pire ; méridiens et échelle ronds (UTM) | conforme | 2026-09-30 |
 | Import de mission | `node tools/test_miz.js` : projection et inverse contre pyproj à 1 mm près, table Lua, archive zip ; en échec sur six calculs faussés | conforme | 2026-09-30 |
 | Import de mission | missions réelles de l'escadron : départ piste de Goudaouta sur le point de référence du terrain (0,00 km) ; sept départs parking à 0,3 – 1,1 km du point de référence de leur terrain | conforme | 2026-09-30 |
@@ -179,7 +181,7 @@ palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
 reprise locale **images comprises** (IndexedDB) ; **fichier de briefing** `.json` à
 enregistrer et ouvrir, images comprises ; **mode présentation** (plein écran, phases au
 clavier, pointeur laser) ; **import de mission `.miz`** (route, bullseye, défenses
-aériennes, navires).
+aériennes, navires) ; **animation entre phases** en présentation.
 
 ## 5. Hors périmètre — décidé, pas oublié
 

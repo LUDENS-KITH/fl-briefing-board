@@ -88,6 +88,12 @@ phase affichée (« 2 / 4 · Attaque »).
 
 - `→`, `Espace` ou `PgSuiv` : phase suivante ; `←` ou `PgPréc` : précédente ; `Début`
   et `Fin` : première et dernière.
+- **Le passage d'une phase à l'autre est animé** : chaque appareil, flèche ou zone
+  présent des deux côtés glisse de sa place à la nouvelle — position, cap, couleur —,
+  ce qui apparaît ou disparaît le fait en fondu, la carte et la vue radar liée suivent.
+  Il suffit de bâtir la phase suivante par **+ phase** et d'y déplacer les appareils :
+  c'est ainsi qu'ils se reconnaissent d'une planche à l'autre. L'animation joue entre
+  deux planches du même repère (même théâtre, ou toutes deux sans carte).
 - La souris devient un **pointeur laser** : un point rouge suit le curseur, et un
   glissé bouton gauche trace un trait rouge qui s'éteint seul en une seconde et demie.
 - La carte reste mobile : molette pour zoomer, clic droit glissé pour se déplacer.

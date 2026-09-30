@@ -25,7 +25,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | v1.5 | engagé le 2026-09-30, livré |
 | 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | v1.6 | engagé le 2026-09-30, livré |
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | v1.7 | engagé le 2026-09-30, livré |
-| 7 | Animation entre phases | proposition | M | — | — | proposé |
+| 7 | Animation entre phases | proposition | M | — | v1.8 | engagé le 2026-09-30, livré |
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | — | proposé |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
@@ -358,6 +358,11 @@ déplacent sur l'écran pendant la manœuvre.
 *Fait quand :* la démo joue son attaque de la phase 1 à la phase 2, et un objet
 apparu en phase 2 entre en fondu.
 
+État au 2026-09-30 : fait. Dans Brave, en présentation, → joue Ingress → Attaque : UZI 1-1
+glisse de la mer vers l'objectif, la cible et la flèche d'attaque entrent en fondu ; la
+vue radar liée suit. Banc 40/40. Les planches créées avant la v1.8 ne partagent pas
+d'identifiants : entre elles, la transition se fait en fondu.
+
 ### Lot 8 — Cadrage du kneeboard
 
 **Objectif :** remplir la page du kneeboard, dont une planche en paysage n'utilise
@@ -401,9 +406,10 @@ avis contraire :
 | 2026-09-30 | Fusions des lots 1 à 3 ; lancement du lot 4 |
 | 2026-09-30 | Fusion du lot 4 ; lancement du lot 5 |
 | 2026-09-30 | Fusion du lot 5 ; lancement du lot 6 |
+| 2026-09-30 | Fusion du lot 6 ; lancement du lot 7 |
 
 **À trancher par Vince :**
 
 | Question | Proposition | Bloque |
 |---|---|---|
-| Lots 7 et 8 : lesquels engager, dans quel ordre | l'ordre du tableau §2 | rien |
+| Lot 8 : l'engager | — | rien |

@@ -83,6 +83,12 @@ current phase ("2 / 4 · Attaque").
 
 - `→`, `Space` or `Page Down`: next phase; `←` or `Page Up`: previous; `Home` and
   `End`: first and last.
+- **Moving from one phase to the next is animated**: every aircraft, arrow or area found
+  on both boards glides from its old place to the new one — position, heading, color —,
+  whatever appears or disappears fades, and the map and linked radar view follow. Build
+  the next phase with **+ phase** and move the aircraft there: that is how they are
+  recognized from one board to the next. The animation plays between two boards in the
+  same frame (same theatre, or both without a map).
 - The mouse becomes a **laser pointer**: a red dot follows the cursor, and a left-button
   drag draws a red line that fades out by itself in a second and a half.
 - The map still moves: mouse wheel to zoom, right-button drag to pan.
