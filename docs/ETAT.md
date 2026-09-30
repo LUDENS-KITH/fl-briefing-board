@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.9.1**.
+> Document vivant. Dernière mise à jour : **2026-10-01**, version **v1.9.2**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 46 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 47 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
@@ -101,6 +101,8 @@ par événements pointeur réels, pas en relisant le code.
 | Kneeboard cadré | démo dans Brave, vrais événements d'entrée : cadre posé, déplacé par son bord, réduit par sa poignée ; la page 768 × 1157 montre exactement son contenu, sans le cadre ; sans cadre, la planche entière au nouveau format | conforme | 2026-09-30 |
 | Marques de piste | 2 scénarios au banc, rouges avant le code, le cas signalé par Vince : écran RWS, brique, hostile — L&S au bout de la tige marque le hostile, sur le fond pose une piste inconnue marquée, sur la brique en fait cette piste, Ctrl+Z la rend ; refus sur l'écran du F-16C, message aux deux noms ; cible chaude désignée → piste système au cap 180° ; 46/46 | conforme | 2026-09-30 |
 | Marques de piste | Brave, vrais événements : écrans RWS et TWS, brique, inconnu, hostile ; L&S et DT2 posées à la souris ; étoile et losange lisibles sur les trois HAFU, tige à 0° et à 130° (relu grossi ×4 et à taille réelle) | conforme | 2026-09-30 |
+| Marques de piste | L&S et DT2 sur deux pistes : 1 scénario au banc, rouge avant le code — échange dans les deux sens, retrait sur sa propre piste, DT2 refusée sur la seule L&S avec message, L&S sur la DT2 seule qui la promeut ; 47/47 | conforme | 2026-10-01 |
+| Marques de piste | démo publiée v1.9.1, Brave, vrais événements : DT2 à 28 px du hostile, sur la brique, sur le fond, retirée, refusée sur l'écran et une piste du F-16C ; cible désignée du F-16C (cibles chaude et froide, fond, refus sur le F/A-18C). Défaut trouvé : DT2 sur la piste L&S effaçait la L&S — corrigé en v1.9.2 | conforme | 2026-10-01 |
 | Import de mission | projection des théâtres mesurée sur les balises de l'installation DCS : 7 théâtres, écart moyen 4 cm, 8 cm au pire ; méridiens et échelle ronds (UTM) | conforme | 2026-09-30 |
 | Import de mission | `node tools/test_miz.js` : projection et inverse contre pyproj à 1 mm près, table Lua, archive zip ; en échec sur six calculs faussés | conforme | 2026-09-30 |
 | Import de mission | missions réelles de l'escadron : départ piste de Goudaouta sur le point de référence du terrain (0,00 km) ; sept départs parking à 0,3 – 1,1 km du point de référence de leur terrain | conforme | 2026-09-30 |
@@ -246,6 +248,10 @@ statistique.
     disparaissait. La marque désigne désormais un écho comme au cockpit (p. 176), se
     dessine par-dessus la tige avec un liseré. Le banc vérifiait l'état de la piste,
     jamais le dessin ni le geste d'un pilote sur un écran garni.
+12. **La DT2 posée sur la piste L&S effaçait la L&S** (v1.3 à v1.9.1), sans un mot : une
+    piste ne porte qu'une marque. Dans l'avion, L&S et DT2 sont toujours deux pistes, et
+    désigner la DT2 les échange (p. 173). Elles s'échangent désormais ; la DT2 est
+    refusée sur la seule L&S. Trouvé en vérifiant la DT2 sur la démo publiée.
 
 ## 7. Risques connus
 

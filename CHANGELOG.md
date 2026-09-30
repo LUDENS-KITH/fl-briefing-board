@@ -3,6 +3,18 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.9.2 — 2026-10-01
+
+### Corrigé — trouvé en vérifiant la DT2 sur la démo publiée
+- **La DT2 posée sur la piste L&S effaçait la L&S**, sans message. L&S et DT2 vont
+  désormais sur deux pistes, comme dans l'avion (F/A-18C p. 173) : l'une posée sur la
+  piste de l'autre les échange ; la DT2 est refusée sur la seule L&S ; la L&S posée sur
+  la DT2 seule en fait la L&S.
+
+### Vérifié en exécutant
+Banc 47/47, le nouveau scénario rouge avant le code · Brave, vrais événements : la DT2
+posée sur la piste L&S les échange.
+
 ## v1.9.1 — 2026-09-30
 
 ### Corrigé — signalé par Vince

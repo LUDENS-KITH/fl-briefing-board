@@ -40,8 +40,9 @@ only goes on a track of its own aircraft.
   of its stem is enough —, the star or the diamond is inscribed in it. Touched anywhere
   else, the mark designates a return, as in the cockpit: a brick becomes the HAFU track
   that carries it, the display background gets a new marked unknown track. One L&S and
-  one DT2 per board, as in the aircraft; placing the same mark on the same track removes
-  it. Never on an F-16C display or track.
+  one DT2 per board, on two different tracks, as in the aircraft: placing one on the
+  other's track swaps them, and the DT2 never replaces the only L&S. Placing a mark again
+  on its own track removes it. Never on an F-16C display or track.
 - **TDC cursor:** two vertical lines, placed over the designated track or brick.
 - Threat rank, speed or altitude of a track go into its label (double-click).
 

@@ -314,7 +314,10 @@ DT2 du F/A-18C, cible désignée du F-16C) marque la piste touchée du même app
 plus proche à 40 px près (`markTrack()`, une seule marque de chaque sorte par vue).
 Ailleurs, elle désigne un écho : un écho brut (`raw`) est remplacé, à sa place et avec
 son `uid`, par la piste `newTrack` de la marque ; sur le fond, cette piste se pose là où
-l'on touche. Sur l'écran, la piste ou l'écho d'un autre appareil, elle refuse ; un **curseur** (`over`) se pose par-dessus ce qu'il touche sans le
+l'on touche. Une piste ne porte qu'une marque : posée sur la piste qui porte l'autre,
+la marque l'échange avec la piste qui la portait ; sans elle, une marque `keep` (la L&S)
+n'est pas retirée, refus. Sur l'écran, la piste ou l'écho d'un autre appareil, elle
+refuse ; un **curseur** (`over`) se pose par-dessus ce qu'il touche sans le
 saisir ; un **écran** (`under`) reste traversable pour `grab()` et se glisse sous les
 autres objets à la pose (`insertLow()`).
 
@@ -450,6 +453,7 @@ maClé: { g:'air', label:'Mon aéronef', s0:1.1, tile:.38, hit:1.25, draw(c){
 | `tileA` | angle de la vignette, pour une forme qui se reconnaît inclinée | `0` |
 | `mark` | la vignette marque la piste touchée au lieu de poser | absent |
 | `newTrack` | d'une marque : la piste créée quand elle désigne un écho | absent |
+| `keep` | d'une marque : jamais retirée par une autre marque posée sur sa piste | absent |
 | `raw` | un écho brut : désigné, il devient la piste `newTrack` ; `rawA`, son cap alors | absent |
 | `over` | se pose par-dessus ce qu'on touche, sans le saisir | absent |
 

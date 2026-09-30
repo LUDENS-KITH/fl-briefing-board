@@ -453,6 +453,30 @@ test("Une marque ne va pas sur l'écran d'un autre appareil ; la cible désigné
      `cible chaude désignée : ${a.s('JSON.stringify(objs[1])')}`);
 });
 
+/* ---------- v1.9.2 : L&S et DT2 ne partagent jamais une piste (vérification de la démo) ---------- */
+
+test("L&S et DT2 : l'une posée sur la piste de l'autre les échange ; la L&S ne se perd jamais en silence", async (ok) => {
+  const a = await open();
+  a.tile('fa18_hafu_h'); a.click(300, 300);
+  a.tile('fa18_hafu_u'); a.click(450, 300);
+  const marks = () => a.s('objs.map(o => o.mark || "-").join(" ")');
+  a.tile('fa18_ls');  a.click(300, 300);
+  a.tile('fa18_dt2'); a.click(450, 300);
+  ok(marks() === 'ls dt2', `départ : ${marks()}`);
+  a.tile('fa18_ls');  a.click(450, 300);                   // désigner la DT2 : échange (p. 173)
+  ok(marks() === 'dt2 ls', `L&S sur la DT2 : ${marks()}`);
+  a.tile('fa18_dt2'); a.click(450, 300);                   // la DT2 sur la L&S : échange aussi
+  ok(marks() === 'ls dt2', `DT2 sur la L&S : ${marks()}`);
+  a.click(450, 300);                                        // reposée sur sa piste : retirée
+  ok(marks() === 'ls -', `DT2 retirée : ${marks()}`);
+  a.click(300, 300);                                        // la DT2 sur la seule L&S : refusée
+  ok(marks() === 'ls -' && /L&S/.test(a.toast()), `DT2 sur la seule L&S : ${marks()}, « ${a.toast()} »`);
+  a.tile('fa18_dt2'); a.click(450, 300);
+  a.tile('fa18_ls');  a.click(300, 300);                   // L&S reposée sur sa piste : retirée
+  a.click(450, 300);                                        // L&S sur la DT2 seule : elle devient la L&S (p. 184)
+  ok(marks() === '- ls', `L&S sur la DT2 seule : ${marks()}`);
+});
+
 /* ---------- lot 3 : vue radar liée ---------- */
 
 /* carte, coupe ouverte, un porteur au sud et une cible au nord, vue radar du F/A-18C */
