@@ -81,6 +81,22 @@ jaune le plus proche de sa palette, l'or `#D1A94A`.
 - **La moitié basse du HAFU** (identification extérieure, p. 210-211) : prévue avec la
   page SA.
 
+## Vue radar liée
+
+| Élément | Choix | Source |
+|---|---|---|
+| Demi-largeur de l'écran du F/A-18C | ±70°, le cône que l'antenne peut balayer | F/A-18C p. 172 (« 140° scannable cone ») |
+| Demi-largeur de l'écran du F-16C | ±60°, le balayage A6 | F-16C p. 395-396 n° 8 |
+| Balayage d'un réglage | F/A-18C : la moitié de l'azimut choisi ; F-16C : A6 ±60°, A3 ±30°, A1 ±10° | F/A-18C p. 163 n° 15 ; F-16C p. 395-396 |
+| Aspect | 0 = on voit la queue de la cible, 180 = son nez ; écrit en dizaines de degrés, avec le côté | F-16C p. 405 |
+| Chaude, froide | la cible vient vers le porteur, ou s'en éloigne | F-16C p. 404 |
+| Symbole tourné du cap relatif | piste du F-16C « in relation to the ownship » ; tige du HAFU | F-16C p. 404 ; F/A-18C p. 209 |
+| Part radiale et filtre Doppler | une cible dont la vitesse radiale passe sous le seuil peut être rejetée en regard vers le bas | F-16C p. 391 ; F/A-18C p. 171 |
+| Identité d'un HAFU | la couleur du symbole posé : rouge hostile, bleu ami, sinon inconnue | palette du tableau |
+
+**Non tranché, faute de source** : les bornes des catégories HOT, FLANK, BEAM, COLD, et
+le seuil du notch, qui dépend de la vitesse, du regard vers le bas et du réglage MTR.
+
 ## F-16C — page FCR air-air
 
 Source unique : *DCS F-16C Early Access Guide* (Eagle Dynamics, anglais, édition du

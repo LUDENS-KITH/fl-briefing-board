@@ -20,8 +20,8 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | Lot | Contenu | Origine | Taille | Dépend de | Version | Statut |
 |---|---|---|---|---|---|---|
 | 1 | Ancrer une forme · clic droit et `Échap` ramènent à la sélection · ouverture sur la sélection · banc de saisie | demande | S | — | v1.2 | en ligne depuis le 2026-09-30 |
-| 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | en ligne le 2026-09-30 ; lecture en jeu à faire |
-| 3 | Vue radar liée : ce que voit le radar de l'appareil désigné, en B-scope | demande | M | lot 2 | v1.4 | à faire |
+| 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | en ligne le 2026-09-30 |
+| 3 | Vue radar liée : ce que voit le radar de l'appareil désigné, en B-scope | demande | M | lot 2 | v1.4 | livré le 2026-09-30 |
 | 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | — | proposé |
 | 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | — | proposé |
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | — | proposé — une inconnue à lever d'abord |
@@ -221,21 +221,18 @@ IT-23) : ils restent hors du kit.
   `docs/RADAR.md`. Un symbole sans source n'entre pas.
 - **Un module à la fois, relu pour lui-même.** Les manuels Flaming Cliffs se recopient
   d'un appareil à l'autre : la symbologie d'un module ne se déduit jamais d'un autre.
-- **Lecture validée par Vince.** Chaque gabarit est comparé à la page en jeu, sur une
-  capture locale jamais publiée ; Vince nomme ce qu'il voit, élément par élément,
-  avant la fusion.
+- ~~Lecture validée par Vince contre le jeu, avant fusion.~~ Retiré le 2026-09-30 : les
+  figures du manuel sont déjà des captures du jeu. Un écart vu en vol ouvre une
+  correction.
 
 ### 5.4 Fait quand
 
 - Pour chaque module : gabarit et symboles posés, recolorés, orientés, étiquetés,
   ancrés ; exports PNG et kneeboard lisibles.
 - Table des sources complète : aucun symbole sans page.
-- Lecture validée par Vince contre le jeu.
 - Une planche « radar » dans `?demo`.
 
-État au 2026-09-30 — **F/A-18C et F-16C** : faits, sauf la lecture contre le jeu. Vince
-a demandé la fusion avant cette lecture : elle se fera sur la version en ligne, et ses
-écarts ouvriront une correction.
+État au 2026-09-30 — **F/A-18C et F-16C** : faits, en ligne (v1.3).
 Banc 23/23 ; rendu relu en image (pages, vignettes, démos, kneeboard) ; sources
 complètes dans [RADAR.md](RADAR.md). Au kneeboard, un écran seul sur sa planche sort à
 la taille utile ; une légende posée à côté le fait rapetisser (cadrage : lot 8).
@@ -267,18 +264,24 @@ recalculé à chaque dessin.**
 
 **Elle montre la géométrie, elle ne simule pas la détection.** Aucun modèle de surface
 équivalente radar, de fouillis de sol ni de notch calculé : la vue affiche l'**aspect**
-(HOT, FLANK, BEAM, COLD) et signale le travers, sans décider à la place du radar si la
-cible est vue. L'élévation de l'antenne est ignorée : la vue est en deux dimensions. Un
+au format du F-16C (p. 405), l'hémisphère chaud ou froid (p. 404) et la **part radiale**
+de la vitesse de la cible, que juge le filtre Doppler (p. 391), sans décider à la place
+du radar si la cible est vue. *Écart au plan initial : les catégories HOT, FLANK, BEAM,
+COLD n'ont de bornes dans aucun manuel lu ; la vue ne les invente pas.* L'élévation de l'antenne est ignorée : la vue est en deux dimensions. Un
 verdict que le simulateur pourrait contredire serait pire qu'une absence.
 
 ### 6.3 Fait quand
 
 - La projection est une fonction pure, testée en `node` comme le magnétisme : cible
   droit devant à 20 NM → au centre, à 20 NM ; à 45° à droite → colonne +45° ; à 70° →
-  absente avec un cône de ±60° ; cible au travers → BEAM.
+  absente avec un cône de ±60° ; cible au travers → aspect 9, part radiale nulle.
 - Déplacer une cible en haut la déplace en bas ; tourner le porteur fait défiler les
   contacts.
 - Kneeboard : plan en haut, radar en bas.
+
+État au 2026-09-30 : fait. `node tools/test_radar.js` 26/26, et en échec sur quatre
+calculs faussés ; banc 27/27 ; interception relue en image ; kneeboard ; planche
+« Interception » dans la démo.
 
 ## 7. Propositions — lots 4 à 8
 

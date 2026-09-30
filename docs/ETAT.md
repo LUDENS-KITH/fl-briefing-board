@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.3**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.4**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,8 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 23 scénarios). Pas de déploiement.
+(`tools/banc-saisie.html`, 27 scénarios) et la géométrie de la vue radar liée
+(`node tools/test_radar.js`, 26 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
 ## 2. Ce qui est vérifié
@@ -90,6 +91,9 @@ par événements pointeur réels, pas en relisant le code.
 | Kit radar F/A-18C | rendu relu en image : pages RWS, TWS, STT, vignettes, planche de démo, kneeboard | conforme | 2026-09-30 |
 | Kit radar F-16C | 2 scénarios au banc : la cible désignée échoue avant le moteur (marques par appareil), passe après ; le réglage au clavier passait déjà, le moteur étant générique ; 23/23 | conforme | 2026-09-30 |
 | Kit radar F-16C | rendu relu en image : FCR RWS et TWS, limites de balayage A3, vignettes, planche de démo ; aucune erreur console | conforme | 2026-09-30 |
+| Vue radar liée | géométrie : 26 vérifications calculées à la main ; le test attrape quatre calculs faussés (sens du gisement, côtés, aspect pris du nez, abscisse sur le balayage) | conforme | 2026-09-30 |
+| Vue radar liée | 4 scénarios au banc, rouges avant le code : message sans porteur, porteur désigné, cible déplacée, porteur tourné de 30°, sans échelle rien d'inventé, panneau non éditable ; 27/27 | conforme | 2026-09-30 |
+| Vue radar liée | interception au Caucase : de face 18 · 100 %, au travers 9D · 0 %, qui s'éloigne 3D · 88 % ; tiges et traits de nez dans le bon sens, relus en image agrandie ; kneeboard avec l'écran sous le plan | conforme | 2026-09-30 |
 
 ## 3. Ce qui n'est pas vérifié
 
@@ -117,10 +121,10 @@ par événements pointeur réels, pas en relisant le code.
   vérifié sur l'événement (`defaultPrevented`) ;
 - **le retour à la sélection au doigt** : un écran tactile n'a ni clic droit ni `Échap` ;
   il passe par le bouton Sélection (⬈). L'appui long n'a pas été essayé ;
-- **la lecture des écrans radar contre le jeu** : chaque libellé et chaque symbole est
-  sourcé dans le manuel ([RADAR.md](RADAR.md)), mais la comparaison à la page en vol
-  revient à Vince, élément par élément. Fusion avancée à sa demande le 2026-09-30 : la
-  lecture se fera sur la version en ligne ;
+- **les écrans radar face au jeu d'aujourd'hui** : chaque libellé et chaque symbole vient
+  du manuel ED ([RADAR.md](RADAR.md)), dont les figures sont des captures du jeu. Seule
+  une page modifiée par DCS depuis l'édition du manuel resterait fausse ; un écart vu en
+  vol ouvre une correction ;
 - **les réglages des écrans radar au doigt** : échelle et azimut se changent au clavier.
 
 ## 4. Périmètre livré
@@ -146,6 +150,10 @@ sourcés, B-scope), briques, HAFU ami, inconnu, hostile avec tige de cap, marque
 DT2, curseur TDC. **Kit radar F-16C** : écrans FCR en RWS et TWS, cibles de recherche
 chaude et froide, pistes TWS et système, cible désignée, curseur A-A, brouillage,
 bullseye. Une planche de démo par appareil.
+
+**Vue radar liée** : l'écran TWS du F/A-18C ou du F-16C d'un porteur, calculé depuis la
+vue de dessus ; aspect, hémisphère, part radiale ; cône balayé sur la carte ; planche
+« Interception » dans la démo ; au kneeboard.
 
 **Planches** : une par phase, copiées d'un clic, chacune avec son historique et son
 échelle. **Exports** : PNG écran, kneeboard DCS 768 × 1024.

@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.3', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.4', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -389,13 +389,12 @@ function draw(){
   drawPlan(w, h);
   ctx.restore();
 
-  if (split){                                     // coupe, dans son propre repère
+  if (split){                                     // coupe ou radar, dans leur propre repère
     ctx.save();
     ctx.translate(0, profTop());
     ctx.beginPath(); ctx.rect(0, 0, w, PROF_H); ctx.clip();
-    drawProfAxes(w);
-    drawPane('p');
-    drawRoute(w);
+    if (prof.pane) drawRadarPane(w);
+    else { drawProfAxes(w); drawPane('p'); drawRoute(w); }
     ctx.restore();
   }
   document.getElementById('lock').classList.toggle('on', !!(sel && sel.locked));
@@ -410,6 +409,7 @@ function drawPlan(w, h){
     for (let y = 0; y < h; y += 24){ ctx.beginPath(); ctx.moveTo(0, y+.5); ctx.lineTo(w, y+.5); ctx.stroke(); }
     ctx.restore();
   }
+  if (split && prof.pane) drawRadarCone();
   drawPane('m');
   if (cam) drawAttribution(w);
 }
@@ -702,6 +702,106 @@ function setLinked(on){
   snapshot();
   prof = { ...prof, linked: on };
   commit();
+}
+
+/* ---------- vue radar liée (lot 3) ----------
+   Le panneau du bas montre, au choix, la coupe ou l'écran radar d'un porteur. Rien
+   n'est stocké : l'écran se recalcule à chaque dessin depuis la vue de dessus
+   (radar.js), comme la route liée. Il montre la géométrie ; il ne simule pas la
+   détection. */
+const RADAR_PAGE = { fa18: 'fa18_tws', f16: 'f16_tws' };
+const radarScope = () => SHAPES[RADAR_PAGE[prof.pane]].scope;
+/* identité d'une piste du F/A-18C : la couleur du symbole posé, comme la palette la
+   nomme — rouge hostile, bleu ami ; toute autre, inconnue */
+const hafuFor = c => c === '#FF4D4D' ? 'fa18_hafu_h' : c === '#2F8CFF' ? 'fa18_hafu_f' : 'fa18_hafu_u';
+
+function radarView(){
+  const own = objs.find(o => o.own && (o.v || 'm') === 'm');
+  if (!own) return { msg: 'Sélectionnez un appareil dans la vue de dessus, puis « Porteur ».' };
+  const pxPerNm = cam ? nmAt(own.y) : nmPx;             // rien d'inventé sans échelle
+  if (!pxPerNm) return { own, msg: 'Il faut une carte, ou une planche étalonnée (bouton Échelle), pour mesurer les distances.' };
+  const sc = radarScope();
+  const tgts = objs.filter(o => o !== own && o.t === 'sym' && (o.v || 'm') === 'm' && (SHAPES[o.k] || {}).g === 'air');
+  return { own, pxPerNm, ...RADAR.radarPicture(own, tgts,
+    { pxPerNm, rangeNm: prof.rrng ?? sc.rng, span: sc.span, cone: sc.cone(prof.raz ?? sc.az) }) };
+}
+
+/* l'écran du porteur à gauche, sa lecture à droite */
+function drawRadarPane(w){
+  const k = RADAR_PAGE[prof.pane], sc = SHAPES[k].scope, v = radarView();
+  ctx.save();
+  ctx.fillStyle = dark ? '#0A1019' : '#EDF1F5'; ctx.fillRect(0, 0, w, PROF_H);
+  const half = PROF_H / 2 - 8, cx = 12 + half, cy = PROF_H / 2;
+  /* drawObj, pas paintSym : c'est lui qui pose la couleur du trait */
+  drawObj({ t:'sym', k, x:cx, y:cy, a:0, s: half / SIZE, c: SHAPES[k].col, w:4,
+            rng: prof.rrng ?? sc.rng, az: prof.raz ?? sc.az });
+  const [L, T, R, B] = sc.area;
+  const X = f => cx + half * (L + (f + 1) / 2 * (R - L)), Y = f => cy + half * (B - f * (B - T));
+  const list = (v.shown || []).slice().sort((p, q) => p.nm - q.nm);
+  list.forEach((c, i) => {
+    /* F/A-18C : HAFU selon la couleur, tige au cap relatif ; F-16C : piste TWS, qui
+       tourne du cap relatif (p. 404) */
+    const tk = prof.pane === 'f16' ? 'f16_track' : hafuFor(c.src.c), x = X(c.fx), y = Y(c.fy);
+    drawObj({ t:'sym', k:tk, x, y, a:c.rel, s: SHAPES[tk].s0 * half / (SIZE * 4.5), c: SHAPES[tk].col, w:2.5 });
+    ctx.fillStyle = SHAPES[tk].col; ctx.font = '700 ' + 10 * tb + 'px ui-sans-serif, system-ui, sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(i + 1), x + 10, y - 9);
+  });
+
+  const ink = dark ? '#E6EDF5' : '#0A1019', dim = dark ? '#7F8C98' : '#4A5661', tx = cx + half + 22;
+  let ty = 22;
+  const line = (txt, col = ink, size = 12, weight = 600) => {
+    ctx.fillStyle = col; ctx.font = `${weight} ${size * tb}px ui-sans-serif, system-ui, sans-serif`;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(txt, tx, ty); ty += (size + 7) * tb;
+  };
+  line((prof.pane === 'f16' ? 'F-16C · FCR' : 'F/A-18C · RDR ATTK') + ' · TWS', ink, 13, 700);
+  if (v.msg){ line(v.msg, dim); ctx.restore(); return; }
+  const azv = prof.raz ?? sc.az;
+  line(`Porteur : ${v.own.lbl || SHAPES[v.own.k].label} · échelle ${prof.rrng ?? sc.rng} NM · balayage `
+       + (prof.pane === 'f16' ? 'A' + azv : azv + '°'), dim);
+  list.slice(0, 8).forEach((c, i) => {
+    /* à 0 % affiché, la cible n'est ni chaude ni froide : elle est au travers */
+    const o = c.src, az = Math.round(c.az), rad = Math.round(c.radial * 100);
+    line(`${i + 1}. ${o.lbl || SHAPES[o.k].label} — ${fmtNm(c.nm)}, ${Math.abs(az)}°${az ? (az < 0 ? ' G' : ' D') : ''}`
+         + ` · aspect ${RADAR.aspectText(c)} · ${rad ? (c.hot ? 'chaude' : 'froide') : 'au travers'} · radiale ${rad} %`);
+  });
+  if (list.length > 8) line(`… et ${list.length - 8} autres`, dim);
+  if (!list.length) line('Aucun contact dans le balayage et l\'échelle.', dim);
+  const miss = [v.outCone && `${v.outCone} hors balayage`, v.beyond && `${v.beyond} au-delà de l'échelle`].filter(Boolean);
+  if (miss.length) line(miss.join(' · '), dim);
+  ty = PROF_H - 34;
+  line('Radiale : part de sa vitesse le long de la ligne de visée. Proche de 0 % (au travers),', dim, 11, 500);
+  line('le filtre Doppler peut rejeter la cible en regard vers le bas (manuel F-16C, p. 391).', dim, 11, 500);
+  ctx.restore();
+}
+
+/* sur la vue de dessus, le volume balayé par le porteur : son cône, jusqu'à l'échelle */
+function drawRadarCone(){
+  const v = radarView();
+  if (!v.own || !v.pxPerNm) return;
+  const sc = radarScope(), o = toScreen(v.own);
+  const r = (prof.rrng ?? sc.rng) * v.pxPerNm * camK(), h = (v.own.a || 0) - Math.PI / 2;
+  const c = sc.cone(prof.raz ?? sc.az) * Math.PI / 180;
+  ctx.save();
+  ctx.fillStyle = ctx.strokeStyle = SHAPES[RADAR_PAGE[prof.pane]].col;
+  ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.arc(o.x, o.y, r, h - c, h + c); ctx.closePath();
+  ctx.globalAlpha = .1; ctx.fill();
+  ctx.globalAlpha = .6; ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.restore();
+}
+
+/* le bandeau suit la vue du panneau : réglages de la coupe, ou du radar */
+function syncPane(){
+  const r = !!prof.pane;
+  $('pane').value = prof.pane || '';
+  $('pcoupe').style.display = r ? 'none' : '';
+  $('pradar').style.display = r ? 'flex' : 'none';
+  if (!r) return;
+  const sc = radarScope(), lab = prof.pane === 'f16' ? a => 'A' + a : a => a + '°';
+  $('rrng').value = prof.rrng ?? sc.rng;
+  $('raz').innerHTML = sc.azs.map(a => `<option value="${a}">${lab(a)}</option>`).join('');
+  $('raz').value = prof.raz ?? sc.az;
 }
 
 /* ---------- règle : distance et cap ---------- */
@@ -1053,6 +1153,7 @@ cv.addEventListener('pointerdown', e => {
   try { cv.setPointerCapture(e.pointerId); } catch(_){}
   const [x, y, raw, sx, sy] = locate(e);
   if (split && raw >= planH() && raw < profTop()) return;           // bandeau de la coupe
+  if (view === 'p' && prof.pane) return;                              // vue radar : calculée, pas éditée
   if (view === 'm') touches.set(e.pointerId, [sx, sy]);
   if (cam && view === 'm' && touches.size === 2){                    // deux doigts : pincer
     cancelGesture();
@@ -1202,7 +1303,8 @@ cv.addEventListener('pointermove', e => {
   if (draft && draft.t === 'zone'){ draft.hov = [x, y]; draw(); return; }
 
   if (!draft){
-    cv.style.cursor = cam && view === 'm' && (tool === 'pan' || spaceHeld) ? 'grab'
+    cv.style.cursor = view === 'p' && prof.pane ? 'default'
+      : cam && view === 'm' && (tool === 'pan' || spaceHeld) ? 'grab'
       : view === 'p' && prof.linked && routeHit(x, y) ? 'ns-resize'
       : cursorOver(tool === 'select' ? pick(x, y) : tool === 'sym' ? grab(x, y) : null);
     return;
@@ -1263,6 +1365,7 @@ cv.addEventListener('pointercancel', releasePointer);
 cv.addEventListener('dblclick', e => {
   const [x, y] = locate(e, !!(draft && draft.t === 'zone'));
   if (draft && draft.t === 'zone'){ finishZone(); return; }
+  if (view === 'p' && prof.pane) return;
   if (view === 'p' && prof.linked){                     // altitude exacte d'un waypoint
     const rp = routeHit(x, y);
     if (rp) return openText(rp.x - 60, rp.y - 44, { t:'wpalt', w: rp.w }, altText(rp.alt));
@@ -1512,7 +1615,8 @@ $('png').onclick = () => {
 /* ---------- export kneeboard DCS : portrait 768 × 1024 ---------- */
 async function kneeboardCanvas(){
   const planObjs = objs.filter(o => (o.v || 'm') === 'm');
-  const withProf = split && (objs.some(o => o.v === 'p') || (prof.linked && route.pts.length > 0));
+  const withProf = split && (prof.pane ? !!radarView().own
+                                       : objs.some(o => o.v === 'p') || (prof.linked && route.pts.length > 0));
   if (!planObjs.length && !withProf && !cam) return null;
   const pad = 36;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -1580,9 +1684,12 @@ async function kneeboardCanvas(){
       ctx.save();
       ctx.translate(16, H - FOOT - 10 - bandH); ctx.scale(kp, kp);
       ctx.beginPath(); ctx.rect(0, 0, sw, PROF_H); ctx.clip();
-      drawProfAxes(sw);
-      for (const o of objs) if (o.v === 'p') drawObj(o);
-      drawRoute(sw);
+      if (prof.pane) drawRadarPane(sw);
+      else {
+        drawProfAxes(sw);
+        for (const o of objs) if (o.v === 'p') drawObj(o);
+        drawRoute(sw);
+      }
       ctx.restore();
       tb = tbPlan;
     }
@@ -1660,6 +1767,26 @@ $('split').onclick = () => {
   fit(); commit();
 };
 
+/* vue du panneau du bas ; un balayage ne passe pas d'un appareil à l'autre */
+$('pane').onchange = e => {
+  snapshot();
+  prof = { ...prof, pane: e.target.value || undefined, raz: undefined };
+  if (prof.pane && PROF_TOOLS.includes(tool)) setTool('select');
+  commit();
+};
+$('rrng').onchange = e => { snapshot(); prof = { ...prof, rrng: +e.target.value }; commit(); };
+$('raz').onchange  = e => { snapshot(); prof = { ...prof, raz: +e.target.value }; commit(); };
+/* le porteur : l'appareil sélectionné dans la vue de dessus, un seul par planche */
+$('own').onclick = () => {
+  if (!sel || sel.t !== 'sym' || (SHAPES[sel.k] || {}).g !== 'air' || (sel.v || 'm') !== 'm'){
+    toast('Sélectionnez d\'abord un appareil de la vue de dessus (outil Sélection, V)'); return;
+  }
+  snapshot();
+  for (const o of objs) delete o.own;
+  sel.own = true;
+  commit();
+};
+
 $('hide').onclick = () => {
   document.body.classList.toggle('nopal');
   requestAnimationFrame(fit);
@@ -1731,6 +1858,7 @@ function commit(){
     : 'Déclinaison inconnue sans carte — cliquer pour la saisir (celle de votre mission DCS)';
   $('decl').classList.toggle('warn', headRef === 'mag' && dc === null);
   $('ceil').value = prof.ceil; $('range').value = prof.range; $('linked').checked = !!prof.linked;
+  syncPane();
   try {
     stash();
     if (DEMO) return;                        // la démo ne touche pas au tableau du visiteur
@@ -1819,7 +1947,20 @@ function demoBoards(){
   ];
   const flat = (name, objs) => ({ name, objs, wpN:1, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
                                   magDec:null, past:[], future:[] });
-  return [board('Ingress', ingress), board('Attaque', attaque), flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
+  /* l'interception vue par le radar du porteur : trois bandits, trois aspects — de face,
+     au travers, qui s'éloigne. Le panneau du bas montre la vue radar liée. */
+  const at = (dx, dy) => [view.x + d(dx), view.y + d(dy)];
+  const [ox, oy] = at(0, 150), [h1x, h1y] = at(0, -80), [h2x, h2y] = at(130, -30), [h3x, h3y] = at(-110, -50);
+  const beamA = Math.atan2(oy - h2y, ox - h2x);            // cap perpendiculaire à la ligne de visée
+  const interception = [
+    sym('fighter', ox, oy, 0, B, 1, { lbl:'UZI 1-1', own:true }),
+    sym('fighter', h1x, h1y, Math.PI, R, 1, { lbl:'BANDIT 1' }),
+    sym('fighter', h2x, h2y, beamA, R, 1, { lbl:'BANDIT 2' }),
+    sym('fighter', h3x, h3y, 0, R, 1, { lbl:'BANDIT 3' }),
+  ];
+  return [board('Ingress', ingress), board('Attaque', attaque),
+          { ...board('Interception', interception), wpN:1, prof:{ ceil, range, linked:false, pane:'fa18', rrng:40 } },
+          flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
 
 (function boot(){

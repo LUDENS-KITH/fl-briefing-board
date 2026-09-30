@@ -81,7 +81,9 @@ function app(f){
     key: (key, o = {}) => d.body.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...o })),
     tile: k => d.querySelector(`.tile[data-k="${k}"]`).click(),
     button: q => d.querySelector(q).click(),
-    map(id = 'Caucasus'){ const s = d.getElementById('theatre'); s.value = id; s.dispatchEvent(new w.Event('change')); },
+    map(id = 'Caucasus'){ this.choose('#theatre', id); },
+    /* une liste déroulante, comme la choisit le pilote : la valeur puis l'événement change */
+    choose(q, v){ const s = d.querySelector(q); s.value = v; s.dispatchEvent(new w.Event('change')); },
     toast: () => { const t = d.getElementById('toast'); return t && !t.hidden ? t.textContent : ''; },
   };
 }
@@ -370,6 +372,60 @@ test('Piste TWS du F-16C : le geste oriente le symbole ; une seule cible désign
   ok(a.s('!objs[0].mark && objs[1].mark') === 'bug', 'deux cibles désignées');
   a.click(700, 300);
   ok(a.s('!objs[2].mark'), 'marque du F-16C posée sur une piste du F/A-18C');
+});
+
+/* ---------- lot 3 : vue radar liée ---------- */
+
+/* carte, coupe ouverte, un porteur au sud et une cible au nord, vue radar du F/A-18C */
+async function radarBoard(a, withMap = true){
+  if (withMap) a.map();
+  a.button('#split');
+  a.tile('fighter'); a.click(500, 340);                     // objs[0] : le porteur
+  a.tile('fighter'); a.click(500, 150);                     // objs[1] : la cible
+  a.choose('#pane', 'fa18');
+}
+
+test('Vue radar : sans porteur, un message ; le porteur se désigne depuis la sélection', async (ok) => {
+  const a = await open();
+  await radarBoard(a);
+  ok(a.s('prof.pane') === 'fa18', `vue du panneau : ${a.s('prof.pane')}`);
+  ok(/porteur/i.test(a.s('radarView().msg || ""')), `message sans porteur : « ${a.s('radarView().msg')} »`);
+  a.key('v'); a.click(500, 340); a.button('#own');
+  ok(a.s('!!objs[0].own && !objs[1].own'), 'porteur non désigné');
+  a.choose('#rrng', '160');
+  ok(a.s('radarView().shown.length') === 1, `contacts affichés : ${a.s('radarView().shown && radarView().shown.length')}`);
+  ok(Math.abs(a.s('radarView().shown[0].az')) < 1, `gisement de la cible droit devant : ${a.s('radarView().shown[0].az')}`);
+});
+
+test('Vue radar : déplacer une cible la déplace ; tourner le porteur fait défiler', async (ok) => {
+  const a = await open();
+  await radarBoard(a);
+  a.key('v'); a.click(500, 340); a.button('#own'); a.choose('#rrng', '160');
+  a.drag(500, 150, 580, 150);
+  const az1 = a.s('radarView().shown[0].az');
+  ok(az1 > 5, `cible poussée à droite, gisement : ${az1}`);
+  a.click(500, 340);
+  for (let i = 0; i < 6; i++) a.key('ArrowRight');         // 6 × 5° : le porteur vire de 30° à droite
+  const az2 = a.s('radarView().shown[0].az');
+  ok(Math.abs(az2 - (az1 - 30)) < .5, `après 30° de virage : ${az2}, attendu ${az1 - 30}`);
+});
+
+test('Vue radar : sans carte ni échelle, un message et rien d\'inventé', async (ok) => {
+  const a = await open();
+  await radarBoard(a, false);
+  a.key('v'); a.click(500, 340); a.button('#own');
+  ok(/échelle|carte/i.test(a.s('radarView().msg || ""')), `message : « ${a.s('radarView().msg')} »`);
+  ok(!a.s('radarView().shown'), 'des contacts affichés sans échelle');
+});
+
+test('Vue radar : un clic dans le panneau ne pose rien ; la coupe revient', async (ok) => {
+  const a = await open();
+  await radarBoard(a);
+  const n = a.s('objs.length'), yp = a.s('profTop()') + 150;
+  a.tile('fighter'); a.click(300, yp);
+  ok(a.s('objs.length') === n, `objets après un clic dans la vue radar : ${a.s('objs.length')}`);
+  a.choose('#pane', '');
+  ok(!a.s('prof.pane'), `vue du panneau : ${a.s('prof.pane')}`);
 });
 
 (async () => {

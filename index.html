@@ -71,7 +71,9 @@
   #profbar{position:absolute;left:0;right:0;height:34px;display:none;align-items:center;gap:6px;
     padding:0 10px;background:var(--fl-bg-1);border-top:1px solid rgba(209,169,74,.55);
     border-bottom:1px solid rgba(183,195,207,.18);z-index:4;font-size:12px;color:var(--fl-silver-1)}
-  #profbar .ptitle{font-weight:700;letter-spacing:.12em;color:var(--fl-gold-2);margin-right:4px}
+  #profbar #pane{font-weight:700;letter-spacing:.12em;color:var(--fl-gold-2);margin:0 4px 0 0}
+  #profbar #pcoupe, #profbar #pradar{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+  #profbar #pradar{display:none}
   #profbar button{padding:5px 9px;font-size:12px}
   #profbar select{font:inherit;font-size:12px;background:var(--fl-bg-0);color:var(--fl-silver-0);
     border:1px solid rgba(183,195,207,.25);border-radius:6px;padding:3px 4px;margin-left:4px}
@@ -197,7 +199,10 @@
       <button id="zfit" class="mo" title="Recadrer sur tout le théâtre">⤢</button>
     </div>
     <div id="profbar">
-      <span class="ptitle">COUPE</span>
+      <select id="pane" title="Panneau du bas : la coupe, ou l'écran radar d'un appareil, calculé depuis la vue de dessus">
+        <option value="">COUPE</option><option value="fa18">RADAR F/A-18C</option><option value="f16">RADAR F-16C</option>
+      </select>
+      <span id="pcoupe">
       <button data-tool="terrain" title="Relief : tracez la crête à main levée, elle se remplit jusqu'au sol">⛰ Relief</button>
       <button data-tool="dome"    title="Enveloppe sol-air : partez du site au sol, tirez jusqu'à son rayon et son plafond">◠ Menace SA</button>
       <button data-tool="block"   title="Bloc d'altitude : glissez verticalement entre deux altitudes">▤ Bloc d'alt.</button>
@@ -213,6 +218,17 @@
         </select></label>
       <label title="La coupe suit les waypoints de la vue de dessus, dans l'ordre de leurs numéros. Tirez un waypoint verticalement pour son altitude, double-cliquez pour la taper."><input type="checkbox" id="linked"> Route liée</label>
       <span class="pnote">pieds · FL au-dessus de 18 000 ft · altitudes calées sur 500 ft</span>
+      </span>
+      <span id="pradar">
+        <button id="own" title="Porteur du radar : sélectionnez un appareil dans la vue de dessus, puis ce bouton">◎ Porteur</button>
+        <label>Échelle
+          <select id="rrng">
+            <option value="5">5 NM</option><option value="10">10 NM</option><option value="20">20 NM</option>
+            <option value="40">40 NM</option><option value="80">80 NM</option><option value="160">160 NM</option>
+          </select></label>
+        <label>Balayage <select id="raz"></select></label>
+        <span class="pnote">calculé depuis la vue de dessus · ne simule pas la détection</span>
+      </span>
     </div>
     <div id="tabs"></div>
     <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
@@ -263,8 +279,9 @@
 
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
-<script src="symbols.js?v=0.8"></script>
-<script src="board.js?v=1.3"></script>
+<script src="symbols.js?v=0.9"></script>
+<script src="radar.js?v=1.0"></script>
+<script src="board.js?v=1.4"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')
