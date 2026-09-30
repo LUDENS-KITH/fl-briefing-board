@@ -3,6 +3,23 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.9.1 — 2026-09-30
+
+### Corrigé — signalé par Vince
+- **L&S, DT2 et la cible désignée se posent sur l'écran** : près d'une piste, le bout
+  de sa tige suffit ; sur une brique, elle devient la piste HAFU qui porte la marque ;
+  sur le fond de l'écran, une piste inconnue marquée s'y pose, comme quand on désigne un
+  écho au cockpit (F/A-18C p. 176). Côté F-16C, la cible désignée fait d'une cible de
+  recherche une piste système (p. 416). Refus clair sur l'écran ou la piste de l'autre
+  appareil.
+- **Les marques se voient** : l'étoile L&S et le losange DT2 étaient couverts par les
+  traits du HAFU, surtout le chevron hostile. Ils se dessinent par-dessus la tige de
+  cap, avec un liseré sombre.
+
+### Vérifié en exécutant
+Banc 46/46, les 2 nouveaux scénarios rouges avant le code · Brave, vrais événements :
+écrans RWS et TWS garnis, marques posées à la souris, relues grossies et à taille réelle.
+
 ## v1.9 — 2026-09-30
 
 Lot 8 du [plan d'action](docs/PLAN.md), engagé par Vince : le cadrage du kneeboard.

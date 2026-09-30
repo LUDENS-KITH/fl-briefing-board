@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.9**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.9.1**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 44 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 46 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
@@ -99,6 +99,8 @@ par événements pointeur réels, pas en relisant le code.
 | Animation entre phases | démo dans Brave, vrais événements d'entrée : Ingress → Attaque, trois captures à 22 %, 61 % et fin — UZI 1-1 glisse de la mer vers l'objectif, UZI 1-2 et la flèche d'ingress s'effacent, la cible et la flèche d'attaque entrent en fondu ; vue radar liée : un bandit passe de 40,x NM (au-delà) à 11° puis 0° | conforme | 2026-09-30 |
 | Kneeboard cadré | 4 scénarios au banc : cadre posé, déplacé par son bord, agrandi sans changer de proportions, ôté, rétabli par Ctrl+Z ; il remplit exactement la zone du plan de la page, sans carte comme sur carte ; page aux proportions de la planchette DCS ; absent du PNG. Ces trois-là rouges avant le code ; le 4e, absent en présentation, mis en échec en retirant la garde ; 44/44 | conforme | 2026-09-30 |
 | Kneeboard cadré | démo dans Brave, vrais événements d'entrée : cadre posé, déplacé par son bord, réduit par sa poignée ; la page 768 × 1157 montre exactement son contenu, sans le cadre ; sans cadre, la planche entière au nouveau format | conforme | 2026-09-30 |
+| Marques de piste | 2 scénarios au banc, rouges avant le code, le cas signalé par Vince : écran RWS, brique, hostile — L&S au bout de la tige marque le hostile, sur le fond pose une piste inconnue marquée, sur la brique en fait cette piste, Ctrl+Z la rend ; refus sur l'écran du F-16C, message aux deux noms ; cible chaude désignée → piste système au cap 180° ; 46/46 | conforme | 2026-09-30 |
+| Marques de piste | Brave, vrais événements : écrans RWS et TWS, brique, inconnu, hostile ; L&S et DT2 posées à la souris ; étoile et losange lisibles sur les trois HAFU, tige à 0° et à 130° (relu grossi ×4 et à taille réelle) | conforme | 2026-09-30 |
 | Import de mission | projection des théâtres mesurée sur les balises de l'installation DCS : 7 théâtres, écart moyen 4 cm, 8 cm au pire ; méridiens et échelle ronds (UTM) | conforme | 2026-09-30 |
 | Import de mission | `node tools/test_miz.js` : projection et inverse contre pyproj à 1 mm près, table Lua, archive zip ; en échec sur six calculs faussés | conforme | 2026-09-30 |
 | Import de mission | missions réelles de l'escadron : départ piste de Goudaouta sur le point de référence du terrain (0,00 km) ; sept départs parking à 0,3 – 1,1 km du point de référence de leur terrain | conforme | 2026-09-30 |
@@ -236,6 +238,14 @@ statistique.
     0,142 × 0,214. Elle y était comprimée d'environ 11 % en largeur : cercles ovales,
     textes tassés. Trouvé en lisant les fichiers du jeu au lot 8, pas en jeu ; la page
     sort désormais en 768 × 1157.
+11. **L&S inutilisable sur l'écran** (v1.3 à v1.9, signalé par Vince). La marque ne se
+    posait qu'au toucher exact d'un HAFU ; sur la brique, le fond de l'écran ou le bout
+    de la tige, elle était refusée, par un message — « piste du groupe Radar F/A-18C » —
+    qui se lisait « écran du F/A-18C ». Et posée, elle ne se voyait pas : au trait épais
+    du tableau, les jambes du chevron hostile couvraient l'étoile, et le losange DT2
+    disparaissait. La marque désigne désormais un écho comme au cockpit (p. 176), se
+    dessine par-dessus la tige avec un liseré. Le banc vérifiait l'état de la piste,
+    jamais le dessin ni le geste d'un pilote sur un écran garni.
 
 ## 7. Risques connus
 
