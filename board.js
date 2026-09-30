@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.5', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.6', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -350,6 +350,7 @@ function renderTabs(){
   p.title = 'Nouvelle planche : copie de celle affichée, à faire évoluer';
   p.onclick = addBoard;
   tabs.appendChild(p);
+  presentBadge();
 }
 
 /* ---------- mise à l'échelle ---------- */
@@ -397,6 +398,7 @@ function draw(){
     else { drawProfAxes(w); drawPane('p'); drawRoute(w); }
     ctx.restore();
   }
+  if (presenting) drawLaser();
   document.getElementById('lock').classList.toggle('on', !!(sel && sel.locked));
 }
 function drawPlan(w, h){
@@ -1152,6 +1154,11 @@ const PROF_TOOLS = ['terrain', 'dome', 'block'];
 cv.addEventListener('pointerdown', e => {
   try { cv.setPointerCapture(e.pointerId); } catch(_){}
   const [x, y, raw, sx, sy] = locate(e);
+  if (presenting){                                                    // présentation : rien ne s'édite
+    if (e.button === 0){ laserDown = true; laser.stroke++; laserPoint(e); }
+    else if (cam && view === 'm') startPan(sx, sy);                   // droit ou molette : la carte
+    return;
+  }
   if (split && raw >= planH() && raw < profTop()) return;           // bandeau de la coupe
   if (view === 'p' && prof.pane) return;                              // vue radar : calculée, pas éditée
   if (view === 'm') touches.set(e.pointerId, [sx, sy]);
@@ -1252,6 +1259,7 @@ cv.addEventListener('pointerdown', e => {
 
 cv.addEventListener('pointermove', e => {
   const [x, y, , sx, sy] = locate(e, !!(drag || draft || pinch));
+  if (presenting && !(drag && drag.m === 'pan')){ laserPoint(e); return; }
   /* bouton droit enfoncé pendant un geste du gauche (pose, tracé, déplacement) : abandon */
   if (e.button === 2 && (draft || (drag && drag.m !== 'pan'))){ backToSelect(); return; }
   if (rpress && Math.hypot(sx - rpress.sx, sy - rpress.sy) > 5) rpress.moved = true;
@@ -1350,6 +1358,7 @@ function endPointer(){
   draft = null; commit();
 }
 function releasePointer(e){
+  laserDown = false;
   touches.delete(e.pointerId);
   if (pinch){ if (touches.size < 2){ pinch = null; saveSoon(); } return; }
   const click = rpress && !rpress.moved && e.type === 'pointerup';
@@ -1363,6 +1372,7 @@ cv.addEventListener('pointercancel', releasePointer);
 
 /* double-clic : referme une zone, ou ouvre le texte de ce qu'on touche */
 cv.addEventListener('dblclick', e => {
+  if (presenting) return;
   const [x, y] = locate(e, !!(draft && draft.t === 'zone'));
   if (draft && draft.t === 'zone'){ finishZone(); return; }
   if (view === 'p' && prof.pane) return;
@@ -1917,6 +1927,61 @@ $('own').onclick = () => {
   commit();
 };
 
+/* ---------- mode présentation (lot 5) ----------
+   Pour mener un briefing en partage d'écran : plein écran, barres et palette masquées,
+   phases au clavier, pointeur laser. Rien de ce qu'on y fait n'entre dans le tableau —
+   ni objet, ni historique, ni export. La carte reste mobile : molette, clic droit. */
+let presenting = false, laserDown = false, laser = { pts: [], hover: null, stroke: 0 };
+const LASER_MS = 1500, LASER_IDLE = 3000;     // durée d'une trace ; le point s'éteint après 3 s d'immobilité
+function present(on){
+  if (on === presenting) return;
+  cancelGesture(); leaveGesture();
+  presenting = on; sel = null; laserDown = false; laser = { pts: [], hover: null, stroke: 0 };
+  document.body.classList.toggle('present', on);
+  if (on){
+    if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    toast('→ ou Espace : phase suivante · ← : précédente · Échap : sortir');
+  } else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  presentBadge();
+  fit();
+}
+/* sortir du plein écran par le navigateur (Échap, F11) quitte aussi la présentation */
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && presenting) present(false); });
+function presentBadge(){
+  $('pbadge').hidden = !presenting;
+  if (presenting) $('pbadge').textContent = `${cur + 1} / ${boards.length} · ${boards[cur].name}`;
+}
+function laserPoint(e){
+  const r = cv.getBoundingClientRect(), p = { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() };
+  laser.hover = p;
+  if (laserDown) laser.pts.push({ ...p, s: laser.stroke });
+  requestDraw();
+}
+/* la trace vivante : ses points de moins de LASER_MS */
+function laserTrail(){
+  const now = performance.now();
+  return laser.pts = laser.pts.filter(p => now - p.t < LASER_MS);
+}
+function drawLaser(){
+  const now = performance.now(), pts = laserTrail(), h = laser.hover, idle = h ? now - h.t : Infinity;
+  ctx.save();
+  ctx.lineCap = ctx.lineJoin = 'round'; ctx.strokeStyle = ctx.fillStyle = '#FF3B3B';
+  for (let i = 1; i < pts.length; i++){
+    if (pts[i].s !== pts[i - 1].s) continue;
+    const k = 1 - (now - pts[i].t) / LASER_MS;                // la trace pâlit et s'amincit
+    ctx.globalAlpha = k; ctx.lineWidth = 2 + 5 * k;
+    ctx.beginPath(); ctx.moveTo(pts[i - 1].x, pts[i - 1].y); ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke();
+  }
+  if (idle < LASER_IDLE){
+    ctx.globalAlpha = Math.min(1, (LASER_IDLE - idle) / 500);
+    ctx.shadowColor = '#FF3B3B'; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(h.x, h.y, 5, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+  if (pts.length || idle < LASER_IDLE) requestDraw();      // elle s'éteint d'elle-même
+}
+$('present').onclick = () => present(true);
+
 $('hide').onclick = () => {
   document.body.classList.toggle('nopal');
   requestAnimationFrame(fit);
@@ -1925,6 +1990,17 @@ $('hide').onclick = () => {
 /* ---------- clavier ---------- */
 addEventListener('keydown', e => {
   if (ti.style.display === 'block') return;
+  if (presenting){                                           // rien ne s'édite : seules les phases
+    const next = ['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key);
+    const prev = ['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key);
+    if (next || prev){ e.preventDefault(); switchBoard(cur + (next ? 1 : -1)); }
+    else if (e.key === 'Home'){ e.preventDefault(); switchBoard(0); }
+    else if (e.key === 'End'){ e.preventDefault(); switchBoard(boards.length - 1); }
+    else if (e.key === 'Escape') present(false);
+    else if (e.key === 'F5') e.preventDefault();
+    return;
+  }
+  if (e.key === 'F5' && !e.ctrlKey && !e.shiftKey){ e.preventDefault(); present(true); return; }
   const k = e.key.toLowerCase();
   if ((e.ctrlKey || e.metaKey) && k === 'z'){ e.preventDefault(); $(e.shiftKey ? 'redo' : 'undo').click(); return; }
   if ((e.ctrlKey || e.metaKey) && k === 'y'){ e.preventDefault(); $('redo').click(); return; }

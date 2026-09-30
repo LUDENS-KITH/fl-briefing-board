@@ -56,6 +56,21 @@ only goes on a track of its own aircraft.
 Prepare radar boards **without a map**: on a map, a display would follow the terrain
 as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" boards).
 
+## Presentation Mode
+
+To lead the briefing over a screen share: **▶ Présenter** (or `F5`). The board goes full
+screen, without toolbar or palette; a discreet tag in the top-right corner shows the
+current phase ("2 / 4 · Attaque").
+
+- `→`, `Space` or `Page Down`: next phase; `←` or `Page Up`: previous; `Home` and
+  `End`: first and last.
+- The mouse becomes a **laser pointer**: a red dot follows the cursor, and a left-button
+  drag draws a red line that fades out by itself in a second and a half.
+- The map still moves: mouse wheel to zoom, right-button drag to pan.
+- Nothing can be edited: no tool, no editing shortcut; nothing the laser draws enters
+  the board, the undo history or the exports.
+- `Esc` leaves, and brings the toolbars back.
+
 ## Linked Radar View
 
 The bottom panel shows either the profile or **an aircraft's radar display**, computed
@@ -163,7 +178,7 @@ drag and drop your own background image.
 `R` rectangle · `Z` zone · `M` ruler · `T` text · `E` eraser · `H` hand ·
 `Ctrl+Z` / `Ctrl+Y` / `Ctrl+D` · `Page Up` / `Page Down` boards · `+` / `-` map zoom ·
 `K` pin · `Esc` or right-click: back to selection · `Ctrl+S` save the briefing ·
-`Ctrl+O` open one.
+`Ctrl+O` open one · `F5` present.
 
 ## What It Does Not Do
 

@@ -116,6 +116,12 @@
   #hint{position:absolute;right:10px;bottom:12px;font-size:11px;color:var(--fl-silver-3);
     pointer-events:none;max-width:44%;text-align:right}
   @media (max-width:1100px){ #hint{display:none} }
+  /* présentation : le tableau seul, en plein écran */
+  body.present #bar, body.present #pal, body.present #tabs, body.present #hint, body.present #mapbar{display:none}
+  body.present #profbar{visibility:hidden}
+  body.present #c{cursor:none}
+  #pbadge{position:absolute;top:10px;right:12px;padding:4px 10px;border-radius:6px;background:rgba(7,11,16,.75);
+    color:var(--fl-silver-1);font-size:12px;font-weight:600;pointer-events:none}
   #toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 12px;border-radius:6px;
     background:rgba(7,11,16,.92);border:1px solid var(--fl-gold-2);color:#E6EDF5;font-size:12px;
     pointer-events:none;white-space:nowrap}
@@ -175,6 +181,7 @@
   <button id="decl"  title="Déclinaison magnétique de la planche">Décl. ?</button>
   <button id="unit"  title="Unité des distances : milles nautiques ou kilomètres">NM</button>
   <button id="scale" title="Échelle de la planche">Échelle</button>
+  <button id="present" title="Présenter (F5) : plein écran, barres masquées, phases au clavier, pointeur laser ; Échap pour sortir">▶ Présenter</button>
   <button id="save"  title="Enregistrer le briefing (Ctrl+S) : toutes les planches, images comprises, dans un fichier .json à ouvrir sur un autre poste">⇩ Briefing</button>
   <button id="open"  title="Ouvrir un briefing enregistré (Ctrl+O) — remplace le tableau affiché ; un fichier .json se glisse aussi sur la page">⇧ Ouvrir</button>
   <input type="file" id="openfile" accept=".json,application/json" hidden>
@@ -236,6 +243,7 @@
     <div id="tabs"></div>
     <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
     <div id="toast" hidden></div>
+    <div id="pbadge" hidden></div>
   </div>
 </div>
 
@@ -284,7 +292,7 @@
 <script src="magnetic.js?v=1.0"></script>
 <script src="symbols.js?v=0.9"></script>
 <script src="radar.js?v=1.0"></script>
-<script src="board.js?v=1.5"></script>
+<script src="board.js?v=1.6"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')
