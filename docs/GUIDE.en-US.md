@@ -56,6 +56,25 @@ only goes on a track of its own aircraft.
 Prepare radar boards **without a map**: on a map, a display would follow the terrain
 as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" boards).
 
+## Importing a DCS Mission
+
+**⇧ Mission**, or drop a `.miz` file on the page: the mission becomes a new board.
+
+- If there are several **playable flights** (groups with a "Client" or "Player"
+  aircraft), pick yours in the list.
+- The board carries its **route** — numbered waypoints with their name and altitude,
+  the flight name on the first —, its coalition's **bullseye**, the **air defences**
+  (SAM, AAA, early-warning radars) and the **ships** of both sides, in their side's color
+  and under their group name.
+- The profile opens with the linked route: the flight profile reads at once. A ground
+  altitude (AGL in the editor) is flagged "alt. sol".
+- On theatres whose projection is measured — Caucasus, Syria, Persian Gulf, Sinai,
+  Afghanistan, Marianas, Kola —, everything lands **on the map**, to the metre. Elsewhere,
+  on a **board without a map** at exact scale, DCS grid north up; its headings then carry
+  a "G" (grid).
+- Ground units are recognized as air defence by their DCS type; others (tanks,
+  trucks…) are not imported.
+
 ## Presentation Mode
 
 To lead the briefing over a screen share: **▶ Présenter** (or `F5`). The board goes full
@@ -178,7 +197,7 @@ drag and drop your own background image.
 `R` rectangle · `Z` zone · `M` ruler · `T` text · `E` eraser · `H` hand ·
 `Ctrl+Z` / `Ctrl+Y` / `Ctrl+D` · `Page Up` / `Page Down` boards · `+` / `-` map zoom ·
 `K` pin · `Esc` or right-click: back to selection · `Ctrl+S` save the briefing ·
-`Ctrl+O` open one · `F5` present.
+`Ctrl+O` open one · `F5` present · drop a `.miz`: import the mission.
 
 ## What It Does Not Do
 

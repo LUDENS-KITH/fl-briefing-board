@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.6', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.7', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -819,7 +819,8 @@ function distText(px, per = nmPx){
 /* V = vrai (nord géographique d'une carte), M = magnétique ; sans suffixe, c'est le
    haut de l'écran d'une planche sans carte */
 function bearing(x1, y1, x2, y2){
-  let b = Math.atan2(x2 - x1, -(y2 - y1)) * 180 / Math.PI, suf = cam ? 'V' : '';
+  /* V : vrai, sur une carte ; G : grille DCS, sur une mission importée sans carte */
+  let b = Math.atan2(x2 - x1, -(y2 - y1)) * 180 / Math.PI, suf = cam ? 'V' : prof.grid ? 'G' : '';
   if (headRef === 'mag'){
     const d = declAt((x1 + x2) / 2, (y1 + y2) / 2);
     if (d !== null){ b -= d; suf = 'M'; }                // cap magnétique = cap vrai − déclinaison Est
@@ -1517,6 +1518,8 @@ addEventListener('dragover', e => e.preventDefault());
 addEventListener('drop', e => {
   e.preventDefault();
   const files = [...e.dataTransfer.files];
+  const miz = files.find(f => /\.miz$/i.test(f.name));
+  if (miz) return openMission(miz);                      // une mission DCS
   const brief = files.find(f => /\.json$/i.test(f.name) || f.type === 'application/json');
   if (brief) return openBriefing(brief);                 // un briefing enregistré
   const f = files.find(f => f.type.startsWith('image/'));
@@ -1892,6 +1895,92 @@ async function openBriefing(file){
 }
 $('open').onclick = () => $('openfile').click();
 $('openfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openBriefing(f); };
+
+/* ---------- import d'une mission DCS (lot 6) ----------
+   Une .miz devient une nouvelle planche : la route du vol choisi (waypoints numérotés,
+   altitudes pour la route liée), le bullseye de sa coalition, les défenses aériennes et
+   les navires (miz.js). Sur un théâtre dont la projection est mesurée (projections.js),
+   tout se pose sur la carte ; sinon, sur une planche sans carte à l'échelle exacte, nord
+   de la grille DCS en haut, et ses caps le disent (« G »). */
+async function openMission(file){
+  let m;
+  try { m = await MIZ.readMiz(new Uint8Array(await file.arrayBuffer())); }
+  catch (e){ toast('Mission illisible : ' + e.message); return; }
+  const base = file.name.replace(/\.miz$/i, '').slice(0, 40) || 'Mission';
+  if (m.flights.length > 1) return chooseFlight(m, base);
+  importMission(m, m.flights[0] || null, base);
+}
+/* plusieurs vols pilotables : le meneur choisit le sien */
+function chooseFlight(m, base){
+  const th = THEATRES.find(t => t.id === m.theatre);
+  $('mizinfo').textContent = `${base} · ${th ? th.name : m.theatre} · ${m.flights.length} vols pilotables`;
+  $('mizlist').textContent = '';
+  for (const f of m.flights){
+    const b = document.createElement('button');
+    b.textContent = `${f.name || 'Vol sans nom'} · ${f.type} ×${f.units} · ${f.points.length} point${f.points.length > 1 ? 's' : ''}`;
+    b.onclick = () => { $('mizbox').hidden = true; importMission(m, f, base); };
+    $('mizlist').appendChild(b);
+  }
+  $('mizbox').hidden = false;
+}
+$('mizbox').onclick = e => { if (e.target.id === 'mizbox' || e.target.id === 'mizclose') $('mizbox').hidden = true; };
+
+const SIDE_COL = { blue: '#2F8CFF', red: '#FF4D4D', neutrals: '#D1A94A' };
+const THREAT_SYM = { sam: 'sam', radar: 'radar', ship: 'ship', carrier: 'carrier' };
+function importMission(m, f, base){
+  const proj = PROJECTIONS[m.theatre], onMap = !!(proj && THEATRES.some(t => t.id === m.theatre));
+  const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [];
+  const all = [...wps, ...m.threats, ...(be ? [be] : [])];
+  if (!all.length){ toast('Rien à importer : ni vol pilotable, ni menace, ni bullseye'); return; }
+  cancelGesture(); leaveGesture();
+  split = true; fit();                                   // la route liée se lit dans la coupe
+  let pos, camM = null, nmPxM = 0;
+  if (onMap){
+    const geo = new Map(all.map(q => [q, MIZ.toGeo(proj, q.x, q.y)]));
+    pos = q => { const [la, lo] = geo.get(q); return [lon2x(lo), lat2y(la)]; };
+    const la = [...geo.values()].map(g => g[0]), lo = [...geo.values()].map(g => g[1]);
+    camM = fitCam([Math.min(...la), Math.min(...lo), Math.max(...la), Math.max(...lo)]);
+  } else {
+    /* les mètres DCS à l'échelle de l'écran, nord de la grille en haut */
+    const xs = all.map(q => q.x), ys = all.map(q => q.y), [vw, vh] = viewSize();
+    const dn = Math.max(...xs) - Math.min(...xs) || 1852, de = Math.max(...ys) - Math.min(...ys) || 1852;
+    const k = Math.min((vw - 160) / de, (vh - 120) / dn), top = Math.max(...xs), left = Math.min(...ys);
+    const ox = (vw - de * k) / 2, oy = (vh - dn * k) / 2;
+    pos = q => [ox + (q.y - left) * k, oy + (top - q.x) * k];
+    nmPxM = 1852 * k;
+  }
+  const sym = (k, q, c, extra) => { const [x, y] = pos(q); return { t:'sym', k, x, y, a:0, s: SHAPES[k].s0 || 1, c, w:4, n:0, ...extra }; };
+  const out = m.threats.map(t => sym(THREAT_SYM[t.kind], t, SIDE_COL[t.side] || SIDE_COL.neutrals, { lbl: t.name }));
+  if (be) out.push(sym('bullseye', be, '#D1A94A'));
+  /* le premier point porte le nom du vol : l'étiquette de l'appareil, posé au même endroit, le cacherait */
+  wps.forEach((q, i) => {
+    const lbl = [i ? '' : f.name, q.name, q.agl ? 'alt. sol' : ''].filter(Boolean).join(' · ');
+    out.push(sym('wp', q, '#D1A94A', { n: i + 1, alt: Math.round(q.alt * 3.28084 / 10) * 10,   // mètres DCS → pieds
+                                        ...(lbl && { lbl }) }));
+  });
+  if (f && wps.length){                                    // le vol, sur son départ, tourné vers le point suivant
+    const [x0, y0] = pos(wps[0]), [x1, y1] = wps[1] ? pos(wps[1]) : [x0, y0 - 1];
+    out.push({ ...sym(f.cat === 'helicopter' ? 'helo' : 'fighter', wps[0], SIDE_COL[f.side] || SIDE_COL.blue),
+               a: Math.atan2(x1 - x0, -(y1 - y0)) });
+  }
+  /* coupe : plafond au-dessus du point le plus haut, largeur sur la longueur de la route */
+  const maxFt = Math.max(0, ...wps.map(q => q.alt * 3.28084));
+  const nm = wps.slice(1).reduce((s, q, i) => s + Math.hypot(q.x - wps[i].x, q.y - wps[i].y) / 1852, 0);
+  const b = { name: base, objs: out, wpN: wps.length + 1, nmPx: nmPxM,
+              prof: { ceil: [10000, 20000, 40000, 60000].find(v => v >= maxFt * 1.1) || 60000,
+                      range: [10, 20, 40, 80, 160].find(v => v >= nm * 1.08) || 160, linked: wps.length > 1,
+                      ...(!onMap && { grid: true }) },
+              map: onMap ? { theatre: m.theatre, style: $('mstyle').value || 'topo' } : null, cam: camM,
+              magDec: null, past: [], future: [] };
+  stash();
+  boards.splice(cur + 1, 0, b);
+  switchBoard(cur + 1);
+  toast(`Mission importée : ${wps.length} point${wps.length > 1 ? 's' : ''} de route, ${m.threats.length} menace`
+        + `${m.threats.length > 1 ? 's' : ''}${be ? ', bullseye' : ''}`
+        + (onMap ? '' : ' — théâtre sans projection mesurée : planche sans carte, nord de la grille en haut'));
+}
+$('miz').onclick = () => $('mizfile').click();
+$('mizfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openMission(f); };
 
 $('about').onclick = () => {
   $('aboutver').textContent = 'v' + APP.version;

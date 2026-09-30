@@ -3,6 +3,39 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.7 — 2026-09-30
+
+Lot 6 du [plan d'action](docs/PLAN.md), engagé par Vince : importer une mission DCS.
+
+### Ajouté
+- **⇧ Mission**, ou glisser un `.miz` : la mission devient une nouvelle planche — route
+  du vol choisi (waypoints numérotés, noms, altitudes, route liée ouverte), bullseye de
+  sa coalition, défenses aériennes et navires des deux camps.
+- **Projection des théâtres mesurée** (`projections.js`, `tools/build_projections.py`) :
+  une Mercator transverse WGS84 ajustée sur les balises de l'installation du jeu, qui
+  portent leur position DCS et leur latitude/longitude. Écart de 4 cm sur 7 théâtres.
+- Théâtre sans projection mesurée : planche sans carte à l'échelle exacte, nord de la
+  grille en haut, caps « G ».
+- `miz.js`, sans dépendance : archive zip, table Lua, contenu de la mission ;
+  **`node tools/test_miz.js`**, 46 vérifications.
+- Banc de saisie : 3 scénarios de plus, 37 en tout.
+
+### Inconnue levée
+Le plan voulait des paramètres de projection publiables. Le fichier du jeu qui les
+déclare est chiffré : il n'est pas lu. Ils sont mesurés, sur les paires de coordonnées
+des balises ; seules quatre valeurs par théâtre sont publiées, et elles tombent sur les
+réglages de l'UTM (méridiens entiers, échelle 0,9996).
+
+### Vérifié en exécutant
+Projection et inverse contre pyproj à 1 mm · test en échec sur six calculs faussés ·
+missions réelles de l'escadron : départ piste de Goudaouta à 0,00 km du point de
+référence du terrain, sept départs parking à 0,3 – 1,1 km · deux missions réelles
+importées dans Brave en `file://`, capture relue · banc 37/37.
+
+### Constaté
+- Une route plus longue que 160 NM dépasse la largeur maximale de la coupe.
+- Beaucoup de groupes sur un même terrain serrent leurs étiquettes.
+
 ## v1.6 — 2026-09-30
 
 Lot 5 du [plan d'action](docs/PLAN.md), engagé par Vince : le mode présentation.

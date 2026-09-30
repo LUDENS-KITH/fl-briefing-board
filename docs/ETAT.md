@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.6**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.7**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,8 +16,9 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 34 scénarios) et la géométrie de la vue radar liée
-(`node tools/test_radar.js`, 26 vérifications). Pas de déploiement.
+(`tools/banc-saisie.html`, 37 scénarios) et la géométrie de la vue radar liée
+(`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
+(`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
 ## 2. Ce qui est vérifié
@@ -94,6 +95,10 @@ par événements pointeur réels, pas en relisant le code.
 | Vue radar liée | géométrie : 26 vérifications calculées à la main ; le test attrape quatre calculs faussés (sens du gisement, côtés, aspect pris du nez, abscisse sur le balayage) | conforme | 2026-09-30 |
 | Vue radar liée | 4 scénarios au banc, rouges avant le code : message sans porteur, porteur désigné, cible déplacée, porteur tourné de 30°, sans échelle rien d'inventé, panneau non éditable ; 27/27 | conforme | 2026-09-30 |
 | Fichier de briefing | 4 scénarios au banc, rouges avant le code : image relue après réouverture ; enregistrer puis ouvrir sur un poste vierge, fichier identique, image comprise, gardé à la réouverture ; fichier étranger refusé ; confirmation avant de remplacer ; nom de planche piégé resté du texte ; 31/31 | conforme | 2026-09-30 |
+| Import de mission | projection des théâtres mesurée sur les balises de l'installation DCS : 7 théâtres, écart moyen 4 cm, 8 cm au pire ; méridiens et échelle ronds (UTM) | conforme | 2026-09-30 |
+| Import de mission | `node tools/test_miz.js` : projection et inverse contre pyproj à 1 mm près, table Lua, archive zip ; en échec sur six calculs faussés | conforme | 2026-09-30 |
+| Import de mission | missions réelles de l'escadron : départ piste de Goudaouta sur le point de référence du terrain (0,00 km) ; sept départs parking à 0,3 – 1,1 km du point de référence de leur terrain | conforme | 2026-09-30 |
+| Import de mission | 3 scénarios au banc, rouges avant le code : choix du vol, route et altitudes, bullseye, SAM, carte, route liée ; planche en grille à l'échelle exacte et caps « G » ; .miz illisible refusé ; 37/37 · deux missions réelles importées dans Brave en `file://`, capture relue | conforme | 2026-09-30 |
 | Présentation | 3 scénarios au banc, rouges avant le code : barres et palette masquées, tableau pleine largeur, Échap en sort ; phases au clavier, outils et Ctrl+Z muets ; laser hors objets et hors historique, éteint en 1,8 s ; 34/34 | conforme | 2026-09-30 |
 | Présentation | Brave sans interface, vrais événements souris et clavier, en `file://` : clic sur ▶ Présenter → plein écran accordé ; laser tracé ; → phase suivante ; Échap quitte plein écran et présentation, les barres reviennent ; capture relue | conforme | 2026-09-30 |
 | Fichier de briefing | Brave sans interface, en `file://` comme le raccourci : image déposée relue après rechargement ; briefing de 2 planches enregistré dans un profil, ouvert dans un second profil vierge : identique | conforme | 2026-09-30 |
@@ -123,6 +128,10 @@ par événements pointeur réels, pas en relisant le code.
   vérifié sur l'événement (`defaultPrevented`) ;
 - **le retour à la sélection au doigt** : un écran tactile n'a ni clic droit ni `Échap` ;
   il passe par le bouton Sélection (⬈). L'appui long n'a pas été essayé ;
+- **l'import sur les théâtres sans balises lues** : Normandie et Mariannes 1944 (sans
+  balises), Nevada, La Manche, Atlantique Sud, Allemagne et Irak (non installés sur le
+  poste de mesure) passent par une planche sans carte ; relancer
+  `tools/build_projections.py` sur une installation qui les a ;
 - **les écrans radar face au jeu d'aujourd'hui** : chaque libellé et chaque symbole vient
   du manuel ED ([RADAR.md](RADAR.md)), dont les figures sont des captures du jeu. Seule
   une page modifiée par DCS depuis l'édition du manuel resterait fausse ; un écart vu en
@@ -169,7 +178,8 @@ sélection par clic droit ou `Échap`.
 palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
 reprise locale **images comprises** (IndexedDB) ; **fichier de briefing** `.json` à
 enregistrer et ouvrir, images comprises ; **mode présentation** (plein écran, phases au
-clavier, pointeur laser).
+clavier, pointeur laser) ; **import de mission `.miz`** (route, bullseye, défenses
+aériennes, navires).
 
 ## 5. Hors périmètre — décidé, pas oublié
 

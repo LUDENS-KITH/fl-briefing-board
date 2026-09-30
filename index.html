@@ -122,6 +122,17 @@
   body.present #c{cursor:none}
   #pbadge{position:absolute;top:10px;right:12px;padding:4px 10px;border-radius:6px;background:rgba(7,11,16,.75);
     color:var(--fl-silver-1);font-size:12px;font-weight:600;pointer-events:none}
+  /* import d'une mission : le choix du vol */
+  #mizbox{position:fixed;inset:0;z-index:20;background:rgba(3,6,10,.72);display:flex;align-items:center;
+    justify-content:center;padding:16px}
+  #mizbox[hidden]{display:none}
+  #mizbox .card{position:relative;max-width:560px;width:100%;max-height:80vh;overflow:auto;background:var(--fl-bg-1);
+    border:1px solid rgba(209,169,74,.45);border-radius:12px;padding:18px 20px;color:var(--fl-silver-0)}
+  #mizbox h2{font-size:17px;margin:0 0 4px}
+  #mizbox p{margin:0 0 12px;color:var(--fl-silver-1);font-size:12px}
+  #mizlist{display:flex;flex-direction:column;gap:6px}
+  #mizlist button{text-align:left;padding:8px 10px}
+  #mizclose{position:absolute;top:8px;right:10px}
   #toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 12px;border-radius:6px;
     background:rgba(7,11,16,.92);border:1px solid var(--fl-gold-2);color:#E6EDF5;font-size:12px;
     pointer-events:none;white-space:nowrap}
@@ -185,6 +196,8 @@
   <button id="save"  title="Enregistrer le briefing (Ctrl+S) : toutes les planches, images comprises, dans un fichier .json à ouvrir sur un autre poste">⇩ Briefing</button>
   <button id="open"  title="Ouvrir un briefing enregistré (Ctrl+O) — remplace le tableau affiché ; un fichier .json se glisse aussi sur la page">⇧ Ouvrir</button>
   <input type="file" id="openfile" accept=".json,application/json" hidden>
+  <button id="miz"   title="Importer une mission DCS (.miz) : la route d'un vol, le bullseye, les défenses aériennes et les navires, sur une nouvelle planche — un .miz se glisse aussi sur la page">⇧ Mission</button>
+  <input type="file" id="mizfile" accept=".miz" hidden>
   <button id="png"   title="Exporter la planche en PNG, telle qu'à l'écran">⇩ PNG</button>
   <button id="knee"  title="Exporter la planche au format kneeboard DCS (portrait 768 × 1024), à copier dans Saved Games\DCS\Kneeboard">⇩ Kneeboard</button>
   <button id="clear" title="Effacer la planche affichée">Effacer</button>
@@ -249,6 +262,15 @@
 
 <input id="ti" placeholder="texte puis Entrée">
 
+<div id="mizbox" hidden>
+  <div class="card">
+    <button id="mizclose" title="Fermer">×</button>
+    <h2>Quel vol importer ?</h2>
+    <p id="mizinfo"></p>
+    <div id="mizlist"></div>
+  </div>
+</div>
+
 <div id="aboutbox" hidden>
   <div class="card">
     <button id="aboutclose" title="Fermer">×</button>
@@ -292,7 +314,9 @@
 <script src="magnetic.js?v=1.0"></script>
 <script src="symbols.js?v=0.9"></script>
 <script src="radar.js?v=1.0"></script>
-<script src="board.js?v=1.6"></script>
+<script src="projections.js?v=1.0"></script>
+<script src="miz.js?v=1.0"></script>
+<script src="board.js?v=1.7"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

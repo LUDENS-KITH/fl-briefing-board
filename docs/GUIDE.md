@@ -60,6 +60,26 @@ Le radar se prépare de préférence sur une planche **sans carte** : sur une ca
 écran suivrait le terrain au gré du zoom. La démo en ligne en montre deux (planches
 « Radar F/A-18C » et « Radar F-16C »).
 
+## Importer une mission DCS
+
+**⇧ Mission**, ou glisser un fichier `.miz` sur la page : la mission devient une
+nouvelle planche.
+
+- S'il y a plusieurs **vols pilotables** (groupes dont un appareil est « Client » ou
+  « Player »), choisissez le vôtre dans la liste.
+- La planche porte sa **route** — waypoints numérotés, avec leur nom et leur altitude,
+  le nom du vol sur le premier —, le **bullseye** de sa coalition, les **défenses
+  aériennes** (SAM, artillerie, radars d'alerte) et les **navires** des deux camps, à la
+  couleur de leur camp et sous leur nom de groupe.
+- La coupe s'ouvre, route liée : le profil du vol se lit tout de suite. Une altitude
+  « sol » (AGL dans l'éditeur) est signalée « alt. sol ».
+- Sur les théâtres dont la projection est mesurée — Caucase, Syrie, Golfe Persique,
+  Sinaï, Afghanistan, Mariannes, Kola —, tout se pose **sur la carte**, au mètre près.
+  Ailleurs, sur une **planche sans carte** à l'échelle exacte, nord de la grille DCS en
+  haut ; ses caps portent alors un « G » (grille).
+- Les unités au sol reconnues comme défense aérienne le sont par leur type DCS ; les
+  autres (chars, camions…) ne sont pas importées.
+
 ## Mode présentation
 
 Pour mener le briefing en partage d'écran : **▶ Présenter** (ou `F5`). Le tableau passe
@@ -180,7 +200,7 @@ d'une image reste possible.
 `R` rectangle · `Z` zone · `M` règle · `T` texte · `E` gomme · `H` main · `Ctrl+Z` /
 `Ctrl+Y` / `Ctrl+D` · `PgPréc` / `PgSuiv` planches · `+` / `−` zoom de la carte · `K`
 ancrer · `Échap` ou clic droit : retour à la sélection · `Ctrl+S` enregistrer le briefing ·
-`Ctrl+O` l'ouvrir · `F5` présenter.
+`Ctrl+O` l'ouvrir · `F5` présenter · glisser un `.miz` : importer la mission.
 
 ## Ce qu'il ne fait pas
 
