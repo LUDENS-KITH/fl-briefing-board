@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-18**, version **v1.1**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.2**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -14,8 +14,9 @@ volontairement fermé (§5).
 Le dépôt est **public depuis le 2026-09-18** :
 [LUDENS-KITH/fl-briefing-board](https://github.com/LUDENS-KITH/fl-briefing-board), démo en
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
-(GitHub Pages, branche `main`). Un seul test automatique : la déclinaison magnétique contre les valeurs
-officielles du NOAA (`node tools/test_magnetic.js`). Pas de déploiement.
+(GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
+officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
+(`tools/banc-saisie.html`, 15 scénarios). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
 ## 2. Ce qui est vérifié
@@ -73,6 +74,16 @@ par événements pointeur réels, pas en relisant le code.
 | Caps magnétiques | saisie, lecture, refus, annulation, persistance, pied de page du kneeboard | conforme | 2026-09-18 |
 | Démo | `?demo` : deux planches, carte, route liée, coupe ; stockage du visiteur identique à l'octet | conforme | 2026-09-18 |
 | Vitrine | signature LK Studio dans le PNG et le kneeboard ; fenêtre À propos | conforme | 2026-09-18 |
+| Banc de saisie | 15 scénarios ; les 13 nouveaux échouent sur la v1.1.1, les 15 passent en v1.2 | conforme | 2026-09-30 |
+| Ouverture | outil Sélection, aucune vignette allumée ; un clic dans le vide ne pose rien | conforme | 2026-09-30 |
+| Clic droit | sans bouger : retour à la sélection, rien de posé, menu du navigateur bloqué, avec et sans carte ; glissé sur une carte : la carte bouge | conforme | 2026-09-30 |
+| Clic droit | pendant une pose ou une zone : geste abandonné, aucune entrée d'historique ; clic molette sans carte : rien de posé | conforme | 2026-09-30 |
+| Clic droit | souris réelle dans l'aperçu intégré : chasseur posé, clic droit, outil Sélection, rien de posé | conforme | 2026-09-30 |
+| Échap | retour à la sélection ; zone en cours abandonnée sans trace | conforme | 2026-09-30 |
+| Ancrage | pose par-dessus ; ni glissé, ni poignée, ni flèches, ni gomme, ni `Suppr` ; message de refus ; libéré, tout revient | conforme | 2026-09-30 |
+| Ancrage | annulé, rétabli, relu après réouverture ; forme libre saisie sous une ancrée ; zone ancrée sur carte : glisser déplace la carte | conforme | 2026-09-30 |
+| Ancrage | épingle or dessinée à la sélection, absente sans sélection ; PNG et kneeboard identiques avec ou sans sélection | conforme | 2026-09-30 |
+| Non-régression | démo : 2 planches, 12 objets, route liée, aucune erreur console ; WMM2025 100/100 | conforme | 2026-09-30 |
 
 ## 3. Ce qui n'est pas vérifié
 
@@ -94,7 +105,12 @@ par événements pointeur réels, pas en relisant le code.
   la page est servie en HTTP, pas quand elle est ouverte comme fichier local ;
 - **le kneeboard dans DCS** : le PNG sort au format 768 × 1024, mais personne ne l'a
   encore chargé dans le cockpit. Le dossier `Saved Games\DCS\Kneeboard\` est cité
-  de mémoire, pas vérifié.
+  de mémoire, pas vérifié ;
+- **le clic droit dans Brave en mode application** : vérifié dans Chromium, au banc et
+  à la souris réelle ; le menu natif n'a pas pu être observé à l'écran, son blocage est
+  vérifié sur l'événement (`defaultPrevented`) ;
+- **le retour à la sélection au doigt** : un écran tactile n'a ni clic droit ni `Échap` ;
+  il passe par le bouton Sélection (⬈). L'appui long n'a pas été essayé.
 
 ## 4. Périmètre livré
 
@@ -119,7 +135,8 @@ plafond et largeur réglables par planche.
 
 **Gestes** : pose orientée en un geste · déplacement · rotation et mise à l'échelle
 par poignée · rotation fine au clavier · courbure de flèche · flèche double sens ·
-duplication · premier plan · recoloration de la sélection.
+duplication · premier plan · recoloration de la sélection · ancrage · retour à la
+sélection par clic droit ou `Échap`.
 
 **Tableau** : image de fond par glisser-déposer ou collage, fond sombre ou clair,
 palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
@@ -176,8 +193,9 @@ statistique.
   [`@excalidraw/excalidraw`](https://github.com/excalidraw/excalidraw) (MIT), au prix
   de silhouettes devenues des SVG figés, donc **non recolorables**. Compromis à peser
   le jour où le besoin apparaît, pas avant.
-- **Aucun filet de sécurité automatisé.** Toute évolution se revérifie à la main ;
-  le tableau des §2 est la seule mémoire des contrôles passés.
+- **Un filet de sécurité partiel.** Le banc de saisie couvre le clic droit, `Échap` et
+  l'ancrage (v1.2) ; le reste — tracés, coupe, cartes, exports — se revérifie encore à
+  la main, et le tableau du §2 reste la mémoire des contrôles passés.
 - **Une planche paysage remplit mal un kneeboard portrait** : environ 40 % de la page
   utilisée. Les textes restent lisibles, les symboles rapetissent. Composer les
   planches destinées au cockpit plutôt en hauteur, ou ajouter un jour un cadrage
@@ -205,13 +223,13 @@ statistique.
   et la chaîne sur un texte (voir [MODELE.md](MODELE.md) §5). Sans conséquence
   aujourd'hui, à surveiller à chaque ajout de code générique.
 
-## 8. Prochaines étapes envisagées
+## 8. Prochaines étapes
 
-Aucune n'est engagée ; l'ordre dépend du premier usage réel.
+Elles sont tenues dans [PLAN.md](PLAN.md) (ouvert le 2026-09-30) : lots, ordre,
+critères de fin et décisions. Les trois pistes notées ici jusque-là y figurent :
 
-1. Conserver les images glissées d'une ouverture à l'autre (aujourd'hui perdues).
-2. Alerte de franchissement du relief par la route liée (le relief dessiné le
-   permet, avec la réserve ci-dessus).
+1. Conserver les images glissées d'une ouverture à l'autre → PLAN, lot 4.
+2. Alerte de franchissement du relief par la route liée → PLAN §8, en attente.
 3. Debriefing sur trace réelle : poser ces symboles par-dessus la trajectoire
    effectivement volée (ACMI / Tacview) — le seul angle que ni e-Brief ni Excalidraw
-   ne peuvent tenir, et FlightLedger possède déjà la donnée.
+   ne peuvent tenir, et FlightLedger possède déjà la donnée → PLAN §8, chantier à part.

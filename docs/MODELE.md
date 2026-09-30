@@ -1,6 +1,6 @@
 # Modèle d'état — FL Briefing Board
 
-> Contrat interne du moteur, à jour au **2026-09-18** (v1.0).
+> Contrat interne du moteur, à jour au **2026-09-30** (v1.2).
 > À lire avant toute évolution de `board.js` ou `symbols.js`.
 > L'état d'avancement du projet est dans [ETAT.md](ETAT.md).
 
@@ -91,7 +91,7 @@ l'annulation, le changement de thème et l'export PNG triviaux.
 
 Douze types d'objets. Champs communs à tous : `t` (type), `c` (couleur CSS),
 `w` (épaisseur de trait en pixels). Les objets tracés portent aussi `ls` : `solid`,
-`dash` ou `dot`.
+`dash` ou `dot`. Tout objet peut porter `locked: true` : il est **ancré** (§4).
 
 | `t` | Champs propres | Sens |
 |---|---|---|
@@ -138,7 +138,8 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 
 | Variable | Valeurs | Rôle |
 |---|---|---|
-| `tool` | `sym` `select` `pen` `arrow` `line` `rect` `circle` `zone` `ruler` `text` `erase` | outil courant |
+| `tool` | `sym` `select` `pen` `arrow` `line` `rect` `circle` `zone` `ruler` `text` `erase` | outil courant ; `select` à l'ouverture |
+| `rpress` | `{ sx, sy, moved }` ou `null` | appui du bouton droit en cours, décidé au relâché |
 | `ls` | `solid` `dash` `dot` | style de trait des prochains objets — et de la sélection |
 | `nmPx` | nombre, 0 = non étalonné | pixels par mille nautique de la planche montée ; fait partie de l'historique |
 | `tb` | 1, ou plus pendant l'export | grossissement des textes |
@@ -175,13 +176,17 @@ cap du départ vers l'arrivée.
 consomme l'événement :
 
 ```
+0. bouton droit                                    → noté (rpress) ; déplace la carte s'il y en a une ;
+                                                     relâché à moins de 5 px : retour à la sélection
+0. bouton molette                                  → déplace la carte s'il y en a une, sinon rien
 1. une poignée de la sélection est sous le doigt   → drag (voir table ci-dessous)
-   — sauf pendant le tracé d'une zone
+   — sauf pendant le tracé d'une zone ; un objet ancré n'a pas de poignée
 2. outil zone                                      → ajoute un sommet / referme
-3. outil gomme                                     → supprime l'objet touché, hors image de fond
-4. outil sélection                                 → désigne et commence un déplacement
-5. outil symbole, sur une forme ou un texte        → saisit et déplace (grab)
-6. outil symbole, dans le vide                     → pose la forme, puis drag 'place'
+3. outil gomme                                     → supprime l'objet touché, hors image de fond et ancrés
+4. outil sélection                                 → désigne, un objet libre avant un ancré ; libre :
+                                                     déplacement ; ancré ou vide : la carte
+5. outil symbole, sur une forme ou un texte libre  → saisit et déplace (grab)
+6. outil symbole, dans le vide ou sur un ancré     → pose la forme, puis drag 'place'
 7. outil texte, sur forme / zone / texte           → édite l'étiquette ou le texte (named)
 8. outil texte, dans le vide                       → ouvre le champ flottant
 9. autres outils (dont règle)                      → commence un draft
@@ -200,6 +205,33 @@ couleur choisie pour la forme suivante la repeindrait.
 
 L'instantané d'historique d'un `drag` est pris **au premier mouvement**, pas au
 toucher : sélectionner sans bouger ne laisse aucune entrée vide.
+
+### Retour à la sélection
+
+`backToSelect()` abandonne le geste en cours (`cancelGesture()` : tracé ou pose retirés,
+instantané rendu), désélectionne et passe à l'outil Sélection. Trois chemins y mènent :
+un clic droit relâché à moins de 5 px de son appui (`releasePointer`), `Échap`, et le
+bouton droit enfoncé pendant un geste du gauche — `pointermove` avec `button === 2`, car
+un second bouton n'émet pas de `pointerdown`. Un clic droit sur une carte ne déplace
+pas la vue : la caméra est remise où elle était. Le menu du navigateur est toujours
+bloqué sur le tableau.
+
+### Objets ancrés
+
+`locked: true` fige la géométrie et l'existence d'un objet, pas son style :
+
+- `grab()` l'ignore : avec une forme choisie, on pose par-dessus ;
+- `pick()` lui préfère un objet libre au même point ; seul sous le doigt, il se
+  sélectionne, pour être libéré ;
+- `handleList()` ne lui donne aucune poignée ; `handles()` dessine un cadre or et une
+  épingle, jamais exportés (les exports se dessinent sans sélection) ;
+- gomme, `Suppr`, flèches du clavier et altitude tirée d'un waypoint le refusent, avec
+  un message (`toast()`) — jamais en silence ;
+- couleur, épaisseur, style, étiquette, premier plan restent libres ; une copie naît
+  libre.
+
+`snap()` recopie tous les champs : l'historique et la sauvegarde gardent l'ancrage sans
+code dédié.
 
 ### Modes de `drag`
 
@@ -264,6 +296,12 @@ désigne en premier.
 9. **Un objet du plan n'est pas en pixels écran quand une carte est chargée.** Toute
    nouvelle fonction qui mesure, désigne ou place doit passer par `toScreen`, `w2s`,
    `s2w` ou `nmAt` — jamais comparer une coordonnée d'objet à celle du pointeur brut.
+10. **Un second bouton de souris n'émet pas de `pointerdown`.** Appuyé pendant qu'un
+    autre est tenu, il arrive en `pointermove`, `button` renseigné. Tout geste « au
+    bouton droit pendant… » se lit là.
+11. **Les scripts sont chargés à une adresse versionnée** (`board.js?v=1.2`). Modifier un
+    script sans monter son paramètre dans `index.html` laisse les navigateurs sur
+    l'ancienne version — le banc de saisie lui-même a d'abord jugé l'ancien code.
 
 ## 6. Historique
 

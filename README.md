@@ -27,7 +27,8 @@
 
 - **28 formes prêtes à poser** — chasseur, bombardier, ravitailleur, AWACS, hélicoptère,
   drone, missile, bombe, char, radar, menace sol-air, porte-avions, marqueurs tactiques.
-  Posées et orientées d'un seul geste, recolorables, étiquetées (« UZI 1-1 · FL250 »).
+  Posées et orientées d'un seul geste, recolorables, étiquetées (« UZI 1-1 · FL250 »),
+  ancrées pour poser par-dessus sans les bousculer.
 - **Les cartes des 14 théâtres DCS** — topographique, satellite ou plan routier, cadrées
   sur chaque théâtre. La carte est vivante : on zoome, on se déplace, tout suit le
   terrain. **Distances et caps exacts, sans étalonnage.**
@@ -93,6 +94,7 @@ sait **et ce qu'il n'a pas vérifié** :
 | | |
 |---|---|
 | [docs/ETAT.md](docs/ETAT.md) | ce qui est vérifié, daté, et ce qui ne l'est pas |
+| [docs/PLAN.md](docs/PLAN.md) | ce qui vient ensuite : lots, ordre, critères de fin |
 | [docs/MODELE.md](docs/MODELE.md) | le contrat interne du moteur |
 | [docs/DEVELOPPER.md](docs/DEVELOPPER.md) | structure, outils, tests |
 | [docs/SOUTENIR.md](docs/SOUTENIR.md) | Ko-Fi, invitations Discord, crédits des soutiens |

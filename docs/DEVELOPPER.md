@@ -6,9 +6,9 @@ Zéro dépendance, zéro build : on modifie, on recharge la page. Le contrat du 
 
 ```
 FL Briefing Board/
-├─ index.html        coquille : barre d'outils, palette, styles          (174 l.)
+├─ index.html        coquille : barre d'outils, palette, styles          (276 l.)
 ├─ symbols.js        les 28 formes, vues de dessus et de profil         (396 l.)
-├─ board.js          le moteur : planches, carte, coupe, route, exports (1 632 l.)
+├─ board.js          le moteur : planches, carte, coupe, route, exports (1 779 l.)
 ├─ theatres.js       14 théâtres DCS et 791 aérodromes (généré, ne pas retoucher)
 ├─ magnetic.js       modèle magnétique WMM2025 (généré, ne pas retoucher)
 ├─ assets/           exports du logo (écusson, icône, .ico du raccourci) — ne pas retoucher
@@ -17,6 +17,7 @@ FL Briefing Board/
 │  ├─ build_theatres.py régénère theatres.js depuis les données de FlightLedger
 │  ├─ build_magnetic.py régénère magnetic.js depuis tools/data/WMM2025.COF (NOAA)
 │  ├─ test_magnetic.js  vérifie la déclinaison contre les 100 valeurs de test du NOAA
+│  ├─ banc-saisie.html  banc de saisie : l'application pilotée par de vrais événements
 │  ├─ build_logo.py     régénère le logo : maîtres dans FlightLedger_BRAND, exports ici
 │  ├─ build_social_preview.py image d'aperçu du dépôt (assets/readme/)
 │  └─ logo-preview.html planche de contrôle du logo
@@ -27,12 +28,13 @@ FL Briefing Board/
    ├─ GUIDE.en-US.md guide d'utilisation en anglais US
    ├─ DEVELOPPER.md  ce fichier
    ├─ ETAT.md        où en est le projet : vérifié, non vérifié, hors périmètre
+   ├─ PLAN.md        ce qui vient ensuite : lots, ordre, critères de fin
    ├─ MODELE.md      contrat interne : objets, interaction, persistance, ajout d'une forme
    └─ SOUTENIR.md    Ko-Fi, invitations Discord, crédits des soutiens
 ```
 
 Les trois fichiers restent à la racine délibérément : un sous-dossier `src/`
-n'apporterait rien à 1 700 lignes et brouillerait le « double-clic sur `index.html` »
+n'apporterait rien à 1 800 lignes et brouillerait le « double-clic sur `index.html` »
 qui fait l'intérêt de l'outil.
 
 ## Logo
@@ -49,6 +51,21 @@ node tools/test_magnetic.js
 ```
 
 Vérifie la déclinaison magnétique contre les 100 valeurs de test officielles du NOAA.
+
+```bash
+python -m http.server 8765
+```
+
+puis ouvrir `http://localhost:8765/tools/banc-saisie.html` : le **banc de saisie**.
+Chaque scénario ouvre l'application neuve dans un cadre et la pilote par de vrais
+`PointerEvent` et `KeyboardEvent`, jamais en appelant le moteur ; le verdict (`OK n/n`,
+ou la liste des échecs) s'affiche en haut et dans le titre de l'onglet. Un scénario
+nouveau doit échouer avant le changement qu'il couvre ; ceux marqués « non-régression »
+passaient déjà et doivent continuer.
+
+Quand un script change, **monter son paramètre de version** dans `index.html`
+(`board.js?v=…`) : sans cela, les navigateurs gardent l'ancienne version en cache.
+
 Le reste de l'outil est vérifié en l'exécutant dans un navigateur : voir
 [ETAT.md](ETAT.md) pour la liste datée des contrôles.
 

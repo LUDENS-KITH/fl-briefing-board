@@ -14,12 +14,12 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.1', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.2', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
 let objs = [], draft = null, sel = null, drag = null, textTarget = null;
-let tool = 'sym', symKey = 'fighter', color = '#2F8CFF', width = 4, ls = 'solid', dark = true;
+let tool = 'select', symKey = 'fighter', color = '#2F8CFF', width = 4, ls = 'solid', dark = true;
 let wpN = 1, nmPx = 0;                  // numéro du prochain waypoint ; pixels par mille nautique
 let tb = 1;                             // grossissement des textes : > 1 seulement pendant l'export kneeboard
 let unit = 'nm', measOn = false;        // unité d'affichage des distances ; cotes sur les prochains traits
@@ -398,6 +398,7 @@ function draw(){
     drawRoute(w);
     ctx.restore();
   }
+  document.getElementById('lock').classList.toggle('on', !!(sel && sel.locked));
 }
 function drawPlan(w, h){
   if (cam){ drawTiles(w, h); drawAirfields(w, h); }
@@ -840,6 +841,7 @@ function labelY(o){
 
 /* ---------- poignées ---------- */
 function handleList(o){
+  if (o.locked) return [];                       // ancré : ni rotation, ni taille, ni sommets
   if (o.t === 'sym'){
     const side = o.v === 'p' && (SHAPES[o.k] || {}).side;
     const r = SIZE * (o.s || 1) * 1.45, a = (o.a || 0) - (side ? 0 : Math.PI / 2);
@@ -857,7 +859,7 @@ function handleList(o){
 }
 function handles(o){
   ctx.save();
-  ctx.strokeStyle = '#2F8CFF'; ctx.fillStyle = BG(); ctx.lineWidth = 2;
+  ctx.strokeStyle = o.locked ? '#D1A94A' : '#2F8CFF'; ctx.fillStyle = BG(); ctx.lineWidth = 2;
   const b = bbox(o);
   ctx.setLineDash([5, 5]); ctx.globalAlpha = .55;
   ctx.strokeRect(b.x - 6, b.y - 6, b.w + 12, b.h + 12);
@@ -865,6 +867,17 @@ function handles(o){
   for (const h of handleList(o)){
     ctx.beginPath(); ctx.arc(h.x, h.y, 7, 0, 7); ctx.fill(); ctx.stroke();
   }
+  if (o.locked) pin(b.x + b.w + 6, b.y - 6);
+  ctx.restore();
+}
+/* l'épingle d'un objet ancré, au coin du cadre de sélection — jamais dans un export,
+   qui se dessine sans sélection */
+function pin(x, y){
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(.5);
+  ctx.strokeStyle = '#D1A94A'; ctx.fillStyle = '#D1A94A'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(0, 9); ctx.stroke();       // aiguille
+  ctx.beginPath(); ctx.arc(0, -5, 4.5, 0, 7); ctx.fill();                  // tête
   ctx.restore();
 }
 
@@ -952,8 +965,10 @@ const topmost = (x, y, keep) => {
 /* ce qu'on attrape sans changer d'outil quand une forme est choisie : formes et
    textes seulement — flèches, zones et carte restent traversables, pour pouvoir
    poser un symbole dessus */
-const grab  = (x, y) => topmost(x, y, o => o.t === 'sym' || o.t === 'text');
-const pick  = (x, y) => topmost(x, y, () => true);
+const grab  = (x, y) => topmost(x, y, o => (o.t === 'sym' || o.t === 'text') && !o.locked);
+/* à l'outil Sélection, un objet libre passe devant un objet ancré qui le recouvre ;
+   l'ancré ne se désigne que seul sous le doigt — c'est ainsi qu'on le libère */
+const pick  = (x, y) => topmost(x, y, o => !o.locked) || topmost(x, y, () => true);
 /* ce qui porte un texte modifiable : l'étiquette d'une forme ou d'une zone, un texte */
 const named = (x, y) => topmost(x, y, o => ['sym', 'zone', 'text', 'dome', 'block'].includes(o.t));
 
@@ -976,8 +991,9 @@ function locate(e, keepView){
   const [wx, wy] = s2w(x, y);
   return [wx, wy, y, x, y];
 }
-/* navigation de la carte : clic droit, clic molette, espace, outil main, pincement */
-let spaceHeld = false, pinch = null;
+/* navigation de la carte : clic droit glissé, clic molette, espace, outil main, pincement.
+   rpress suit un appui du bouton droit : il ne se décide qu'au relâché */
+let spaceHeld = false, pinch = null, rpress = null;
 const touches = new Map();
 function cancelGesture(){
   if (draft){ draft = null; past.pop(); }
@@ -987,7 +1003,18 @@ function cancelGesture(){
   }
 }
 const startPan = (sx, sy) => { drag = { m:'pan', sx, sy, cx: cam.x, cy: cam.y, saved: true }; cv.style.cursor = 'grabbing'; };
-cv.addEventListener('contextmenu', e => { if (cam) e.preventDefault(); });
+/* le clic droit a son propre sens sur le tableau : le menu du navigateur n'y apparaît jamais */
+cv.addEventListener('contextmenu', e => e.preventDefault());
+
+/* clic droit sans bouger, ou Échap : on abandonne le geste en cours et l'on revient à
+   l'outil Sélection, la fonction par défaut. Ce n'est pas l'Annuler de l'historique. */
+function backToSelect(){
+  closeText(true);
+  cancelGesture();
+  sel = null;
+  setTool('select');
+  commit();
+}
 cv.addEventListener('wheel', e => {
   if (!cam) return;
   const r = cv.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
@@ -1008,7 +1035,18 @@ cv.addEventListener('pointerdown', e => {
     pinch = { d0: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z0: cam.z, w: s2w(mx, my) };
     draw(); return;
   }
-  if (cam && view === 'm' && (e.button === 1 || e.button === 2 || spaceHeld || tool === 'pan')){
+  /* bouton droit : glissé, il déplace la carte ; relâché sans bouger, il ramène à la
+     sélection (releasePointer). Il ne pose et ne trace jamais rien. */
+  if (e.button === 2){
+    rpress = { sx, sy, moved: false };
+    if (cam && view === 'm') startPan(sx, sy);
+    return;
+  }
+  if (e.button === 1){                                                // molette : la carte, rien d'autre
+    if (cam && view === 'm') startPan(sx, sy);
+    return;
+  }
+  if (cam && view === 'm' && (spaceHeld || tool === 'pan')){
     startPan(sx, sy); return;
   }
   closeText(true);
@@ -1018,6 +1056,7 @@ cv.addEventListener('pointerdown', e => {
   /* coupe liée : un waypoint de la route se tire verticalement, pour son altitude */
   if (view === 'p' && prof.linked && !draft){
     const rp = routeHit(x, y);
+    if (rp && rp.w.locked){ toast(LOCKED); return; }
     if (rp){ sel = null; drag = { m:'alt', o: rp.w }; draw(); return; }
   }
 
@@ -1033,16 +1072,17 @@ cv.addEventListener('pointerdown', e => {
   if (tool === 'erase'){
     /* la gomme ignore l'image de fond : un clic dans une zone vide ne doit pas
        faire disparaître la carte. Elle se retire par sélection puis Suppr. */
-    const o = topmost(x, y, o => o.t !== 'img');
+    const o = topmost(x, y, o => o.t !== 'img' && !o.locked);
     if (o){ snapshot(); objs.splice(objs.indexOf(o), 1); sel = null; commit(); }
+    else if (topmost(x, y, o => o.t !== 'img')) toast(LOCKED);
     return;
   }
 
   if (tool === 'select'){
     const o = pick(x, y);
     sel = o;
-    if (o) drag = { m:'move', o, x, y };
-    else if (cam && view === 'm') startPan(sx, sy);                 // glisser dans le vide : la carte
+    if (o && !o.locked) drag = { m:'move', o, x, y };
+    else if (cam && view === 'm') startPan(sx, sy);                 // le vide ou un objet ancré : la carte
     draw(); return;
   }
 
@@ -1083,6 +1123,9 @@ cv.addEventListener('pointerdown', e => {
 
 cv.addEventListener('pointermove', e => {
   const [x, y, , sx, sy] = locate(e, !!(drag || draft || pinch));
+  /* bouton droit enfoncé pendant un geste du gauche (pose, tracé, déplacement) : abandon */
+  if (e.button === 2 && (draft || (drag && drag.m !== 'pan'))){ backToSelect(); return; }
+  if (rpress && Math.hypot(sx - rpress.sx, sy - rpress.sy) > 5) rpress.moved = true;
 
   if (pinch && touches.has(e.pointerId)){
     touches.set(e.pointerId, [sx, sy]);
@@ -1132,7 +1175,7 @@ cv.addEventListener('pointermove', e => {
   if (!draft){
     cv.style.cursor = cam && view === 'm' && (tool === 'pan' || spaceHeld) ? 'grab'
       : view === 'p' && prof.linked && routeHit(x, y) ? 'ns-resize'
-      : (tool === 'select' ? pick(x, y) : tool === 'sym' ? grab(x, y) : null) ? 'move' : 'crosshair';
+      : cursorOver(tool === 'select' ? pick(x, y) : tool === 'sym' ? grab(x, y) : null);
     return;
   }
   if (draft.t === 'stroke' || draft.t === 'terrain') draft.pts.push([x, y]);
@@ -1143,6 +1186,7 @@ cv.addEventListener('pointermove', e => {
 });
 
 const recenter = o => { o.cx = (o.x1 + o.x2) / 2; o.cy = (o.y1 + o.y2) / 2; };
+const cursorOver = o => !o ? 'crosshair' : !o.locked ? 'move' : cam && view === 'm' ? 'grab' : 'default';
 
 function endPointer(){
   if (drag){
@@ -1177,7 +1221,11 @@ function endPointer(){
 function releasePointer(e){
   touches.delete(e.pointerId);
   if (pinch){ if (touches.size < 2){ pinch = null; saveSoon(); } return; }
+  const click = rpress && !rpress.moved && e.type === 'pointerup';
+  rpress = null;
+  if (click && drag && drag.m === 'pan'){ cam.x = drag.cx; cam.y = drag.cy; }   // un clic ne déplace pas la carte
   endPointer();
+  if (click) backToSelect();
 }
 cv.addEventListener('pointerup', releasePointer);
 cv.addEventListener('pointercancel', releasePointer);
@@ -1284,7 +1332,7 @@ for (const [g, titre] of GROUPS){
   for (const k in SHAPES){
     if (SHAPES[k].g !== g) continue;
     const b = document.createElement('button');
-    b.className = 'tile' + (k === symKey ? ' on' : '');
+    b.className = 'tile' + (tool === 'sym' && k === symKey ? ' on' : '');
     b.dataset.k = k; b.title = SHAPES[k].label;
 
     const tc = document.createElement('canvas');
@@ -1362,10 +1410,26 @@ $('dup').onclick = () => {
   if (!sel) return;
   snapshot();
   const kk = (sel.v || 'm') === 'm' ? camK() : 1;
-  const o = snap(sel); move(o, 24 / kk, 24 / kk);
+  const o = snap(sel); delete o.locked; move(o, 24 / kk, 24 / kk);   // la copie naît libre
   if (o.t === 'sym' && SHAPES[o.k].num) o.n = wpN++;
   objs.push(o); sel = o; commit();
 };
+/* ancrer : la sélection ne se déplace plus, ne tourne plus, ne s'efface plus ; on pose
+   par-dessus. Couleur, trait et étiquette restent libres. */
+$('lock').onclick = () => {
+  if (!sel){ toast('Sélectionnez d\'abord l\'objet à ancrer (outil Sélection, V)'); return; }
+  snapshot();
+  if (sel.locked) delete sel.locked; else sel.locked = true;
+  commit();
+};
+/* un refus n'est jamais muet : message bref en haut du tableau */
+const LOCKED = 'Objet ancré — 📌 ou K pour le libérer';
+let toastT = 0;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2200);
+}
 $('clear').onclick = () => {
   if (objs.length && confirm(`Effacer la planche « ${boards[cur].name} » ?`)){
     snapshot(); objs = []; sel = null; wpN = 1; commit();
@@ -1581,27 +1645,28 @@ addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && k === 'd'){ e.preventDefault(); $('dup').click(); return; }
   if (e.ctrlKey || e.metaKey) return;
 
-  if (draft && draft.t === 'zone'){
-    if (e.key === 'Enter'){ finishZone(); return; }
-    if (e.key === 'Escape'){ draft = null; past.pop(); draw(); return; }
-  }
+  if (draft && draft.t === 'zone' && e.key === 'Enter'){ finishZone(); return; }
+  if (e.key === 'Escape'){ backToSelect(); return; }
   if (e.key === 'PageDown'){ e.preventDefault(); switchBoard(cur + 1); return; }
   if (e.key === 'PageUp'){   e.preventDefault(); switchBoard(cur - 1); return; }
   if (e.key === 'Delete' || e.key === 'Backspace'){
-    if (sel){ snapshot(); objs.splice(objs.indexOf(sel), 1); sel = null; commit(); }
+    if (sel && sel.locked) toast(LOCKED);
+    else if (sel){ snapshot(); objs.splice(objs.indexOf(sel), 1); sel = null; commit(); }
     return;
   }
-  if (e.key === 'Escape'){ sel = null; draw(); return; }
 
   /* rotation fine de la sélection au clavier */
   if (sel && sel.t === 'sym' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
-    e.preventDefault(); snapshot();
+    e.preventDefault();
+    if (sel.locked){ toast(LOCKED); return; }
+    snapshot();
     sel.a += (e.key === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? .01745 : .0873);
     commit(); return;
   }
   if (e.key === ' ' && cam){ spaceHeld = true; e.preventDefault(); return; }
   if (cam && (e.key === '+' || e.key === '=')){ const [w, h] = viewSize(); zoomAt(w / 2, h / 2, .5); return; }
   if (cam && e.key === '-'){ const [w, h] = viewSize(); zoomAt(w / 2, h / 2, -.5); return; }
+  if (k === 'k'){ $('lock').click(); return; }
   const map = { v:'select', p:'pen', a:'arrow', l:'line', c:'circle', r:'rect', t:'text', e:'erase',
                 z:'zone', m:'ruler', h:'pan' };
   if (map[k]) bar.querySelector(`[data-tool="${map[k]}"]`).click();
@@ -1709,5 +1774,6 @@ function demoBoards(){
   load(Math.min(DEMO ? 0 : (data && data.cur) || 0, boards.length - 1));
   renderTabs();
   fit();
+  setTool(tool);                           // l'outil d'ouverture, allumé dans la barre
   commit();
 })();

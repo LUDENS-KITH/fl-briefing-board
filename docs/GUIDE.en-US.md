@@ -50,6 +50,15 @@ drag and drop your own background image.
   by a wingtip. The selection tool (`V`) also grabs arrows, lines and background maps.
   The blue handle rotates and resizes; `←` and `→` rotate by one degree, with `Shift`
   for finer steps.
+- **Back to selection:** right-click without moving, or `Esc`. The gesture in progress
+  is dropped (an unfinished area, a shape being placed) and the selection tool takes
+  over. Dragged, the right button still pans the map. The app opens on the selection
+  tool, so a first click on an empty board places nothing.
+- **Pin** (📌 or `K`): the selection can no longer be moved, rotated or erased — neither
+  by the eraser nor by `Delete`. You place and grab on top of it without disturbing it:
+  SAM area, bullseye, background image. Color, line and label stay editable; a
+  duplicate is born unpinned. To unpin: selection tool, touch the object, then 📌 or
+  `K`. On a map, dragging over a pinned object pans the map.
 - **Label:** double-click a shape, for example `UZI 1-1 · FL250 · 450 kt`. The label
   follows the shape; emptying it removes it.
 - **Curve an arrow:** draw it straight, then drag the middle handle.
@@ -82,7 +91,8 @@ drag and drop your own background image.
 
 **Shortcuts:** `V` select · `A` arrow · `L` line · `P` pencil · `C` circle ·
 `R` rectangle · `Z` zone · `M` ruler · `T` text · `E` eraser · `H` hand ·
-`Ctrl+Z` / `Ctrl+Y` / `Ctrl+D` · `Page Up` / `Page Down` boards · `+` / `-` map zoom.
+`Ctrl+Z` / `Ctrl+Y` / `Ctrl+D` · `Page Up` / `Page Down` boards · `+` / `-` map zoom ·
+`K` pin · `Esc` or right-click: back to selection.
 
 ## What It Does Not Do
 

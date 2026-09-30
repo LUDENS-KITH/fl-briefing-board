@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banc de saisie — FL Briefing Board</title>
+<style>
+  body{margin:0;padding:16px;background:#070B10;color:#E6EDF5;font:14px/1.45 ui-sans-serif,system-ui,sans-serif}
+  h1{font-size:18px;margin:0 0 4px}
+  #sum{font-weight:700;margin:0 0 10px}
+  #sum.ok{color:#34D399} #sum.ko{color:#FF4D4D}
+  ol{margin:0 0 14px;padding-left:22px} li{margin:2px 0}
+  li.ok::marker{color:#34D399} li.ko{color:#FF8A8A}
+  .nr{color:#8FA3B8;font-size:12px}
+  #host iframe{width:1280px;height:800px;border:1px solid #1E2A38}
+</style>
+</head>
+<body>
+<h1>Banc de saisie</h1>
+<p id="sum">en cours…</p>
+<ol id="out"></ol>
+<div id="host"></div>
+
+<script>
+/* Banc de saisie — FL Briefing Board.
+   Chaque scénario ouvre l'application neuve dans un cadre, stockage vidé, puis la pilote
+   par de vrais PointerEvent et KeyboardEvent, comme un pilote : jamais en appelant le
+   moteur. L'état (tool, sel, objs, past, cam…) est lu, jamais écrit.
+   À servir en HTTP local depuis la racine du dépôt :
+     python -m http.server 8765  →  http://localhost:8765/tools/banc-saisie.html
+   Le verdict s'affiche en haut de la page et dans le titre de l'onglet. */
+
+const KEY = 'fl-briefing-board-v3';
+const host = document.getElementById('host');
+const BITS = [1, 4, 2];                    // boutons gauche, molette, droit → masque `buttons`
+
+async function open(){                     // application neuve, tableau vide
+  localStorage.removeItem(KEY);
+  return reload();
+}
+async function reload(){                   // relit le stockage, comme une réouverture
+  host.innerHTML = '';
+  const f = document.createElement('iframe');
+  f.src = '../index.html';
+  host.appendChild(f);
+  await new Promise(r => f.addEventListener('load', r, { once: true }));
+  await pause(50);                         // pas requestAnimationFrame : suspendu dans un onglet masqué
+  return app(f);
+}
+function pause(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function app(f){
+  const w = f.contentWindow, d = w.document, cv = d.getElementById('c');
+  const at = (x, y) => { const r = cv.getBoundingClientRect(); return { clientX: r.left + x, clientY: r.top + y }; };
+  const pe = (type, x, y, button, buttons) => {
+    const ev = new w.PointerEvent(type, { bubbles: true, cancelable: true, composed: true, pointerId: 1,
+      pointerType: 'mouse', isPrimary: true, button, buttons, ...at(x, y) });
+    cv.dispatchEvent(ev);
+    return ev;
+  };
+  return {
+    w, d,
+    s: expr => w.eval(expr),                                   // lecture de l'état du moteur
+    down: (x, y, b = 0) => pe('pointerdown', x, y, b, BITS[b]),
+    move: (x, y, buttons = 1) => pe('pointermove', x, y, -1, buttons),
+    chord: (x, y) => pe('pointermove', x, y, 2, 3),            // droit enfoncé pendant un glissé gauche
+    up: (x, y, b = 0) => pe('pointerup', x, y, b, 0),
+    /* le menu du navigateur : bloqué si l'événement est annulé */
+    menu(x, y){
+      const ev = new w.MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2, ...at(x, y) });
+      cv.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    },
+    click(x, y, b = 0){ this.down(x, y, b); this.up(x, y, b); return b === 2 ? this.menu(x, y) : undefined; },
+    drag(x1, y1, x2, y2, b = 0){
+      this.down(x1, y1, b);
+      for (let i = 1; i <= 6; i++) this.move(x1 + (x2 - x1) * i / 6, y1 + (y2 - y1) * i / 6, BITS[b]);
+      this.up(x2, y2, b);
+      if (b === 2) this.menu(x2, y2);
+    },
+    key: (key, o = {}) => d.body.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...o })),
+    tile: k => d.querySelector(`.tile[data-k="${k}"]`).click(),
+    button: q => d.querySelector(q).click(),
+    map(id = 'Caucasus'){ const s = d.getElementById('theatre'); s.value = id; s.dispatchEvent(new w.Event('change')); },
+    toast: () => { const t = d.getElementById('toast'); return t && !t.hidden ? t.textContent : ''; },
+  };
+}
+
+/* ---------- scénarios ----------
+   `nr` : non-régression — déjà vrai avant le lot, doit le rester. Les autres doivent
+   échouer sur le code d'avant le lot : sinon ils ne prouvent rien. */
+const T = [];
+const test = (nom, fn, nr = false) => T.push({ nom, fn, nr });
+
+test('Ouverture : outil Sélection, un clic dans le vide ne pose rien', async (ok) => {
+  const a = await open();
+  a.click(400, 300);
+  ok(a.s('objs.length') === 0, `objets posés : ${a.s('objs.length')}`);
+  ok(a.s('tool') === 'select', `outil à l'ouverture : ${a.s('tool')}`);
+  ok(!a.d.querySelector('.tile.on'), 'une vignette de la palette est allumée');
+  ok(a.d.querySelector('[data-tool="select"]').classList.contains('on'), 'bouton Sélection éteint');
+});
+
+test('Forme choisie, clic droit sans bouger, sans carte : retour à la sélection', async (ok) => {
+  const a = await open();
+  a.tile('fighter');
+  const blocked = a.click(400, 300, 2);
+  ok(a.s('objs.length') === 0, `objets posés : ${a.s('objs.length')}`);
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+  ok(blocked, 'le menu du navigateur s\'ouvre');
+});
+
+test('Forme choisie, clic droit sans bouger, sur une carte : retour à la sélection, la carte reste', async (ok) => {
+  const a = await open();
+  a.map(); a.tile('fighter');
+  const cam0 = a.s('JSON.stringify(cam)');
+  const blocked = a.click(400, 300, 2);
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+  ok(a.s('objs.length') === 0, `objets posés : ${a.s('objs.length')}`);
+  ok(a.s('JSON.stringify(cam)') === cam0, 'la carte a bougé');
+  ok(blocked, 'le menu du navigateur s\'ouvre');
+});
+
+test('Sur une carte, clic droit glissé : la carte bouge, l\'outil ne change pas', async (ok) => {
+  const a = await open();
+  a.map(); a.tile('fighter');
+  const x0 = a.s('cam.x');
+  a.drag(400, 300, 520, 360, 2);
+  ok(a.s('cam.x') !== x0, 'la carte n\'a pas bougé');
+  ok(a.s('tool') === 'sym', `outil : ${a.s('tool')}`);
+  ok(a.s('objs.length') === 0, `objets posés : ${a.s('objs.length')}`);
+}, true);
+
+test('Clic molette sans carte : rien n\'est posé', async (ok) => {
+  const a = await open();
+  a.tile('fighter');
+  a.click(400, 300, 1);
+  ok(a.s('objs.length') === 0, `objets posés : ${a.s('objs.length')}`);
+});
+
+test('Pose en cours, clic droit : la pose est annulée, retour à la sélection', async (ok) => {
+  const a = await open();
+  a.tile('fighter');
+  a.down(400, 300); a.move(440, 300); a.chord(440, 300); a.up(440, 300); a.menu(440, 300);
+  ok(a.s('objs.length') === 0, `objets restants : ${a.s('objs.length')}`);
+  ok(a.s('past.length') === 0, `entrées d'historique : ${a.s('past.length')}`);
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+});
+
+test('Zone en cours, clic droit : zone abandonnée, sans trace dans l\'historique', async (ok) => {
+  const a = await open();
+  a.key('z');
+  a.click(200, 200); a.click(360, 200); a.click(360, 340);
+  ok(a.s('draft && draft.pts.length') === 3, `zone en cours : ${a.s('draft && draft.pts.length')} sommets`);
+  a.click(300, 260, 2);
+  ok(a.s('draft') === null, 'la zone est toujours en cours');
+  ok(a.s('objs.length') === 0, `objets : ${a.s('objs.length')}`);
+  ok(a.s('past.length') === 0, `entrées d'historique : ${a.s('past.length')}`);
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+});
+
+test('Échap avec une forme choisie : retour à la sélection', async (ok) => {
+  const a = await open();
+  a.tile('fighter');
+  a.key('Escape');
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+  a.click(400, 300);
+  ok(a.s('objs.length') === 0, `objets posés : ${a.s('objs.length')}`);
+});
+
+test('Échap pendant une zone : zone abandonnée, retour à la sélection', async (ok) => {
+  const a = await open();
+  a.key('z');
+  a.click(200, 200); a.click(360, 200); a.click(360, 340);
+  a.key('Escape');
+  ok(a.s('draft') === null, 'la zone est toujours en cours');
+  ok(a.s('past.length') === 0, `entrées d'historique : ${a.s('past.length')}`);
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+});
+
+test('Forme ancrée, forme choisie, clic dessus : une nouvelle forme se pose par-dessus', async (ok) => {
+  const a = await open();
+  a.tile('sam'); a.click(400, 300);
+  const pos = a.s('JSON.stringify([objs[0].x, objs[0].y])');
+  a.key('v'); a.click(400, 300); a.key('k');
+  ok(a.s('!!objs[0].locked'), 'le SAM n\'est pas ancré');
+  a.tile('fighter'); a.click(400, 300);
+  ok(a.s('objs.length') === 2, `objets : ${a.s('objs.length')}`);
+  ok(a.s('JSON.stringify([objs[0].x, objs[0].y])') === pos, 'le SAM a bougé');
+  ok(a.s('objs[objs.length - 1].k') === 'fighter', 'la forme posée n\'est pas un chasseur');
+});
+
+test('Forme ancrée : ni déplacée, ni tournée, ni gommée, ni supprimée ; libérée, tout revient', async (ok) => {
+  const a = await open();
+  a.tile('sam'); a.click(400, 300);
+  a.key('v'); a.click(400, 300);
+  const h = JSON.parse(a.s('JSON.stringify(handleList(toScreen(sel))[0])'));
+  const geo = () => a.s('JSON.stringify([objs[0].x, objs[0].y, objs[0].a, objs[0].s])');
+  a.key('k');
+  const g0 = geo();
+  a.drag(400, 300, 480, 360);
+  ok(geo() === g0, 'déplacée en glissant');
+  a.key('v'); a.click(400, 300);
+  a.drag(h.x, h.y, h.x + 60, h.y + 20);
+  ok(geo() === g0, 'tournée par la poignée');
+  a.key('v'); a.click(400, 300);
+  a.key('ArrowRight');
+  ok(geo() === g0, 'tournée au clavier');
+  a.key('Delete');
+  ok(a.s('objs.length') === 1, 'supprimée par Suppr');
+  ok(/ancr/i.test(a.toast()), `refus muet (message : « ${a.toast()} »)`);
+  a.key('e'); a.click(400, 300);
+  ok(a.s('objs.length') === 1, 'effacée à la gomme');
+  a.key('v'); a.click(400, 300); a.key('k');
+  ok(a.s('!objs[0].locked'), 'toujours ancrée après K');
+  a.drag(400, 300, 480, 360);
+  ok(a.s('objs[0].x') === 480, `libérée mais pas déplacée (x = ${a.s('objs[0].x')})`);
+  a.key('Delete');
+  ok(a.s('objs.length') === 0, 'libérée mais pas supprimée');
+});
+
+test('Ancrage annulable, rétabli, et relu après réouverture', async (ok) => {
+  let a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.key('v'); a.click(400, 300); a.key('k');
+  ok(a.s('!!objs[0].locked'), 'pas ancrée');
+  a.key('z', { ctrlKey: true });
+  ok(a.s('!objs[0].locked'), 'Ctrl+Z ne libère pas');
+  a.key('y', { ctrlKey: true });
+  ok(a.s('!!objs[0].locked'), 'Ctrl+Y ne rétablit pas l\'ancrage');
+  a = await reload();
+  ok(a.s('objs.length === 1 && !!objs[0].locked'), 'ancrage perdu à la réouverture');
+});
+
+test('Zone ancrée sur une carte : glisser dessus à l\'outil Sélection déplace la carte', async (ok) => {
+  const a = await open();
+  a.map();
+  a.key('z');
+  a.click(300, 200); a.click(520, 200); a.click(520, 420); a.click(300, 420); a.key('Enter');
+  ok(a.s('objs.length === 1 && objs[0].t') === 'zone', 'zone non créée');
+  a.key('v'); a.click(410, 310); a.key('k');
+  ok(a.s('!!objs[0].locked'), 'zone non ancrée');
+  const pts = a.s('JSON.stringify(objs[0].pts)'), x0 = a.s('cam.x');
+  a.drag(410, 310, 470, 350);
+  ok(a.s('JSON.stringify(objs[0].pts)') === pts, 'la zone a bougé sur le terrain');
+  ok(a.s('cam.x') !== x0, 'la carte n\'a pas bougé');
+});
+
+test('Sous une forme ancrée, une forme libre se saisit à l\'outil Sélection', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);                 // chasseur libre
+  a.tile('sam'); a.click(440, 300);                     // SAM au-dessus, son anneau couvre le chasseur
+  a.key('v'); a.click(470, 300); a.key('k');
+  ok(a.s('objs[1].k === "sam" && !!objs[1].locked'), 'SAM non ancré');
+  const sam = a.s('JSON.stringify([objs[1].x, objs[1].y])');
+  a.drag(400, 300, 400, 380);
+  ok(a.s('objs[0].y') === 380, `chasseur non déplacé (y = ${a.s('objs[0].y')})`);
+  ok(a.s('JSON.stringify([objs[1].x, objs[1].y])') === sam, 'le SAM a bougé');
+});
+
+test('Exports PNG et kneeboard : rien ne marque l\'objet ancré sélectionné', async (ok) => {
+  const a = await open();
+  a.tile('sam'); a.click(400, 300);
+  a.key('v'); a.click(400, 300); a.key('k');
+  const got = [];
+  a.w.download = url => got.push(url);                 // intercepte le téléchargement
+  a.button('#png'); a.button('#knee'); await pause(300);
+  a.key('Escape');
+  a.button('#png'); a.button('#knee'); await pause(300);
+  ok(got.length === 4, `exports interceptés : ${got.length}`);
+  ok(got[0] === got[2], 'le PNG diffère selon la sélection');
+  ok(got[1] === got[3], 'le kneeboard diffère selon la sélection');
+}, true);
+
+(async () => {
+  const out = document.getElementById('out'), sum = document.getElementById('sum');
+  /* le cache HTTP servirait au cadre la version d'avant la modification : le banc
+     aurait alors jugé l'ancien code. On recharge la page et chaque script à l'adresse
+     exacte qu'elle cite, paramètre de version compris (board.js?v=…). */
+  const page = await (await fetch('../index.html', { cache: 'reload' })).text();
+  for (const m of page.matchAll(/<script[^>]*\ssrc="([^"]+)"/g)) await fetch('../' + m[1], { cache: 'reload' });
+  const res = [];
+  for (const t of T){
+    const fails = [];
+    try { await t.fn((cond, msg) => { if (!cond) fails.push(msg); }); }
+    catch (e){ fails.push('erreur : ' + e.message); }
+    res.push({ nom: t.nom, nr: t.nr, ok: !fails.length, fails });
+    const li = document.createElement('li');
+    li.className = fails.length ? 'ko' : 'ok';
+    li.textContent = (fails.length ? '✗ ' : '✓ ') + t.nom + (fails.length ? ' — ' + fails.join(' · ') : '');
+    if (t.nr){ const s = document.createElement('span'); s.className = 'nr'; s.textContent = ' (non-régression)'; li.appendChild(s); }
+    out.appendChild(li);
+  }
+  host.innerHTML = '';
+  localStorage.removeItem(KEY);
+  const n = res.filter(r => r.ok).length;
+  sum.textContent = n === res.length ? `OK ${n}/${res.length}` : `ÉCHEC ${res.length - n}/${res.length}`;
+  sum.className = n === res.length ? 'ok' : 'ko';
+  document.title = sum.textContent + ' — banc de saisie';
+  window.__banc = res;
+})();
+</script>
+</body>
+</html>
