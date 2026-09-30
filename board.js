@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.2', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.3', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -789,13 +789,18 @@ function paintSym(c, o){
   const sh = SHAPES[o.k]; if (!sh) return;
   const s = SIZE * (o.s || 1), side = o.v === 'p' && sh.side;
   c.save();
-  c.translate(o.x, o.y); c.rotate(o.a || 0);
+  c.translate(o.x, o.y);
+  if (!sh.upright) c.rotate(o.a || 0);      // une forme droite (écran, HAFU) ne tourne jamais
   /* un appareil de profil qui vole vers la gauche est retourné, pas mis sur le dos */
   if (side && Math.cos(o.a || 0) < 0) c.scale(1, -1);
   c.scale(s, s);
   c.lineWidth = (o.w || 4) / s;
   c.lineJoin = 'round'; c.lineCap = 'round';
-  if (side) sh.side(c); else sh.draw(c);
+  if (side) sh.side(c); else sh.draw(c, o);
+  if (sh.stem){                              // seule sa tige suit le cap
+    c.rotate(o.a || 0);
+    c.beginPath(); c.moveTo(0, -sh.stem[0]); c.lineTo(0, -sh.stem[1]); c.stroke();
+  }
   c.restore();
   /* dans la coupe, tout s'écrit au-dessus : dessous, c'est le sol. Un aéronef ou une
      munition y ajoute son altitude — « HAWG 1-1 · 1 000 ft » */
@@ -843,8 +848,9 @@ function labelY(o){
 function handleList(o){
   if (o.locked) return [];                       // ancré : ni rotation, ni taille, ni sommets
   if (o.t === 'sym'){
-    const side = o.v === 'p' && (SHAPES[o.k] || {}).side;
-    const r = SIZE * (o.s || 1) * 1.45, a = (o.a || 0) - (side ? 0 : Math.PI / 2);
+    const sh = SHAPES[o.k] || {}, side = o.v === 'p' && sh.side;
+    /* une forme droite sans tige (écran, brique, curseur) se dimensionne par son coin haut droit */
+    const r = SIZE * (o.s || 1) * 1.45, a = sh.upright && !sh.stem ? -Math.PI / 4 : (o.a || 0) - (side ? 0 : Math.PI / 2);
     return [{ id:'rot', x: o.x + Math.cos(a) * r, y: o.y + Math.sin(a) * r }];
   }
   if (o.t === 'dome')  return [{ id:'p2', x:o.x2, y:o.y2 }];
@@ -882,7 +888,7 @@ function pin(x, y){
 }
 
 function bbox(o){
-  if (o.t === 'sym'){ const r = SIZE * (o.s || 1) * 1.15; return { x:o.x-r, y:o.y-r, w:r*2, h:r*2 }; }
+  if (o.t === 'sym'){ const r = SIZE * (o.s || 1) * ((SHAPES[o.k] || {}).box || 1.15); return { x:o.x-r, y:o.y-r, w:r*2, h:r*2 }; }
   if (o.t === 'text'){ const w = o.s.length * (7 + o.w * 1.6); return { x:o.x-4, y:o.y-14, w:w+8, h:28 }; }
   if (o.t === 'img')  return { x:o.x, y:o.y, w:o.w2, h:o.h2 };
   if (o.t === 'dome'){ const { rx, ry } = domeGeom(o); return { x:o.x1 - rx, y:groundY() - ry, w:2 * rx, h:ry }; }
@@ -917,7 +923,11 @@ function inPoly(p, x, y){
 function hit(o, x, y){
   /* la zone de préhension suit l'encombrement réel de la forme : on doit pouvoir
      attraper un bombardier par son aile, pas seulement par son fuselage */
-  if (o.t === 'sym')    return near(x, y, o.x, o.y, SIZE * (o.s||1) * ((SHAPES[o.k]||{}).hit || 1.15));
+  if (o.t === 'sym'){
+    const sh = SHAPES[o.k] || {}, r = SIZE * (o.s || 1);
+    if (sh.box) return Math.abs(x - o.x) < r * sh.box && Math.abs(y - o.y) < r * sh.box;   // un écran : ses coins aussi
+    return near(x, y, o.x, o.y, r * (sh.hit || 1.15));
+  }
   if (o.t === 'text' || o.t === 'img'){
     const b = bbox(o); return x > b.x && x < b.x+b.w && y > b.y && y < b.y+b.h;
   }
@@ -963,9 +973,10 @@ const topmost = (x, y, keep) => {
   return null;
 };
 /* ce qu'on attrape sans changer d'outil quand une forme est choisie : formes et
-   textes seulement — flèches, zones et carte restent traversables, pour pouvoir
-   poser un symbole dessus */
-const grab  = (x, y) => topmost(x, y, o => (o.t === 'sym' || o.t === 'text') && !o.locked);
+   textes seulement — flèches, zones, écrans radar et carte restent traversables,
+   pour pouvoir poser un symbole dessus */
+const grab  = (x, y) => topmost(x, y, o => (o.t === 'text' || o.t === 'sym' && !(SHAPES[o.k] || {}).under)
+                                          && !o.locked);
 /* à l'outil Sélection, un objet libre passe devant un objet ancré qui le recouvre ;
    l'ancré ne se désigne que seul sous le doigt — c'est ainsi qu'on le libère */
 const pick  = (x, y) => topmost(x, y, o => !o.locked) || topmost(x, y, () => true);
@@ -1013,6 +1024,18 @@ function backToSelect(){
   cancelGesture();
   sel = null;
   setTool('select');
+  commit();
+}
+/* L&S et DT2 (manuel F/A-18C, p. 173 et 176) : la piste prioritaire et la deuxième
+   désignée, une seule de chaque par vue. Reposer la même marque sur la même piste
+   l'enlève. Un HAFU ancré l'accepte : c'est un état, pas une géométrie. */
+function markTrack(x, y, mk){
+  const t = topmost(x, y, o => o.t === 'sym' && (SHAPES[o.k] || {}).hafu);
+  if (!t){ toast('L&S et DT2 se posent sur une piste HAFU'); return; }
+  snapshot();
+  const on = t.mark !== mk;
+  for (const o of objs) if (o.mark === mk && (o.v || 'm') === (t.v || 'm')) delete o.mark;
+  if (on) t.mark = mk;
   commit();
 }
 cv.addEventListener('wheel', e => {
@@ -1087,15 +1110,18 @@ cv.addEventListener('pointerdown', e => {
   }
 
   if (tool === 'sym'){
+    const sh = SHAPES[symKey];
+    if (sh.mark){ markTrack(x, y, sh.mark); return; }  // L&S, DT2 : l'état d'une piste
     /* toucher une forme ou un texte existant le saisit ; toucher le vide pose une
-       nouvelle forme. Sans cela, déplacer exigeait de changer d'outil. */
-    const g = grab(x, y);
+       nouvelle forme. Sans cela, déplacer exigeait de changer d'outil. Un curseur,
+       lui, se pose par-dessus ce qu'il désigne. */
+    const g = !sh.over && grab(x, y);
     if (g){ sel = g; drag = { m:'move', o:g, x, y }; draw(); return; }
     snapshot();
-    const sh = SHAPES[symKey];
-    const o = { t:'sym', k:symKey, x, y, a:0, s:sh.s0 || 1, c:color, w:width, n: sh.num ? wpN++ : 0 };
+    const o = { t:'sym', k:symKey, x, y, a:0, s:sh.s0 || 1, c: sh.col || color, w:width, n: sh.num ? wpN++ : 0 };
     if (view === 'p') o.v = 'p';
-    objs.push(o); sel = o;
+    if (sh.under) insertLow(o); else objs.push(o);      // un écran passe sous ce qu'on posera dessus
+    sel = o;
     drag = { m:'place', o, x, y, saved:true };   // glisser en posant = orienter et dimensionner
     draw(); return;
   }
@@ -1153,9 +1179,10 @@ cv.addEventListener('pointermove', e => {
     else if (drag.m === 'place' || drag.m === 'rot'){
       const d = Math.hypot(x - o.x, y - o.y) * kv();     // en pixels écran, quel que soit le zoom
       if (d > 14){
-        const side = o.v === 'p' && SHAPES[o.k].side;     // de profil : 0 = nez à droite
+        const sh = SHAPES[o.k], side = o.v === 'p' && sh.side;     // de profil : 0 = nez à droite
         o.a = Math.atan2(y - o.y, x - o.x) + (side ? 0 : Math.PI / 2);
-        o.s = Math.max(.35, Math.min(6, d / (SIZE * 1.45)));
+        /* une piste radar se pose à sa taille : le geste l'oriente ; la poignée, elle, redimensionne */
+        if (!sh.fixed || drag.m === 'rot') o.s = Math.max(.35, Math.min(sh.smax || 6, d / (SIZE * 1.45)));
       }
     }
     else if (drag.m === 'p1'){ o.x1 = x; o.y1 = y; if (!o.bent) recenter(o); }
@@ -1655,8 +1682,21 @@ addEventListener('keydown', e => {
     return;
   }
 
-  /* rotation fine de la sélection au clavier */
-  if (sel && sel.t === 'sym' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
+  /* écran radar sélectionné : ↑ ↓ changent l'échelle, ← → l'azimut balayé, comme ses
+     boutons. Ce sont des réglages, pas une géométrie : un écran ancré les accepte. */
+  const sc = sel && sel.t === 'sym' && (SHAPES[sel.k] || {}).scope;
+  if (sc && e.key.startsWith('Arrow')){
+    e.preventDefault();
+    const vert = e.key === 'ArrowUp' || e.key === 'ArrowDown', list = vert ? sc.ranges : sc.azs;
+    const f = vert ? 'rng' : 'az', cur = sel[f] ?? sc[f];
+    const v = list && list[Math.max(0, Math.min(list.length - 1,
+                           list.indexOf(cur) + (e.key === 'ArrowUp' || e.key === 'ArrowRight' ? 1 : -1)))];
+    if (v !== undefined && v !== cur){ snapshot(); sel[f] = v; commit(); }
+    return;
+  }
+  /* rotation fine de la sélection au clavier — une forme droite sans tige n'a pas de cap */
+  const still = sel && sel.t === 'sym' && SHAPES[sel.k].upright && !SHAPES[sel.k].stem;
+  if (sel && sel.t === 'sym' && !still && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
     e.preventDefault();
     if (sel.locked){ toast(LOCKED); return; }
     snapshot();
@@ -1745,7 +1785,25 @@ function demoBoards(){
   const view = { x: (bx + kx) / 2, y: (by + ky) / 2 + (ky - by) * .1, z: zoom };
   const board = (name, objs) => ({ name, objs, wpN: 4, nmPx: 0, prof: { ceil, range, linked: true },
     map: { theatre: 'Caucasus', style: 'topo' }, cam: { ...view }, magDec: null, past: [], future: [] });
-  return [board('Ingress', ingress), board('Attaque', attaque)];
+  /* une planche sans carte : l'écran radar du F/A-18C en TWS, tel qu'on l'explique au
+     briefing (docs/RADAR.md) — écran ancré, pistes posées dessus */
+  const GR = '#34D399', ink = { w:3 };
+  const radar = [
+    sym('fa18_tws', 380, 200, 0, GR, .8, { locked:true }),
+    sym('fa18_brick', 428, 138, 0, GR, .9),
+    sym('fa18_brick', 362, 250, 0, GR, .9),
+    sym('fa18_hafu_h', 402, 162, 2.6, R, .9, { ...ink, mark:'ls' }),
+    sym('fa18_hafu_u', 344, 140, 3.5, G, .9, { ...ink, mark:'dt2' }),
+    sym('fa18_hafu_f', 334, 236, .2, GR, .9, ink),
+    sym('fa18_tdc', 428, 138, 0, G, .9, ink),                 // le curseur sur un contact brut
+    { t:'text', s:'F/A-18C · RDR ATTK en TWS', x:640, y:110, c:Wh, w:4 },
+    { t:'text', s:'étoile : L&S, piste prioritaire', x:640, y:140, c:R, w:2 },
+    { t:'text', s:'losange : DT2, deuxième piste', x:640, y:164, c:G, w:2 },
+    { t:'text', s:'briques : contacts bruts (HITS)', x:640, y:188, c:GR, w:2 },
+  ];
+  return [board('Ingress', ingress), board('Attaque', attaque),
+          { name:'Radar', objs: radar, wpN:1, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
+            magDec:null, past:[], future:[] }];
 }
 
 (function boot(){

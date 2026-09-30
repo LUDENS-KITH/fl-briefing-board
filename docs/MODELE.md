@@ -1,6 +1,6 @@
 # Modèle d'état — FL Briefing Board
 
-> Contrat interne du moteur, à jour au **2026-09-30** (v1.2).
+> Contrat interne du moteur, à jour au **2026-09-30** (v1.3).
 > À lire avant toute évolution de `board.js` ou `symbols.js`.
 > L'état d'avancement du projet est dans [ETAT.md](ETAT.md).
 
@@ -95,7 +95,7 @@ Douze types d'objets. Champs communs à tous : `t` (type), `c` (couleur CSS),
 
 | `t` | Champs propres | Sens |
 |---|---|---|
-| `sym` | `k`, `x`, `y`, `a`, `s`, `n`, `lbl`, `alt` (waypoint) | forme de la palette : clé, position, **angle en radians**, **échelle**, numéro (waypoints), étiquette attachée |
+| `sym` | `k`, `x`, `y`, `a`, `s`, `n`, `lbl`, `alt` (waypoint), `rng` `az` (écran radar), `mark` (piste radar) | forme de la palette : clé, position, **angle en radians**, **échelle**, numéro (waypoints), étiquette attachée ; échelle et azimut d'un écran ; marque `ls` ou `dt2` d'un HAFU |
 | `arrow` | `x1,y1`, `x2,y2`, `cx,cy`, `bent`, `both`, `meas` | flèche : extrémités, point de contrôle quadratique, courbure assumée, double pointe, cote affichée |
 | `line` | identiques à `arrow` | trait, même géométrie sans pointe |
 | `rect` | `x1,y1`, `x2,y2` | coins opposés |
@@ -245,6 +245,12 @@ code dédié.
 | `size` | poignée d'une image | échelle homothétique à partir de `w0`, `h0` ; `nmPx` suit le même rapport |
 | `v0`, `v1`… | sommets d'une zone | déplace ce sommet |
 
+Trois formes du kit radar dérogent aux cas 5 et 6 : une vignette de **marque** (L&S,
+DT2) ne pose rien, elle marque le HAFU touché (`markTrack()`, une seule marque de chaque
+sorte par vue) ; un **curseur** (`over`) se pose par-dessus ce qu'il touche sans le
+saisir ; un **écran** (`under`) reste traversable pour `grab()` et se glisse sous les
+autres objets à la pose (`insertLow()`).
+
 Une **zone** ne se crée pas par glissé : chaque `pointerdown` ajoute un sommet au
 `draft`, le relâché ne termine rien. Elle se referme sur son premier point, par
 double-clic ou `Entrée` ; `Échap` l'abandonne. Elle est insérée **juste au-dessus des
@@ -349,6 +355,22 @@ maClé: { g:'air', label:'Mon aéronef', s0:1.1, tile:.38, hit:1.25, draw(c){
 | `hit` | rayon de préhension | `1.15` |
 | `num` | affiche un numéro au centre (waypoints) | absent |
 | `tag` | étiquette fixe sous la forme | absent |
+| `upright` | la forme ne tourne jamais ; seule sa tige suit `a` | absent |
+| `stem` | `[début, fin]` de la tige de cap, dans le repère `[-1, 1]` | absent |
+| `fixed` | le geste de pose oriente sans redimensionner ; la poignée redimensionne | absent |
+| `under` | se pose sous les autres objets, traversable quand une forme est choisie | absent |
+| `box` | désignation et encombrement carrés, demi-côté en unités du repère | absent |
+| `smax` | échelle maximale au geste et à la poignée | `6` |
+| `col` | couleur donnée à la pose, à la place de la couleur choisie | absent |
+| `scope` | écran : `page`, `rng`, `az`, `ranges`, `azs` proposés au clavier, `pb` libellés des boutons | absent |
+| `hafu` | une piste : peut porter une marque | absent |
+| `mark` | la vignette marque la piste touchée au lieu de poser | absent |
+| `over` | se pose par-dessus ce qu'on touche, sans le saisir | absent |
+
+`draw(c, o)` reçoit aussi l'objet : un écran y lit son échelle et son azimut, un HAFU sa
+marque. Une forme droite sans tige garde une poignée, au coin haut droit, qui la
+redimensionne. Le kit radar vit en fin de `symbols.js`, un groupe de palette par module,
+et chaque élément cite sa source dans [RADAR.md](RADAR.md).
 
 Aides disponibles : `sil()` (silhouette symétrique décrite d'un seul côté),
 `body()` (remplissage léger + contour), `pods()` (nacelles symétriques).

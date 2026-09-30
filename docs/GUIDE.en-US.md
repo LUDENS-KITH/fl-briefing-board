@@ -19,6 +19,29 @@ has a T-tail, and the bomber has four engines.
 Nothing is a bitmap. Every shape is parametric, so it can be rotated, resized and
 recolored without quality loss. To add a shape, see [docs/MODELE.md §8](MODELE.md).
 
+## Radar Kit — F/A-18C
+
+A palette group, **Radar F/A-18C**, explains the Hornet's air-to-air attack radar page
+(RDR ATTK). Everything is drawn from the ED manual, and every element cites its page:
+[RADAR.md](RADAR.md).
+
+- **RWS, TWS and STT displays:** the cockpit display, its 20 pushbuttons and their
+  labels, the B-scope. A display goes **under** other objects and stays pass-through:
+  choose a track, touch the display, and the track lands on it. Dragging while placing
+  enlarges it; pin it (📌) so it no longer moves. When selected, `↑` `↓` change the range
+  scale (5 to 160 NM) and `←` `→` the azimuth scan, like its pushbuttons.
+- **Tracks:** brick (raw hit), friendly, unknown or hostile HAFU, placed in their
+  identification color. The placing gesture orients the **heading stem** without
+  resizing; the handle rotates and resizes.
+- **L&S and DT2** are not objects but a track state: choose one, then touch a HAFU — the
+  star or the diamond is inscribed in it. One L&S and one DT2 per board, as in the
+  aircraft; placing the same mark on the same track removes it.
+- **TDC cursor:** two vertical lines, placed over the designated track or brick.
+- Threat rank, speed or altitude of a track go into its label (double-click).
+
+Prepare radar boards **without a map**: on a map, a display would follow the terrain
+as you zoom. The online demo shows one (the "Radar" board).
+
 ## Maps
 
 The selector in the top-right corner offers the **14 DCS theatres**, with topographic,
