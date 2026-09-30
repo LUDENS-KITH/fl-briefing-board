@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.8', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.9', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -22,6 +22,7 @@ let objs = [], draft = null, sel = null, drag = null, textTarget = null;
 let tool = 'select', symKey = 'fighter', color = '#2F8CFF', width = 4, ls = 'solid', dark = true;
 let wpN = 1, nmPx = 0;                  // numéro du prochain waypoint ; pixels par mille nautique
 let tb = 1;                             // grossissement des textes : > 1 seulement pendant l'export kneeboard
+let bare = false;                       // dessin d'export : sans les aides d'édition (cadre du kneeboard)
 let unit = 'nm', measOn = false;        // unité d'affichage des distances ; cotes sur les prochains traits
 
 /* ---------- carte vivante : fond de carte réel, objets accrochés au terrain ----------
@@ -93,6 +94,7 @@ function toScreen(o){
   if (o.pts) c.pts = o.pts.map(([x, y]) => [fx(x), fy(y)]);
   if (o.hov) c.hov = [fx(o.hov[0]), fy(o.hov[1])];
   if (o.t === 'img'){ c.w2 = o.w2 * k; c.h2 = o.h2 * k; }
+  if (o.t === 'kframe') c.w2 = o.w2 * k;
   return c;
 }
 /* bascule du plan entre repère écran et repère terrain, sans rien déplacer à l'écran */
@@ -107,6 +109,7 @@ function convertPlan(toScreenSpace){
     for (const key of ['y', 'y1', 'y2', 'cy']) if (typeof o[key] === 'number') o[key] = fy(o[key]);
     if (o.pts) o.pts = o.pts.map(([x, y]) => [fx(x), fy(y)]);
     if (o.t === 'img') for (const key of ['w2', 'h2', 'w0', 'h0']) o[key] = fs(o[key]);
+    if (o.t === 'kframe') o.w2 = fs(o.w2);
   }
 }
 function fitCam(b){
@@ -422,6 +425,7 @@ function drawFrame(){
   }
   if (presenting) drawLaser();
   document.getElementById('lock').classList.toggle('on', !!(sel && sel.locked));
+  document.getElementById('kframe').classList.toggle('on', objs.some(o => o.t === 'kframe'));
 }
 function drawPlan(w, h){
   if (cam){ drawTiles(w, h); drawAirfields(w, h); }
@@ -486,6 +490,8 @@ function drawObj(o){
   ctx.lineWidth = o.w || 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
   if (o.t === 'img'){ if (ready(o.el)) ctx.drawImage(o.el, o.x, o.y, o.w2, o.h2); }
+
+  else if (o.t === 'kframe') drawKFrame(o);
 
   else if (o.t === 'stroke'){
     dash(o);
@@ -970,6 +976,16 @@ function labelY(o){
   return o.y + s * (sh.ldy || (o.k === 'sam' ? 1.7 : 1.2)) + (sh.tag ? 15 : 2);
 }
 
+/* le cadre du kneeboard : une aide d'édition, qui ne se montre ni en présentation, ni
+   dans un export (bare) */
+function drawKFrame(o){
+  if (presenting || bare) return;
+  ctx.strokeStyle = ctx.fillStyle = '#D1A94A'; ctx.lineWidth = 2;
+  ctx.setLineDash([10, 6]); ctx.strokeRect(o.x, o.y, o.w2, kbHeight(o)); ctx.setLineDash([]);
+  ctx.font = '700 11px ui-sans-serif, system-ui, sans-serif'; ctx.textBaseline = 'bottom';
+  ctx.fillText('KNEEBOARD', o.x + 2, o.y - 4);
+}
+
 /* ---------- poignées ---------- */
 function handleList(o){
   if (o.locked) return [];                       // ancré : ni rotation, ni taille, ni sommets
@@ -987,6 +1003,7 @@ function handleList(o){
   if (o.t === 'zone')  return o.pts.map((p, i) => ({ id:'v' + i, x:p[0], y:p[1] }));
   if (o.t === 'rect' || o.t === 'circle') return [{ id:'p2', x:o.x2, y:o.y2 }];
   if (o.t === 'img')  return [{ id:'size', x:o.x + o.w2, y:o.y + o.h2 }];
+  if (o.t === 'kframe') return [{ id:'size', x:o.x + o.w2, y:o.y + kbHeight(o) }];
   return [];
 }
 function handles(o){
@@ -1017,6 +1034,7 @@ function bbox(o){
   if (o.t === 'sym'){ const r = SIZE * (o.s || 1) * ((SHAPES[o.k] || {}).box || 1.15); return { x:o.x-r, y:o.y-r, w:r*2, h:r*2 }; }
   if (o.t === 'text'){ const w = o.s.length * (7 + o.w * 1.6); return { x:o.x-4, y:o.y-14, w:w+8, h:28 }; }
   if (o.t === 'img')  return { x:o.x, y:o.y, w:o.w2, h:o.h2 };
+  if (o.t === 'kframe') return { x:o.x, y:o.y, w:o.w2, h:kbHeight(o) };
   if (o.t === 'dome'){ const { rx, ry } = domeGeom(o); return { x:o.x1 - rx, y:groundY() - ry, w:2 * rx, h:ry }; }
   if (o.t === 'block'){ const [t, b] = blockSpan(o); return { x:PROF_L, y:t, w:220, h:b - t }; }
   if (o.t === 'stroke' || o.t === 'zone' || o.t === 'terrain'){
@@ -1053,6 +1071,13 @@ function hit(o, x, y){
     const sh = SHAPES[o.k] || {}, r = SIZE * (o.s || 1);
     if (sh.box) return Math.abs(x - o.x) < r * sh.box && Math.abs(y - o.y) < r * sh.box;   // un écran : ses coins aussi
     return near(x, y, o.x, o.y, r * (sh.hit || 1.15));
+  }
+  /* le cadre du kneeboard se saisit par son bord ou son titre : dedans, on continue de
+     travailler sur le plan */
+  if (o.t === 'kframe'){
+    const b = bbox(o), m = 9;
+    const out = x > b.x - m && x < b.x + b.w + m && y > b.y - m - 14 && y < b.y + b.h + m;
+    return out && !(x > b.x + m && x < b.x + b.w - m && y > b.y + m && y < b.y + b.h - m);
   }
   if (o.t === 'text' || o.t === 'img'){
     const b = bbox(o); return x > b.x && x < b.x+b.w && y > b.y && y < b.y+b.h;
@@ -1325,6 +1350,7 @@ cv.addEventListener('pointermove', e => {
     else if (drag.m === 'ctl'){ o.cx = x; o.cy = y; o.bent = true; }
     else if (drag.m[0] === 'v'){ o.pts[+drag.m.slice(1)] = [x, y]; }
     else if (drag.m === 'alt'){ o.alt = Math.max(0, Math.min(prof.ceil, altAt(y))); }
+    else if (drag.m === 'size' && o.t === 'kframe') o.w2 = Math.max(60 / kv(), x - o.x);   // la hauteur suit la page
     else if (drag.m === 'size'){
       const k = Math.max(.1, (x - o.x) / o.w0);
       o.w2 = o.w0 * k; o.h2 = o.h0 * k;
@@ -1365,7 +1391,7 @@ function endPointer(){
       if (o.t === 'dome') o.y2 = Math.min(snapAlt(o.y2), groundY() - 4);
     }
     /* agrandir la carte agrandit les distances : l'échelle suit */
-    if (drag.m === 'size' && drag.saved && nmPx && drag.w2s) nmPx *= drag.o.w2 / drag.w2s;
+    if (drag.m === 'size' && drag.o.t === 'img' && drag.saved && nmPx && drag.w2s) nmPx *= drag.o.w2 / drag.w2s;
     drag = null; commit(); return;
   }
   if (!draft || draft.t === 'zone') return;     // une zone se referme au clic, pas au relâché
@@ -1638,7 +1664,7 @@ $('front').onclick = () => {
   snapshot(); objs.splice(objs.indexOf(sel), 1); objs.push(sel); commit();
 };
 $('dup').onclick = () => {
-  if (!sel) return;
+  if (!sel || sel.t === 'kframe') return;                   // un seul cadre par planche
   snapshot();
   const kk = (sel.v || 'm') === 'm' ? camK() : 1;
   const o = snap(sel); delete o.locked; delete o.uid; move(o, 24 / kk, 24 / kk);   // la copie naît libre, et neuve
@@ -1706,45 +1732,67 @@ function signed(){
   return c;
 }
 $('png').onclick = () => {
-  const keep = sel; sel = null; draw();
-  download(signed().toDataURL('image/png'), `fl-briefing-${slug(boards[cur].name)}-${stamp()}.png`);
-  sel = keep; draw();
+  const keep = sel; sel = null; bare = true;
+  try { draw(); download(signed().toDataURL('image/png'), `fl-briefing-${slug(boards[cur].name)}-${stamp()}.png`); }
+  finally { sel = keep; bare = false; draw(); }
 };
 
-/* ---------- export kneeboard DCS : portrait 768 × 1024 ---------- */
-async function kneeboardCanvas(){
-  const planObjs = objs.filter(o => (o.v || 'm') === 'm');
+/* ---------- export kneeboard DCS : portrait 768 × 1157 ----------
+   DCS étire chaque image du dossier Kneeboard sur toute sa planchette, dont les
+   proportions sont 0,142 × 0,214 (Scripts/Aircrafts/_Common/Cockpit/KNEEBOARD :
+   declare_kneeboard_device.lua pour la taille, indicator/init.lua pour l'image posée
+   sur toute la page). Une page à ces proportions s'affiche sans déformation ; une page
+   768 × 1024 y était écrasée d'un huitième en largeur. */
+const KB_W = 768, KB_H = Math.round(KB_W * .214 / .142), KB_HEAD = 66, KB_FOOT = 30;
+/* la page : un en-tête, un pied, et la coupe en bas, sur toute la largeur, quand elle
+   est affichée ; le plan prend le reste (area) */
+function kbLayout(){
   const withProf = split && (prof.pane ? !!radarView().own
                                        : objs.some(o => o.v === 'p') || (prof.linked && route.pts.length > 0));
-  if (!planObjs.length && !withProf && !cam) return null;
+  const sw = stage.clientWidth, kp = (KB_W - 32) / sw, bandH = withProf ? PROF_H * kp : 0;
+  const area = { x:16, y:KB_HEAD + 10, w:KB_W - 32, h:KB_H - KB_HEAD - KB_FOOT - 20 - (bandH ? bandH + 12 : 0) };
+  return { withProf, sw, kp, bandH, area };
+}
+/* le cadre a les proportions de la zone du plan : sa largeur est gardée, sa hauteur suit */
+const kbAspect = () => { const a = kbLayout().area; return a.w / a.h; };
+const kbHeight = f => f.w2 / kbAspect();
+/* ce que la page montre du plan. Le cadre, s'il y en a un : il remplit toute la zone du
+   plan. Sinon, sur une carte, l'emprise vue à l'écran (ecam) ; sans carte, tous les
+   objets, dans la transformation k, ox, oy. */
+function kbFit(f){
+  const L = kbLayout(), area = L.area;
+  if (f && cam) return { ...L, ecam: { x: f.x + f.w2 / 2, y: f.y + kbHeight(f) / 2,
+                                       z: REF_Z + Math.log2(area.w / f.w2) } };
+  if (f){ const k = area.w / f.w2; return { ...L, k, ox: area.x - f.x * k, oy: area.y - f.y * k }; }
+  if (cam){
+    const [pw, ph] = viewSize(), kf = Math.min(area.w / pw, area.h / ph);
+    return { ...L, ecam: { x: cam.x, y: cam.y, z: cam.z + Math.log2(kf) } };
+  }
   const pad = 36;
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  for (const o of planObjs){
+  for (const o of objs){
+    if ((o.v || 'm') !== 'm' || o.t === 'kframe') continue;
     const b = bbox(o);
     x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
     x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
   }
   x0 -= pad; y0 -= pad; x1 += pad; y1 += pad;
-  const W = 768, H = 1024, HEAD = 66, FOOT = 30;
-  /* la coupe occupe le bas de la page, sur toute sa largeur ; le plan prend le reste */
-  const sw = stage.clientWidth, kp = (W - 32) / sw, bandH = withProf ? PROF_H * kp : 0;
-  const area = { x:16, y:HEAD + 10, w:W - 32, h:H - HEAD - FOOT - 20 - (bandH ? bandH + 12 : 0) };
-  if (!planObjs.length){ x0 = 0; y0 = 0; x1 = 1; y1 = 1; }
-  const k  = Math.min(area.w / (x1 - x0), area.h / (y1 - y0), 2.2);
-  const ox = area.x + (area.w - (x1 - x0) * k) / 2 - x0 * k;
-  const oy = area.y + (area.h - (y1 - y0) * k) / 2 - y0 * k;
-  /* sur une carte, la page reprend l'emprise vue à l'écran ; ses tuiles sont chargées
-     avant de dessiner, sinon la page sortirait trouée */
-  let ecam = null;
-  if (cam){
-    const [pw, ph] = viewSize(), kf = Math.min(area.w / pw, area.h / ph);
-    ecam = { x: cam.x, y: cam.y, z: cam.z + Math.log2(kf) };
-    await preloadTiles(ecam, area.w, area.h);
-  }
+  if (!isFinite(x0)){ x0 = 0; y0 = 0; x1 = 1; y1 = 1; }         // rien sur le plan
+  const k = Math.min(area.w / (x1 - x0), area.h / (y1 - y0), 2.2);
+  return { ...L, k, ox: area.x + (area.w - (x1 - x0) * k) / 2 - x0 * k,
+                    oy: area.y + (area.h - (y1 - y0) * k) / 2 - y0 * k };
+}
+async function kneeboardCanvas(){
+  const planObjs = objs.filter(o => (o.v || 'm') === 'm' && o.t !== 'kframe');
+  const { withProf, sw, kp, bandH, area, k, ox, oy, ecam } = kbFit(objs.find(o => o.t === 'kframe'));
+  if (!planObjs.length && !withProf && !cam) return null;
+  const W = KB_W, H = KB_H, HEAD = KB_HEAD, FOOT = KB_FOOT;
+  /* sur une carte, les tuiles sont chargées avant de dessiner, sinon la page sortirait trouée */
+  if (ecam) await preloadTiles(ecam, area.w, area.h);
 
   const off = document.createElement('canvas'); off.width = W; off.height = H;
   const screen = ctx, keepSel = sel;
-  ctx = off.getContext('2d'); sel = null;
+  ctx = off.getContext('2d'); sel = null; bare = true;
   /* une planche paysage réduite dans une page portrait rendrait les textes illisibles
      en cockpit : les symboles se réduisent, les textes gardent au moins leur taille écran */
   tb = ecam ? 1 : Math.min(1.8, Math.max(1, 1 / k));
@@ -1800,7 +1848,7 @@ async function kneeboardCanvas(){
       ? ` · caps magnétiques, déclinaison ${fmtDecl(dk)}${magDec !== null ? ' (saisie)' : ' (WMM2025)'}`
       : cam ? ' · caps vrais' : ''), 18, H - 12);
   } finally {
-    ctx = screen; sel = keepSel; tb = 1;
+    ctx = screen; sel = keepSel; tb = 1; bare = false;
   }
   return off;
 }
@@ -1813,6 +1861,20 @@ $('unit').onclick = () => {
   unit = unit === 'nm' ? 'km' : 'nm';
   $('unit').textContent = unit === 'km' ? 'km' : 'NM';
   commit();
+};
+
+/* le cadre du kneeboard : un par planche. Le bouton le pose au milieu de la vue, ou l'ôte ;
+   il se déplace par son bord et s'agrandit par sa poignée, sans changer de proportions. */
+$('kframe').onclick = () => {
+  leaveGesture();
+  const f = objs.find(o => o.t === 'kframe');
+  snapshot();
+  if (f){ objs.splice(objs.indexOf(f), 1); if (sel === f) sel = null; commit(); return; }
+  const w = stage.clientWidth, h = planH(), a = kbAspect();
+  const fh = Math.min(h * .8, w * .8 / a), fw = fh * a;
+  const [x, y] = cam ? s2w((w - fw) / 2, (h - fh) / 2) : [(w - fw) / 2, (h - fh) / 2];
+  const o = { t:'kframe', x, y, w2: fw / camK(), c:'#D1A94A' };
+  objs.push(o); sel = o; commit();
 };
 
 $('knee').onclick = async () => {

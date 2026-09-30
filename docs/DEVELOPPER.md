@@ -6,9 +6,9 @@ Zéro dépendance, zéro build : on modifie, on recharge la page. Le contrat du 
 
 ```
 FL Briefing Board/
-├─ index.html        coquille : barre d'outils, palette, styles          (276 l.)
+├─ index.html        coquille : barre d'outils, palette, styles          (329 l.)
 ├─ symbols.js        les 28 formes, vues de profil, kit radar           (705 l.)
-├─ board.js          le moteur : planches, carte, coupe, route, exports (2 359 l.)
+├─ board.js          le moteur : planches, carte, coupe, route, exports (2 421 l.)
 ├─ theatres.js       14 théâtres DCS et 791 aérodromes (généré, ne pas retoucher)
 ├─ magnetic.js       modèle magnétique WMM2025 (généré, ne pas retoucher)
 ├─ radar.js          vue radar liée : géométrie du B-scope, fonctions pures
@@ -41,7 +41,7 @@ FL Briefing Board/
 ```
 
 Les scripts restent à la racine délibérément : un sous-dossier `src/`
-n'apporterait rien à 3 200 lignes et brouillerait le « double-clic sur `index.html` »
+n'apporterait rien à 3 700 lignes et brouillerait le « double-clic sur `index.html` »
 qui fait l'intérêt de l'outil.
 
 ## Logo

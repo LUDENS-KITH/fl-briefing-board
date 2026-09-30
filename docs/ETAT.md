@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.8**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.9**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 40 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 44 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
@@ -97,6 +97,8 @@ par événements pointeur réels, pas en relisant le code.
 | Fichier de briefing | 4 scénarios au banc, rouges avant le code : image relue après réouverture ; enregistrer puis ouvrir sur un poste vierge, fichier identique, image comprise, gardé à la réouverture ; fichier étranger refusé ; confirmation avant de remplacer ; nom de planche piégé resté du texte ; 31/31 | conforme | 2026-09-30 |
 | Animation entre phases | 3 scénarios au banc, rouges avant le code : uid gardé par « + phase », neuf par Ctrl+D ; à mi-transition, un chasseur à mi-chemin et à une couleur intermédiaire, un bombardier apparu à mi-fondu ; hors présentation, changement instantané ; 40/40 | conforme | 2026-09-30 |
 | Animation entre phases | démo dans Brave, vrais événements d'entrée : Ingress → Attaque, trois captures à 22 %, 61 % et fin — UZI 1-1 glisse de la mer vers l'objectif, UZI 1-2 et la flèche d'ingress s'effacent, la cible et la flèche d'attaque entrent en fondu ; vue radar liée : un bandit passe de 40,x NM (au-delà) à 11° puis 0° | conforme | 2026-09-30 |
+| Kneeboard cadré | 4 scénarios au banc : cadre posé, déplacé par son bord, agrandi sans changer de proportions, ôté, rétabli par Ctrl+Z ; il remplit exactement la zone du plan de la page, sans carte comme sur carte ; page aux proportions de la planchette DCS ; absent du PNG. Ces trois-là rouges avant le code ; le 4e, absent en présentation, mis en échec en retirant la garde ; 44/44 | conforme | 2026-09-30 |
+| Kneeboard cadré | démo dans Brave, vrais événements d'entrée : cadre posé, déplacé par son bord, réduit par sa poignée ; la page 768 × 1157 montre exactement son contenu, sans le cadre ; sans cadre, la planche entière au nouveau format | conforme | 2026-09-30 |
 | Import de mission | projection des théâtres mesurée sur les balises de l'installation DCS : 7 théâtres, écart moyen 4 cm, 8 cm au pire ; méridiens et échelle ronds (UTM) | conforme | 2026-09-30 |
 | Import de mission | `node tools/test_miz.js` : projection et inverse contre pyproj à 1 mm près, table Lua, archive zip ; en échec sur six calculs faussés | conforme | 2026-09-30 |
 | Import de mission | missions réelles de l'escadron : départ piste de Goudaouta sur le point de référence du terrain (0,00 km) ; sept départs parking à 0,3 – 1,1 km du point de référence de leur terrain | conforme | 2026-09-30 |
@@ -122,9 +124,11 @@ par événements pointeur réels, pas en relisant le code.
   aucune séance réelle n'a eu lieu ;
 - **le comportement multi-navigateurs** : seul le moteur de l'aperçu intégré
   (Chromium) a servi ;
-- **le kneeboard dans DCS** : le PNG sort au format 768 × 1024, mais personne ne l'a
-  encore chargé dans le cockpit. Le dossier `Saved Games\DCS\Kneeboard\` est cité
-  de mémoire, pas vérifié ;
+- **le kneeboard dans DCS** : aucune page n'a encore été vue dans le cockpit. Son
+  format, lui, est lu dans les fichiers du jeu (`Scripts/Aircrafts/_Common/Cockpit/KNEEBOARD`) :
+  une image du dossier est étirée sur toute la planchette, de proportions
+  0,142 × 0,214 ; la page sort à ces proportions depuis la v1.9. Le dossier
+  `Saved Games\DCS\Kneeboard\` existe sur le poste de mesure et y sert déjà ;
 - **le clic droit dans Brave en mode application** : vérifié dans Chromium, au banc et
   à la souris réelle ; le menu natif n'a pas pu être observé à l'écran, son blocage est
   vérifié sur l'événement (`defaultPrevented`) ;
@@ -169,7 +173,8 @@ vue de dessus ; aspect, hémisphère, part radiale ; cône balayé sur la carte 
 « Interception » dans la démo ; au kneeboard.
 
 **Planches** : une par phase, copiées d'un clic, chacune avec son historique et son
-échelle. **Exports** : PNG écran, kneeboard DCS 768 × 1024.
+échelle. **Exports** : PNG écran, kneeboard DCS 768 × 1157 aux proportions de la
+planchette du jeu, cadrable sur le plan.
 
 **Gestes** : pose orientée en un geste · déplacement · rotation et mise à l'échelle
 par poignée · rotation fine au clavier · courbure de flèche · flèche double sens ·
@@ -181,7 +186,8 @@ palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
 reprise locale **images comprises** (IndexedDB) ; **fichier de briefing** `.json` à
 enregistrer et ouvrir, images comprises ; **mode présentation** (plein écran, phases au
 clavier, pointeur laser) ; **import de mission `.miz`** (route, bullseye, défenses
-aériennes, navires) ; **animation entre phases** en présentation.
+aériennes, navires) ; **animation entre phases** en présentation ; **cadrage du
+kneeboard**.
 
 ## 5. Hors périmètre — décidé, pas oublié
 
@@ -225,6 +231,11 @@ statistique.
 9. **Kneeboard illisible** (v0.5) : une planche paysage réduite dans une page portrait
    tombait à ~70 %, étiquettes vers 8 px. Les textes gardent désormais leur taille
    écran à l'export.
+10. **Le kneeboard sortait déformé dans le jeu** (v0.5 à v1.8) : la page faisait
+    768 × 1024, soit 3:4, or DCS étire toute image du dossier sur sa planchette,
+    0,142 × 0,214. Elle y était comprimée d'environ 11 % en largeur : cercles ovales,
+    textes tassés. Trouvé en lisant les fichiers du jeu au lot 8, pas en jeu ; la page
+    sort désormais en 768 × 1157.
 
 ## 7. Risques connus
 
@@ -237,10 +248,9 @@ statistique.
 - **Un filet de sécurité partiel.** Le banc de saisie couvre le clic droit, `Échap` et
   l'ancrage (v1.2) ; le reste — tracés, coupe, cartes, exports — se revérifie encore à
   la main, et le tableau du §2 reste la mémoire des contrôles passés.
-- **Une planche paysage remplit mal un kneeboard portrait** : environ 40 % de la page
-  utilisée. Les textes restent lisibles, les symboles rapetissent. Composer les
-  planches destinées au cockpit plutôt en hauteur, ou ajouter un jour un cadrage
-  manuel de l'export.
+- **Sans cadre, une planche paysage remplit mal un kneeboard portrait** : environ 40 %
+  de la page utilisée. Les textes restent lisibles, les symboles rapetissent. C'est à
+  cela que sert ⬚ Cadre, depuis la v1.9.
 - **Seuls les waypoints font la route liée**, dans l'ordre de leurs numéros. Un
   numéro supprimé laisse un trou sans conséquence ; deux routes distinctes sur une
   même planche ne sont pas prévues. Ce qu'on dessine librement dans la coupe (relief,

@@ -683,6 +683,74 @@ test('Hors présentation, changer de planche reste instantané', async (ok) => {
   ok(a.s('cur') === 0 && !a.s('anim'), `planche ${a.s('cur') + 1}, animation ${a.s('anim')}`);
 });
 
+/* ---------- lot 8 : cadrage du kneeboard ---------- */
+
+const FRAME = 'JSON.stringify((o => o && { x: o.x, y: o.y, w: o.w2, h: kbHeight(o) })(objs.find(o => o.t === "kframe")))';
+
+test("Cadre kneeboard : posé et ôté par son bouton ; déplacé et agrandi sans changer de proportions", async (ok) => {
+  const a = await open();
+  a.button('#kframe');
+  const k = JSON.parse(a.s(FRAME));
+  ok(k && Math.abs(k.w / k.h - a.s('kbAspect()')) < 1e-9, `cadre : ${JSON.stringify(k)}, proportions attendues ${a.s('kbAspect()')}`);
+  if (!k) return;
+  a.key('v'); a.drag(k.x + 2, k.y + k.h / 2, k.x + 62, k.y + k.h / 2);          // saisi par son bord gauche
+  const m = JSON.parse(a.s(FRAME));
+  ok(Math.abs(m.x - (k.x + 60)) < 1 && Math.abs(m.y - k.y) < 1, `déplacé : ${JSON.stringify(m)}`);
+  const h = JSON.parse(a.s('JSON.stringify(sel && handleList(toScreen(sel))[0] || null)'));
+  ok(h, 'pas de poignée');
+  if (h) a.drag(h.x, h.y, h.x + 50, h.y + 10);
+  const g = JSON.parse(a.s(FRAME));
+  ok(g.w > m.w + 30 && Math.abs(g.w / g.h - a.s('kbAspect()')) < 1e-9, `agrandi : ${JSON.stringify(g)}`);
+  a.button('#kframe');
+  ok(!a.s('objs.some(o => o.t === "kframe")'), 'cadre toujours là');
+  a.key('z', { ctrlKey: true });
+  ok(a.s('objs.some(o => o.t === "kframe")'), 'cadre non rétabli par Ctrl+Z');
+});
+
+test('Kneeboard cadré : le cadre remplit la zone de la page, sans carte comme sur carte', async (ok) => {
+  const near = (u, v) => Math.abs(u - v) < .5;
+  let a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.button('#kframe');
+  let f = JSON.parse(a.s(FRAME)), v = JSON.parse(a.s('JSON.stringify(kbFit(objs.find(o => o.t === "kframe")))'));
+  const A = v.area;
+  ok(near(f.x * v.k + v.ox, A.x) && near((f.x + f.w) * v.k + v.ox, A.x + A.w)
+     && near(f.y * v.k + v.oy, A.y) && near((f.y + f.h) * v.k + v.oy, A.y + A.h), `sans carte : ${JSON.stringify({ f, v })}`);
+  const c = await a.w.kneeboardCanvas();
+  /* DCS étire l'image aux proportions de sa planchette, 0,142 × 0,214 : la page les prend */
+  ok(c && c.width === 768 && Math.abs(c.width / c.height - .142 / .214) < .001, `page : ${c && c.width}×${c && c.height}`);
+
+  a = await open();
+  a.map(); a.button('#kframe');
+  f = JSON.parse(a.s(FRAME)); v = JSON.parse(a.s('JSON.stringify(kbFit(objs.find(o => o.t === "kframe")))'));
+  const kz = 2 ** (v.ecam.z - 12), px = wx => (wx - v.ecam.x) * kz + v.area.w / 2, py = wy => (wy - v.ecam.y) * kz + v.area.h / 2;
+  ok(near(px(f.x), 0) && near(px(f.x + f.w), v.area.w) && near(py(f.y), 0) && near(py(f.y + f.h), v.area.h),
+     `sur carte : ${JSON.stringify({ f, v })}`);
+});
+
+test('Le cadre ne sort pas dans le PNG', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.button('#kframe');
+  const got = []; a.w.download = url => got.push(url);
+  a.button('#png');
+  a.button('#kframe');
+  a.button('#png');
+  ok(got.length === 2 && got[0] === got[1], `PNG avec et sans cadre : ${got.length} export(s), ${got[0] === got[1] ? 'identiques' : 'différents'}`);
+});
+
+test('En présentation, le cadre ne se montre pas', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.button('#kframe');
+  a.button('#present');
+  const avec = a.s('(drawFrame(), cv.toDataURL())');
+  a.key('Escape'); a.button('#kframe'); a.button('#present');
+  const sans = a.s('(drawFrame(), cv.toDataURL())');
+  a.key('Escape');
+  ok(avec === sans, 'le tableau présenté diffère selon le cadre');
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

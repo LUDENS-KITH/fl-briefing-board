@@ -56,7 +56,11 @@ Règles qui en découlent :
 - l'historique garde carte et caméra, mais `restore()` ne rend la caméra que si la
   carte change : annuler un déplacement de symbole ne fait pas sauter la vue ;
 - l'export kneeboard impose une vue (`vp`) et une caméra le temps de dessiner, après
-  avoir chargé les tuiles (`preloadTiles`).
+  avoir chargé les tuiles (`preloadTiles`). `kbFit()` dit ce que la page montre : le
+  cadre `kframe` s'il existe, qui remplit alors exactement la zone du plan ; sinon
+  l'emprise vue à l'écran (carte) ou tous les objets (sans carte). La page a les
+  proportions de la planchette DCS, 0,142 × 0,214 (`KB_W`, `KB_H`), et `kbLayout()`
+  y place l'en-tête, le pied et la coupe.
 
 ### Caps vrais et magnétiques
 
@@ -110,6 +114,7 @@ objet porte un `uid`, posé à sa première écriture (`withUids()` dans `commit
 | `block` | `y1`, `y2`, `lbl` | coupe : tranche d'altitude pleine largeur |
 | `text` | `s`, `x`, `y` | **`s` est la chaîne**, `x,y` son ancre (ligne de base médiane) |
 | `img` | `el`, `x`, `y`, `w2`, `h2`, `w0`, `h0` | image de fond : élément DOM, coin haut-gauche, taille courante, taille d'origine |
+| `kframe` | `x`, `y`, `w2` | cadre du kneeboard, un par planche : coin haut-gauche et largeur ; sa hauteur suit les proportions de la zone du plan de la page (`kbHeight()`). Aide d'édition : jamais dessiné en présentation ni dans un export (`bare`) |
 
 **L'ordre du tableau est l'ordre de rendu.** Une image ajoutée entre par `unshift`
 (donc au fond) ; le bouton « premier plan » déplace un objet en fin de liste.
@@ -327,7 +332,9 @@ images**, donc sous les symboles qui la justifient.
 - `stroke` : distance aux **segments**, tolérance 13 px — pas aux seuls points
   enregistrés : un geste rapide n'en produit que quelques-uns et le milieu du trait
   doit rester attrapable ;
-- `text`, `img` : boîte englobante.
+- `text`, `img` : boîte englobante ;
+- `kframe` : son bord, à 9 px près, et son titre — l'intérieur ne prend pas, on y
+  travaille sur le plan.
 
 `pick()` parcourt `objs` **de la fin vers le début** : ce qui est au-dessus se
 désigne en premier.
@@ -350,7 +357,8 @@ désigne en premier.
 6. **`ctx` est réassigné pendant l'export kneeboard** vers un canvas hors écran, et
    `tb` (grossissement des textes) y passe au-dessus de 1. Toute fonction de dessin
    doit lire `ctx` et `tb` au moment de l'appel, jamais les capturer. Le `finally`
-   de `kneeboardCanvas()` les remet en place.
+   de `kneeboardCanvas()` les remet en place, avec `bare`, qui retire les aides
+   d'édition (le cadre du kneeboard) de l'export ; l'export PNG le pose aussi.
 7. **Dans la coupe, une silhouette de profil pointe à droite pour `a = 0`**, alors
    qu'une vue de dessus pointe vers le haut. `paintSym`, les poignées et le geste de
    pose tiennent compte des deux conventions ; une silhouette qui vole vers la

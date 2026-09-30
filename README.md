@@ -44,7 +44,8 @@
 - **Kit radar F/A-18C et F-16C** — les écrans radar air-air (RDR ATTK du Hornet, FCR du
   Viper), leurs pistes, marques et curseurs, dessinés d'après le manuel de chaque module,
   page par page.
-- **Export kneeboard DCS** — la planche, sa coupe et ses caps, au format du cockpit.
+- **Export kneeboard DCS** — la planche, ou le cadre qu'on y pose, avec sa coupe et ses
+  caps, aux proportions de la planchette du jeu.
 - **Un fichier de briefing** — tout le tableau, images comprises, à préparer sur un poste
   et à mener sur un autre, ou à passer au meneur suivant.
 - **Un mode présentation** — plein écran, phases au clavier, pointeur laser, et la
