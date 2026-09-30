@@ -151,7 +151,7 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 | `headRef` | `true` `mag` | référence des caps affichés ; persistée |
 | `magDec` | nombre ou `null` | déclinaison saisie pour la planche (° Est positif) ; dans l'historique |
 | `split` | booléen | écran partagé plan / coupe ; persisté |
-| `prof` | `{ ceil, range, linked }` | plafond (ft), largeur (NM) et route liée de la planche montée ; dans l'historique |
+| `prof` | `{ ceil, range, linked, pane, rrng, raz }` | plafond (ft), largeur (NM) et route liée de la planche montée ; vue du panneau du bas (`fa18`, `f16`, absente = coupe), échelle et balayage de la vue radar ; dans l'historique |
 | `view` | `m` `p` | vue du geste en cours, fixée au `pointerdown` et gardée jusqu'au relâché |
 | `symKey` | clé de `SHAPES` | forme que posera l'outil `sym` |
 | `color`, `width` | couleur FL, 2 / 4 / 8 | valeurs des **prochains** objets — et repeignent la sélection si elle existe |
@@ -215,6 +215,22 @@ bouton droit enfoncé pendant un geste du gauche — `pointermove` avec `button 
 un second bouton n'émet pas de `pointerdown`. Un clic droit sur une carte ne déplace
 pas la vue : la caméra est remise où elle était. Le menu du navigateur est toujours
 bloqué sur le tableau.
+
+### Vue radar liée
+
+Le panneau du bas montre la coupe, ou l'écran radar d'un **porteur** : le symbole de
+la vue de dessus marqué `own: true`, un seul par planche. Comme la route liée, **rien
+n'est stocké** : `radarView()` recalcule l'image à chaque dessin avec `RADAR.radarPicture`
+(`radar.js`, fonctions pures testées par `node tools/test_radar.js`).
+
+- Les contacts sont les symboles du groupe `air` de la vue de dessus, porteur exclu.
+- Distances : `nmAt(y)` sur une carte, `nmPx` sinon ; sans l'un ni l'autre, un message.
+- L'écran est la page TWS du module (`fa18_tws`, `f16_tws`), dessinée par `drawObj` ;
+  sa zone tactique, sa demi-largeur et son cône viennent de `scope.area`, `scope.span`
+  et `scope.cone(az)` — la même source que le kit radar.
+- `drawRadarCone()` trace le volume balayé sur la vue de dessus, sous les objets.
+- Le panneau radar se lit, il ne s'édite pas : `pointerdown` et le double-clic y
+  rendent la main aussitôt.
 
 ### Objets ancrés
 

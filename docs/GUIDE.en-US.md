@@ -56,6 +56,33 @@ only goes on a track of its own aircraft.
 Prepare radar boards **without a map**: on a map, a display would follow the terrain
 as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" boards).
 
+## Linked Radar View
+
+The bottom panel shows either the profile or **an aircraft's radar display**, computed
+from the top-down board: what the drawn maneuver looks like on the B-scope.
+
+1. Open the profile view (⊟), then pick **RADAR F/A-18C** or **RADAR F-16C** in the
+   toolbar list.
+2. Select an aircraft on the top-down board, then **◎ Porteur** (radar carrier). One
+   carrier per board; its scan cone is drawn dashed on the top-down board.
+3. Set the **range** and **azimuth scan** in the toolbar.
+
+Every other aircraft on the top-down board becomes a contact, placed by its bearing and
+range: move a target or turn the carrier (`←` `→`) and the display follows. On the
+F/A-18C a contact is a HAFU whose identification follows its color (red hostile, blue
+friendly, anything else unknown); on the F-16C, a TWS track. Its stem or nose line
+shows its heading relative to yours.
+
+On the right, each contact is read out: range, bearing, **aspect** in F-16C format (tens
+of degrees, L or R side: "9D" beam, "18" nose-on), **hot** or **cold**, and **radial** —
+the share of its speed along the line of sight. Near 0 %, the target is beaming: that is
+where a Doppler radar may reject it when looking down. Contacts outside the scan or
+beyond the range scale are counted.
+
+The view shows geometry; it does not simulate detection. It needs a map or a calibrated
+board: without a scale, a message, and nothing made up. The online demo shows one (the
+"Interception" board), and the kneeboard carries it under the plan.
+
 ## Maps
 
 The selector in the top-right corner offers the **14 DCS theatres**, with topographic,

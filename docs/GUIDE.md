@@ -60,6 +60,34 @@ Le radar se prépare de préférence sur une planche **sans carte** : sur une ca
 écran suivrait le terrain au gré du zoom. La démo en ligne en montre deux (planches
 « Radar F/A-18C » et « Radar F-16C »).
 
+## Vue radar liée
+
+Le panneau du bas montre, au choix, la coupe ou **l'écran radar d'un appareil**,
+calculé depuis la vue de dessus : ce que la manœuvre dessinée donne sur le B-scope.
+
+1. Ouvrez la coupe (⊟), puis choisissez **RADAR F/A-18C** ou **RADAR F-16C** dans la
+   liste du bandeau.
+2. Sélectionnez un appareil dans la vue de dessus, puis **◎ Porteur**. Un seul porteur
+   par planche ; son cône balayé se dessine en pointillés sur la vue de dessus.
+3. Réglez l'**échelle** et le **balayage** dans le bandeau.
+
+Chaque autre aéronef de la vue de dessus devient un contact, placé selon son gisement
+et sa distance : déplacez une cible, tournez le porteur (`←` `→`), l'écran suit. Au
+F/A-18C, un contact est un HAFU dont l'identité suit sa couleur (rouge hostile, bleu
+ami, toute autre inconnue) ; au F-16C, une piste TWS. Sa tige ou son trait de nez
+montre son cap rapporté au vôtre.
+
+À droite, la lecture de chaque contact : distance, gisement, **aspect** au format du
+F-16C (en dizaines de degrés, côté G ou D : « 9D » au travers, « 18 » de face),
+**chaude** ou **froide**, et **radiale** — la part de sa vitesse le long de la ligne de
+visée. Près de 0 %, la cible est au travers : c'est là qu'un radar Doppler peut la
+rejeter en regardant vers le bas. Les contacts hors du balayage ou au-delà de l'échelle
+sont comptés.
+
+La vue montre la géométrie ; elle ne simule pas la détection. Il faut une carte ou une
+planche étalonnée : sans échelle, un message, et rien d'inventé. La démo en ligne en
+montre une (planche « Interception »), et le kneeboard l'emporte sous le plan.
+
 ## Cartes
 
 La liste en haut à droite de la vue de dessus propose les **14 théâtres DCS**, en

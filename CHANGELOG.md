@@ -3,6 +3,41 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.4 — 2026-09-30
+
+Lot 3 du [plan d'action](docs/PLAN.md) : la vue radar liée.
+
+### Ajouté
+- **Vue radar liée** : le panneau du bas montre, au choix, la coupe ou l'écran radar
+  TWS d'un **porteur** (F/A-18C ou F-16C), calculé depuis la vue de dessus. Chaque
+  aéronef y devient un contact, à son gisement et à sa distance ; sa tige ou son trait
+  de nez montre son cap rapporté au porteur. Déplacer une cible ou tourner le porteur
+  met l'écran à jour.
+- La lecture de chaque contact : distance, gisement, **aspect** au format du F-16C
+  (« 9D », « 14G », « 18 »), **chaude**, **froide** ou **au travers**, et **radiale**, la
+  part de sa vitesse le long de la ligne de visée. Contacts hors balayage ou au-delà
+  de l'échelle comptés.
+- Le **cône balayé** du porteur se dessine sur la vue de dessus.
+- Planche **« Interception »** dans la démo ; le kneeboard emporte la vue radar.
+- `radar.js`, fonctions pures, et **`node tools/test_radar.js`** : 26 vérifications.
+- Banc de saisie : 4 scénarios de plus, 27 en tout.
+
+### Écart au plan
+- Le plan annonçait les catégories HOT, FLANK, BEAM, COLD. Aucun manuel lu ne donne
+  leurs bornes : la vue donne l'aspect chiffré (F-16C, p. 405), l'hémisphère (p. 404)
+  et la part radiale, grandeur que juge le filtre Doppler (p. 391), sans trancher.
+
+### Corrigé — trouvés en regardant
+- L'écran et la première piste du panneau radar sortaient presque noirs : la couleur
+  du trait est posée par `drawObj`, pas par `paintSym`.
+- Une cible exactement au travers se lisait « froide » : à 0 % affiché, elle se lit
+  désormais « au travers ».
+
+### Vérifié en exécutant
+`node tools/test_radar.js` 26/26, et en échec sur quatre calculs volontairement faussés
+— dont un que la première version du test laissait passer · banc 27/27 · interception
+relue en image, tiges comprises · kneeboard · démo sans erreur console.
+
 ## v1.3 — 2026-09-30
 
 Lot 2 du [plan d'action](docs/PLAN.md) : le kit radar, F/A-18C puis F-16C comme décidé

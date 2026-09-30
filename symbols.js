@@ -413,7 +413,9 @@ const GROUPS = [
      over     se pose par-dessus ce qu'on touche, sans le saisir (curseur)
      tileA    angle de la vignette, quand une forme se reconnaît à son inclinaison
      scope    écran : page, échelle et azimut par défaut, valeurs proposées au clavier,
-              libellés des boutons */
+              libellés des boutons ; `area` la zone tactique [gauche, haut, droite, bas],
+              `span` sa demi-largeur en degrés, `cone(az)` le demi-balayage d'un réglage
+              — lus aussi par la vue radar liée */
 
 /* les 20 boutons d'un écran de F/A-18C, numérotés comme dans le manuel ED :
    PB1 → PB5 à gauche de bas en haut, PB6 → PB10 en haut de gauche à droite,
@@ -467,7 +469,7 @@ function ddiBezel(c){
 function fa18Attk(c, o){
   const sc = SHAPES[o.k].scope, lw = c.lineWidth;
   ddiBezel(c);
-  const L = -.6, R = .6, T = -.62, B = .6;                 // zone tactique
+  const [L, T, R, B] = sc.area;                            // zone tactique
   c.save();
   c.lineWidth = lw * .35;
   c.strokeRect(L, T, R - L, B - T);
@@ -519,6 +521,10 @@ const MARKS = {
   bug(c){ c.beginPath(); c.arc(0, 0, .72, 0, 7); c.stroke(); },
 };
 const withMark = (c, o) => { if (o && MARKS[o.mark]) MARKS[o.mark](c); };
+/* le B-scope du F/A-18C couvre le cône de 140° que l'antenne peut balayer (p. 172) ;
+   un réglage d'azimut en donne la largeur totale (p. 163, n° 15) */
+const FA18_B = { area: [-.6, -.62, .6, .6], span: 70, cone: az => az / 2 };
+
 /* HAFU, moitié haute : l'identification par les capteurs de bord (p. 209-210) */
 const hafu = (label, col, draw) => ({ g:'fa18', label, col, track:true, upright:true, fixed:true, stem:[.2, 1.2],
   s0:.55, tile:.5, draw(c, o){ draw(c); withMark(c, o); } });
@@ -527,17 +533,17 @@ Object.assign(SHAPES, {
   /* ---------------- radar F/A-18C ---------------- */
   fa18_rws: { g:'fa18', label:'Écran RWS', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
     ldy:1.12, col:'#34D399', draw: fa18Attk,
-    scope: { page:'rws', rng:40, az:140, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80, 140],
+    scope: { ...FA18_B, page:'rws', rng:40, az:140, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80, 140],
              pb: { 1:'HI\nINTL', 5:'RWS', 6:'4B 1', 7:'SIL', 8:'ERASE', 11:'↑', 12:'↓', 13:'SET',
                    14:'RSET', 15:'NCTR', 16:'DATA', 17:'CHAN', 19:'{az}°', 20:'MODE' } } },
   fa18_tws: { g:'fa18', label:'Écran TWS', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
     ldy:1.12, col:'#34D399', draw: fa18Attk,
-    scope: { page:'tws', rng:40, az:80, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80],
+    scope: { ...FA18_B, page:'tws', rng:40, az:80, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80],
              pb: { 1:'HI\nINTL', 5:'TWS', 6:'2B 2', 7:'SIL', 8:'HITS', 9:'RAID', 11:'↑', 12:'↓',
                    13:'AUTO\nMAN', 14:'RSET', 16:'DATA', 19:'{az}°', 20:'EXP' } } },
   fa18_stt: { g:'fa18', label:'Écran STT', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
     ldy:1.12, col:'#34D399', draw: fa18Attk,
-    scope: { page:'stt', rng:40, ranges:[5, 10, 20, 40, 80, 160],
+    scope: { ...FA18_B, page:'stt', rng:40, ranges:[5, 10, 20, 40, 80, 160],
              pb: { 1:'HI\nINTL', 5:'RWS', 6:'2B 1', 8:'ERASE', 15:'NCTR', 16:'DATA', 17:'CHAN', 20:'MODE' } } },
 
   /* contact brut : une brique pleine (p. 158) */
@@ -597,7 +603,7 @@ const MFD_OSB = (() => {
 function f16Fcr(c, o){
   const sc = SHAPES[o.k].scope, lw = c.lineWidth, ink = c.strokeStyle, WH = '#E6EDF5';
   ddiBezel(c);
-  const L = -.55, R = .62, T = -.64, B = .6, X0 = (L + R) / 2, hy = (T + B) / 2;
+  const [L, T, R, B] = sc.area, X0 = (L + R) / 2, hy = (T + B) / 2;
   c.save();
   c.lineWidth = lw * .35;
   c.strokeStyle = WH; c.fillStyle = WH;
@@ -655,7 +661,9 @@ function f16Track(c, o){
 
 const f16Page = (label, sub) => ({ g:'f16', label, under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
   ldy:1.12, col:'#4FC3F7', draw: f16Fcr,
-  scope: { page: sub.toLowerCase(), rng:40, az:6, ranges:[5, 10, 20, 40, 80, 160], azs:[1, 3, 6],
+  /* A6 couvre toute la largeur, ±60° ; A3 ±30°, A1 ±10° (p. 395-396, n° 8) */
+  scope: { area: [-.55, -.64, .62, .6], span: 60, cone: az => az * 10,
+           page: sub.toLowerCase(), rng:40, az:6, ranges:[5, 10, 20, 40, 80, 160], azs:[1, 3, 6],
            pb: { 1:'CRM', 2:sub, 3:'NORM', 4:'OVRD', 5:'CNTL', 6:'CONT', 18:'A\n{az}', 17:'4\nB',
                  15:'SWAP', 14:'FCR', 13:'TEST', 12:'DTE', 11:'DCLT' } } });
 
