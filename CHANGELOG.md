@@ -3,6 +3,27 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.6 — 2026-09-30
+
+Lot 5 du [plan d'action](docs/PLAN.md), engagé par Vince : le mode présentation.
+
+### Ajouté
+- **▶ Présenter** (`F5`) : plein écran, barres, palette, onglets et contrôles de carte
+  masqués ; un repère discret dit la phase affichée.
+- Phases au clavier : `→`, `Espace`, `PgSuiv` suivante ; `←`, `PgPréc` précédente ;
+  `Début`, `Fin`.
+- **Pointeur laser** : un point rouge suit la souris ; un glissé bouton gauche trace un
+  trait qui s'éteint seul en une seconde et demie. Hors tableau, hors historique, hors
+  export.
+- La carte reste mobile en présentation ; rien ne s'édite. `Échap` sort, et sortir du
+  plein écran par le navigateur sort aussi.
+- Banc de saisie : 3 scénarios de plus, 34 en tout.
+
+### Vérifié en exécutant
+Banc 34/34, les 3 nouveaux rouges avant le code · Brave sans interface, vrais
+événements d'entrée, en `file://` : plein écran accordé au clic, laser, phase suivante,
+Échap qui rend les barres ; capture relue.
+
 ## v1.5 — 2026-09-30
 
 Lot 4 du [plan d'action](docs/PLAN.md), engagé par Vince : le fichier de briefing.

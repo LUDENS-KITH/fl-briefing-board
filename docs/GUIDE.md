@@ -60,6 +60,21 @@ Le radar se prépare de préférence sur une planche **sans carte** : sur une ca
 écran suivrait le terrain au gré du zoom. La démo en ligne en montre deux (planches
 « Radar F/A-18C » et « Radar F-16C »).
 
+## Mode présentation
+
+Pour mener le briefing en partage d'écran : **▶ Présenter** (ou `F5`). Le tableau passe
+en plein écran, sans barre ni palette ; un repère discret, en haut à droite, dit la
+phase affichée (« 2 / 4 · Attaque »).
+
+- `→`, `Espace` ou `PgSuiv` : phase suivante ; `←` ou `PgPréc` : précédente ; `Début`
+  et `Fin` : première et dernière.
+- La souris devient un **pointeur laser** : un point rouge suit le curseur, et un
+  glissé bouton gauche trace un trait rouge qui s'éteint seul en une seconde et demie.
+- La carte reste mobile : molette pour zoomer, clic droit glissé pour se déplacer.
+- Rien ne s'édite : aucun outil, aucun raccourci d'édition ; rien de ce que trace le
+  laser n'entre dans le tableau, l'historique ou les exports.
+- `Échap` sort, et rend les barres.
+
 ## Vue radar liée
 
 Le panneau du bas montre, au choix, la coupe ou **l'écran radar d'un appareil**,
@@ -165,7 +180,7 @@ d'une image reste possible.
 `R` rectangle · `Z` zone · `M` règle · `T` texte · `E` gomme · `H` main · `Ctrl+Z` /
 `Ctrl+Y` / `Ctrl+D` · `PgPréc` / `PgSuiv` planches · `+` / `−` zoom de la carte · `K`
 ancrer · `Échap` ou clic droit : retour à la sélection · `Ctrl+S` enregistrer le briefing ·
-`Ctrl+O` l'ouvrir.
+`Ctrl+O` l'ouvrir · `F5` présenter.
 
 ## Ce qu'il ne fait pas
 

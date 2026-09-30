@@ -507,6 +507,48 @@ test('Ouvrir sur un tableau non vide demande confirmation ; un nom piégé reste
   ok(a.d.querySelector('.tab').textContent === piege && !a.w.__pwn, 'le nom de planche a été interprété');
 });
 
+/* ---------- lot 5 : mode présentation ---------- */
+
+test("Présentation : barres et palette masquées, le tableau prend tout l'écran ; Échap en sort", async (ok) => {
+  const a = await open();
+  const w0 = a.s('stage.clientWidth');
+  a.button('#present');
+  ok(a.s('presenting') === true, 'mode présentation non ouvert');
+  ok(!a.d.getElementById('bar').offsetParent && !a.d.getElementById('pal').offsetParent, 'barre ou palette visible');
+  ok(a.s('stage.clientWidth') > w0 && a.s('cv.clientWidth') === a.s('innerWidth'), `largeur du tableau : ${a.s('cv.clientWidth')} sur ${a.s('innerWidth')}`);
+  a.key('Escape');
+  ok(a.s('presenting') === false && !!a.d.getElementById('bar').offsetParent, 'Échap ne ramène pas la barre');
+  ok(a.s('stage.clientWidth') === w0, `largeur après la sortie : ${a.s('stage.clientWidth')}, attendue ${w0}`);
+});
+
+test('Présentation : → et ← changent de phase ; les outils et les raccourcis ne répondent plus', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  a.button('.tab.add');                                     // deux planches, la seconde affichée
+  a.key('v');
+  a.button('#present');
+  a.key('ArrowLeft');
+  ok(a.s('cur') === 0, `phase après ← : ${a.s('cur') + 1}`);
+  ok(/1 \/ 2/.test(a.d.getElementById('pbadge').textContent), `repère de phase : « ${a.d.getElementById('pbadge').textContent} »`);
+  a.key(' ');
+  ok(a.s('cur') === 1, `phase après Espace : ${a.s('cur') + 1}`);
+  a.key('e'); a.key('z', { ctrlKey: true });
+  ok(a.s('tool') === 'select' && a.s('objs.length') === 1, `outil ${a.s('tool')}, ${a.s('objs.length')} objet(s)`);
+});
+
+test("Présentation : le pointeur laisse une trace éphémère, hors objets et hors historique", async (ok) => {
+  const a = await open();
+  a.tile('fighter');                                       // une forme choisie avant la présentation
+  a.button('#present');
+  const n = a.s('objs.length'), h = a.s('past.length');
+  a.click(300, 300);
+  a.drag(300, 300, 520, 360);
+  ok(a.s('objs.length') === n && a.s('past.length') === h, `objets ${a.s('objs.length')}, historique ${a.s('past.length')}`);
+  ok(a.s('laserTrail().length') > 3, `points de la trace : ${a.s('laserTrail().length')}`);
+  await pause(1800);
+  ok(a.s('laserTrail().length') === 0, `trace encore là après 1,8 s : ${a.s('laserTrail().length')} points`);
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

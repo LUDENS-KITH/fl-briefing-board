@@ -176,6 +176,7 @@ cap du départ vers l'arrivée.
 consomme l'événement :
 
 ```
+−1. mode présentation                              → gauche : laser ; droit ou molette : la carte ; rien d'autre
 0. bouton droit                                    → noté (rpress) ; déplace la carte s'il y en a une ;
                                                      relâché à moins de 5 px : retour à la sélection
 0. bouton molette                                  → déplace la carte s'il y en a une, sinon rien
@@ -215,6 +216,19 @@ bouton droit enfoncé pendant un geste du gauche — `pointermove` avec `button 
 un second bouton n'émet pas de `pointerdown`. Un clic droit sur une carte ne déplace
 pas la vue : la caméra est remise où elle était. Le menu du navigateur est toujours
 bloqué sur le tableau.
+
+### Mode présentation
+
+`present(on)` bascule `presenting`, la classe `present` du corps de page (barres,
+palette, onglets et contrôles de carte masqués) et le plein écran du navigateur. Tant
+qu'on présente, `pointerdown` ne fait que le laser ou déplacer la carte, le clavier ne
+répond qu'aux phases et à `Échap`, le double-clic est ignoré. Sortir du plein écran par
+le navigateur (`fullscreenchange`) quitte aussi la présentation.
+
+Le laser vit hors du tableau : `laser.pts` en pixels d'écran, chaque point daté, relié
+au précédent s'il est du même glissé (`s`) ; `laserTrail()` ne rend que ceux de moins
+de `LASER_MS`. `drawLaser()` le dessine en dernier et redemande un dessin tant qu'il
+reste une trace : elle s'éteint d'elle-même. Ni objet, ni historique, ni export.
 
 ### Vue radar liée
 

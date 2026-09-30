@@ -23,7 +23,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | 2 | Kit radar fixe : gabarits d'écran et symbologie, F/A-18C puis F-16C | demande | M | lot 1 | v1.3 | en ligne le 2026-09-30 |
 | 3 | Vue radar liée : ce que voit le radar de l'appareil désigné, en B-scope | demande | M | lot 2 | v1.4 | livré le 2026-09-30 |
 | 4 | Enregistrer et ouvrir un briefing en fichier ; images de fond conservées | proposition | S | — | v1.5 | engagé le 2026-09-30, livré |
-| 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | — | proposé |
+| 5 | Mode présentation : plein écran, pointeur laser, phases au clavier | proposition | S | lot 1 | v1.6 | engagé le 2026-09-30, livré |
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | — | proposé — une inconnue à lever d'abord |
 | 7 | Animation entre phases | proposition | M | — | — | proposé |
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | — | proposé |
@@ -314,6 +314,9 @@ laisse une trace éphémère — hors historique, hors export. `Échap` sort du 
 *Fait quand :* une séance entière se mène au clavier et à la souris sans rouvrir une
 barre.
 
+État au 2026-09-30 : fait. Dans Brave, avec de vrais événements souris et clavier :
+entrée au clic, plein écran, laser, phases, sortie par Échap ; banc 34/34.
+
 ### Lot 6 — Import d'une mission `.miz`
 
 **Objectif :** partir de la vraie mission : route du vol, bullseye, menaces.
@@ -389,9 +392,10 @@ avis contraire :
 | 2026-09-30 | Kit radar : **F/A-18C d'abord, puis F-16C** |
 | 2026-09-30 | Lancement du lot 1 |
 | 2026-09-30 | Fusions des lots 1 à 3 ; lancement du lot 4 |
+| 2026-09-30 | Fusion du lot 4 ; lancement du lot 5 |
 
 **À trancher par Vince :**
 
 | Question | Proposition | Bloque |
 |---|---|---|
-| Lots 5 à 8 : lesquels engager, dans quel ordre | l'ordre du tableau §2 | rien |
+| Lots 6 à 8 : lesquels engager, dans quel ordre | l'ordre du tableau §2 | rien |

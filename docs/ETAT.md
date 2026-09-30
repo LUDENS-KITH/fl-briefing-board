@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.5**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.6**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 31 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 34 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
@@ -94,6 +94,8 @@ par événements pointeur réels, pas en relisant le code.
 | Vue radar liée | géométrie : 26 vérifications calculées à la main ; le test attrape quatre calculs faussés (sens du gisement, côtés, aspect pris du nez, abscisse sur le balayage) | conforme | 2026-09-30 |
 | Vue radar liée | 4 scénarios au banc, rouges avant le code : message sans porteur, porteur désigné, cible déplacée, porteur tourné de 30°, sans échelle rien d'inventé, panneau non éditable ; 27/27 | conforme | 2026-09-30 |
 | Fichier de briefing | 4 scénarios au banc, rouges avant le code : image relue après réouverture ; enregistrer puis ouvrir sur un poste vierge, fichier identique, image comprise, gardé à la réouverture ; fichier étranger refusé ; confirmation avant de remplacer ; nom de planche piégé resté du texte ; 31/31 | conforme | 2026-09-30 |
+| Présentation | 3 scénarios au banc, rouges avant le code : barres et palette masquées, tableau pleine largeur, Échap en sort ; phases au clavier, outils et Ctrl+Z muets ; laser hors objets et hors historique, éteint en 1,8 s ; 34/34 | conforme | 2026-09-30 |
+| Présentation | Brave sans interface, vrais événements souris et clavier, en `file://` : clic sur ▶ Présenter → plein écran accordé ; laser tracé ; → phase suivante ; Échap quitte plein écran et présentation, les barres reviennent ; capture relue | conforme | 2026-09-30 |
 | Fichier de briefing | Brave sans interface, en `file://` comme le raccourci : image déposée relue après rechargement ; briefing de 2 planches enregistré dans un profil, ouvert dans un second profil vierge : identique | conforme | 2026-09-30 |
 | Vue radar liée | interception au Caucase : de face 18 · 100 %, au travers 9D · 0 %, qui s'éloigne 3D · 88 % ; tiges et traits de nez dans le bon sens, relus en image agrandie ; kneeboard avec l'écran sous le plan | conforme | 2026-09-30 |
 
@@ -166,7 +168,8 @@ sélection par clic droit ou `Échap`.
 **Tableau** : image de fond par glisser-déposer ou collage, fond sombre ou clair,
 palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
 reprise locale **images comprises** (IndexedDB) ; **fichier de briefing** `.json` à
-enregistrer et ouvrir, images comprises.
+enregistrer et ouvrir, images comprises ; **mode présentation** (plein écran, phases au
+clavier, pointeur laser).
 
 ## 5. Hors périmètre — décidé, pas oublié
 
