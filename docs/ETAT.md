@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.2**.
+> Document vivant. Dernière mise à jour : **2026-09-30**, version **v1.3**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 15 scénarios). Pas de déploiement.
+(`tools/banc-saisie.html`, 21 scénarios). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
 ## 2. Ce qui est vérifié
@@ -84,6 +84,10 @@ par événements pointeur réels, pas en relisant le code.
 | Ancrage | annulé, rétabli, relu après réouverture ; forme libre saisie sous une ancrée ; zone ancrée sur carte : glisser déplace la carte | conforme | 2026-09-30 |
 | Ancrage | épingle or dessinée à la sélection, absente sans sélection ; PNG et kneeboard identiques avec ou sans sélection | conforme | 2026-09-30 |
 | Non-régression | démo : 2 planches, 12 objets, route liée, aucune erreur console ; WMM2025 100/100 | conforme | 2026-09-30 |
+| Kit radar F/A-18C | 6 scénarios au banc, rouges avant le moteur (échecs de comportement, pas d'absence), verts après ; 21/21 | conforme | 2026-09-30 |
+| Kit radar F/A-18C | écran posé sous les pistes, traversable, pris par son coin, agrandi par sa poignée ; échelle et azimut au clavier, annulables | conforme | 2026-09-30 |
+| Kit radar F/A-18C | HAFU orienté au geste sans changer de taille, à sa couleur d'identité ; L&S et DT2 uniques par planche ; curseur TDC posé sur une piste | conforme | 2026-09-30 |
+| Kit radar F/A-18C | rendu relu en image : pages RWS, TWS, STT, vignettes, planche de démo, kneeboard | conforme | 2026-09-30 |
 
 ## 3. Ce qui n'est pas vérifié
 
@@ -110,7 +114,11 @@ par événements pointeur réels, pas en relisant le code.
   à la souris réelle ; le menu natif n'a pas pu être observé à l'écran, son blocage est
   vérifié sur l'événement (`defaultPrevented`) ;
 - **le retour à la sélection au doigt** : un écran tactile n'a ni clic droit ni `Échap` ;
-  il passe par le bouton Sélection (⬈). L'appui long n'a pas été essayé.
+  il passe par le bouton Sélection (⬈). L'appui long n'a pas été essayé ;
+- **la lecture des écrans radar contre le jeu** : chaque libellé et chaque symbole est
+  sourcé dans le manuel ([RADAR.md](RADAR.md)), mais la comparaison à la page en vol
+  revient à Vince, élément par élément, avant la fusion ;
+- **les réglages des écrans radar au doigt** : échelle et azimut se changent au clavier.
 
 ## 4. Périmètre livré
 
@@ -129,6 +137,10 @@ sur traits et flèches, en NM ou en km.
 **Coupe** : écran partagé, vue de profil en pieds et niveaux de vol, 14 silhouettes de
 profil, altitude affichée et calée sur 500 ft, relief, dôme sol-air, bloc d'altitude,
 plafond et largeur réglables par planche.
+
+**Kit radar F/A-18C** : écrans RDR ATTK en RWS, TWS et STT (20 boutons, libellés
+sourcés, B-scope), briques, HAFU ami, inconnu, hostile avec tige de cap, marques L&S et
+DT2, curseur TDC ; planche « Radar » dans la démo.
 
 **Planches** : une par phase, copiées d'un clic, chacune avec son historique et son
 échelle. **Exports** : PNG écran, kneeboard DCS 768 × 1024.

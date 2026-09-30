@@ -19,6 +19,32 @@ Rien n'est une image : chaque forme est **paramétrique**. C'est ce qui la rend
 orientable, redimensionnable et **recolorable sans perte**. Pour en ajouter une :
 [docs/MODELE.md §8](MODELE.md).
 
+## Kit radar — F/A-18C
+
+Un groupe de la palette, **Radar F/A-18C**, pour expliquer la page d'attaque radar
+air-air (RDR ATTK) du Hornet. Tout est dessiné d'après le manuel ED, et chaque élément
+cite sa page : [RADAR.md](RADAR.md).
+
+- **Écrans RWS, TWS et STT** : l'écran de bord, ses 20 boutons et leurs libellés, le
+  B-scope. Il se pose **sous** les autres objets et reste traversable : choisissez une
+  piste, touchez l'écran, elle se pose dessus. Glisser en le posant l'agrandit ;
+  ancrez-le (📌) pour ne plus le bousculer. Sélectionné, `↑` `↓` changent l'échelle
+  (5 à 160 NM) et `←` `→` l'azimut balayé, comme ses boutons.
+- **Pistes** : brique (contact brut), HAFU ami, inconnu ou hostile, posés à leur couleur
+  d'identité. Le geste de pose oriente la **tige de cap** sans changer la taille ; la
+  poignée tourne et redimensionne.
+- **L&S et DT2** ne sont pas des objets mais l'état d'une piste : choisissez-les, puis
+  touchez un HAFU — l'étoile ou le losange s'y inscrit. Une seule L&S et une seule DT2
+  par planche, comme dans l'avion ; les reposer sur la même piste les retire.
+- **Curseur TDC** : deux traits verticaux, posés par-dessus la piste ou la brique
+  désignée.
+- Le rang de menace, la vitesse ou l'altitude d'une piste vont dans son étiquette
+  (double-clic).
+
+Le radar se prépare de préférence sur une planche **sans carte** : sur une carte, un
+écran suivrait le terrain au gré du zoom. La démo en ligne en montre une (planche
+« Radar »).
+
 ## Cartes
 
 La liste en haut à droite de la vue de dessus propose les **14 théâtres DCS**, en

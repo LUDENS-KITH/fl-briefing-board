@@ -394,3 +394,175 @@ const GROUPS = [
   ['sol', 'Sol / Mer'],
   ['tac', 'Tactique'],
 ];
+
+/* ================= kit radar =================
+   Écrans de bord et symbologie radar, module par module. Tout est dessiné ici, en
+   vecteurs, d'après le manuel ED du module : aucune capture du jeu, aucune image de
+   manuel. Chaque libellé et chaque symbole cite sa page dans docs/RADAR.md.
+
+   Champs propres à ces formes, lus par board.js :
+     upright  la forme ne tourne jamais ; seule sa tige (`stem`) suit le cap `a`
+     stem     [début, fin] de la tige de cap, dans le repère [-1, 1]
+     fixed    le geste de pose oriente sans redimensionner ; la poignée redimensionne
+     under    se pose sous les autres objets, et reste traversable quand une forme est choisie
+     box      désignation carrée (demi-côté, en unités du repère) au lieu d'un disque
+     smax     échelle maximale (6 par défaut)
+     col      couleur donnée à la pose : identité d'un HAFU, encre d'un écran
+     hafu     une piste : peut porter une marque (`mark` sur l'objet)
+     mark     la vignette ne pose rien : elle marque la piste touchée (L&S, DT2)
+     over     se pose par-dessus ce qu'on touche, sans le saisir (curseur)
+     scope    écran : page, échelle et azimut par défaut, valeurs proposées au clavier,
+              libellés des boutons */
+
+/* les 20 boutons d'un écran de F/A-18C, numérotés comme dans le manuel ED :
+   PB1 → PB5 à gauche de bas en haut, PB6 → PB10 en haut de gauche à droite,
+   PB11 → PB15 à droite de haut en bas, PB16 → PB20 en bas de droite à gauche */
+const DDI_PB = (() => {
+  const p = {}, k = [-.52, -.26, 0, .26, .52];
+  k.forEach((v, i) => {
+    p[5 - i]  = { x: -.935, y: v, lx: -.8, ly: v, al: 'left' };
+    p[6 + i]  = { x: v, y: -.935, lx: v, ly: -.775, al: 'center' };
+    p[11 + i] = { x: .935, y: v, lx: .8, ly: v, al: 'right' };
+    p[20 - i] = { x: v, y: .935, lx: v, ly: .79, al: 'center' };
+  });
+  return p;
+})();
+
+/* texte dans le repère [-1, 1] : une police de 10 px ramenée à `size` unités ;
+   « \n » passe à la ligne */
+function scopeText(c, s, x, y, al = 'center', size = .062){
+  const lines = s.split('\n');
+  lines.forEach((t, i) => {
+    c.save();
+    c.translate(x, y + (i - (lines.length - 1) / 2) * size * 1.15);
+    c.scale(size / 10, size / 10);
+    c.font = '600 10px ui-monospace, Consolas, monospace';
+    c.textAlign = al; c.textBaseline = 'middle';
+    c.fillText(t, 0, 0);
+    c.restore();
+  });
+}
+
+/* boîtier, boutons et verre : gris, indépendants de la couleur choisie */
+function ddiBezel(c){
+  const lw = c.lineWidth;
+  c.save();
+  c.lineWidth = lw * .5;
+  c.fillStyle = '#161D25'; c.strokeStyle = '#3C4854';
+  c.beginPath(); c.roundRect(-1, -1, 2, 2, .09); c.fill(); c.stroke();
+  c.fillStyle = '#26303A';
+  for (const n in DDI_PB){
+    const b = DDI_PB[n];
+    c.beginPath(); c.roundRect(b.x - .045, b.y - .045, .09, .09, .02); c.fill(); c.stroke();
+  }
+  c.fillStyle = '#040806';
+  c.fillRect(-.87, -.87, 1.74, 1.74);
+  c.restore();
+}
+
+/* page RDR ATTK air-air du F/A-18C, en B-scope : la distance croît vers le haut,
+   l'azimut de gauche à droite (DCS F/A-18C Early Access Guide, p. 157-177) */
+function fa18Attk(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth;
+  ddiBezel(c);
+  const L = -.6, R = .6, T = -.62, B = .6;                 // zone tactique
+  c.save();
+  c.lineWidth = lw * .35;
+  c.strokeRect(L, T, R - L, B - T);
+  c.beginPath(); c.moveTo(0, T); c.lineTo(0, B); c.stroke();       // B-sweep (p. 157)
+  if (o.mini){ c.restore(); return; }
+
+  /* échelle des distances, bord droit : repères au quart, à la moitié, aux trois
+     quarts (p. 157) ; valeur choisie en haut à droite (p. 162, n° 8) */
+  for (const f of [.25, .5, .75]){
+    const y = B - (B - T) * f;
+    c.beginPath(); c.moveTo(R, y); c.lineTo(R - .05, y); c.stroke();
+  }
+  scopeText(c, String(o.rng ?? sc.rng), R, T - .045, 'right');
+  scopeText(c, '0', R + .015, B, 'left', .05);
+  /* chevron d'élévation d'antenne, bord gauche (p. 157) */
+  c.beginPath(); c.moveTo(L + .07, -.04); c.lineTo(L + .02, 0); c.lineTo(L + .07, .04); c.stroke();
+  /* ligne d'horizon et vecteur vitesse, reflets du HUD à position fixe (p. 163, n° 18-19) */
+  const hy = -.24;
+  c.beginPath(); c.moveTo(-.34, hy); c.lineTo(-.1, hy); c.moveTo(.1, hy); c.lineTo(.34, hy); c.stroke();
+  c.beginPath(); c.arc(0, hy, .035, 0, 7); c.stroke();
+  c.beginPath();
+  c.moveTo(-.075, hy); c.lineTo(-.035, hy); c.moveTo(.035, hy); c.lineTo(.075, hy);
+  c.moveTo(0, hy - .035); c.lineTo(0, hy - .07);
+  c.stroke();
+  /* radar en émission (p. 162, n° 1) ; losange pointé : le TDC est sur cet écran
+     (p. 162, n° 2 ; p. 168) */
+  scopeText(c, 'OPR', -.8, -.7, 'left');
+  const dx = .72, dy = -.7;
+  c.beginPath(); c.moveTo(dx, dy - .035); c.lineTo(dx + .035, dy); c.lineTo(dx, dy + .035); c.lineTo(dx - .035, dy); c.closePath(); c.stroke();
+  c.beginPath(); c.arc(dx, dy, .009, 0, 7); c.fill();
+  /* libellés des boutons de la page */
+  for (const [n, t] of Object.entries(sc.pb))
+    scopeText(c, t.replace('{az}', (o.az ?? sc.az) + '°'), DDI_PB[n].lx, DDI_PB[n].ly, DDI_PB[n].al);
+  c.restore();
+}
+
+/* marques d'une piste, inscrites dans son HAFU : étoile L&S, losange DT2 (p. 176) */
+const HAFU_MARK = {
+  ls(c){
+    c.beginPath();
+    for (let i = 0; i < 10; i++){
+      const r = i % 2 ? .12 : .3, t = -Math.PI / 2 + i * Math.PI / 5;
+      c.lineTo(Math.cos(t) * r, -.2 + Math.sin(t) * r);
+    }
+    c.closePath(); c.fill();
+  },
+  dt2(c){ c.beginPath(); c.moveTo(0, -.47); c.lineTo(.27, -.2); c.lineTo(0, .07); c.lineTo(-.27, -.2); c.closePath(); c.stroke(); },
+};
+/* HAFU, moitié haute : l'identification par les capteurs de bord (p. 209-210) */
+const hafu = (label, col, draw) => ({ g:'fa18', label, col, hafu:true, upright:true, fixed:true, stem:[.2, 1.2],
+  s0:.55, tile:.5, draw(c, o){ draw(c); if (o && HAFU_MARK[o.mark]) HAFU_MARK[o.mark](c); } });
+
+Object.assign(SHAPES, {
+  /* ---------------- radar F/A-18C ---------------- */
+  fa18_rws: { g:'fa18', label:'Écran RWS', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
+    ldy:1.12, col:'#34D399', draw: fa18Attk,
+    scope: { page:'rws', rng:40, az:140, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80, 140],
+             pb: { 1:'HI\nINTL', 5:'RWS', 6:'4B 1', 7:'SIL', 8:'ERASE', 11:'↑', 12:'↓', 13:'SET',
+                   14:'RSET', 15:'NCTR', 16:'DATA', 17:'CHAN', 19:'{az}', 20:'MODE' } } },
+  fa18_tws: { g:'fa18', label:'Écran TWS', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
+    ldy:1.12, col:'#34D399', draw: fa18Attk,
+    scope: { page:'tws', rng:40, az:80, ranges:[5, 10, 20, 40, 80, 160], azs:[20, 40, 60, 80],
+             pb: { 1:'HI\nINTL', 5:'TWS', 6:'2B 2', 7:'SIL', 8:'HITS', 9:'RAID', 11:'↑', 12:'↓',
+                   13:'AUTO\nMAN', 14:'RSET', 16:'DATA', 19:'{az}', 20:'EXP' } } },
+  fa18_stt: { g:'fa18', label:'Écran STT', under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
+    ldy:1.12, col:'#34D399', draw: fa18Attk,
+    scope: { page:'stt', rng:40, ranges:[5, 10, 20, 40, 80, 160],
+             pb: { 1:'HI\nINTL', 5:'RWS', 6:'2B 1', 8:'ERASE', 15:'NCTR', 16:'DATA', 17:'CHAN', 20:'MODE' } } },
+
+  /* contact brut : une brique pleine (p. 158) */
+  fa18_brick: { g:'fa18', label:'Brique', upright:true, fixed:true, s0:.5, tile:.7, col:'#34D399', draw(c){
+    c.fillRect(-.45, -.22, .9, .44);
+  }},
+  /* hémisphère = ami, crochet = inconnu, chevron = hostile ; la tige donne le cap (p. 209) */
+  fa18_hafu_f: hafu('Ami', '#34D399', c => { c.beginPath(); c.arc(0, 0, .55, Math.PI, 0); c.stroke(); }),
+  fa18_hafu_u: hafu('Inconnu', '#D1A94A', c => {
+    c.beginPath(); c.moveTo(-.5, .05); c.lineTo(-.5, -.5); c.lineTo(.5, -.5); c.lineTo(.5, .05); c.stroke();
+  }),
+  fa18_hafu_h: hafu('Hostile', '#FF4D4D', c => {
+    c.beginPath(); c.moveTo(-.55, .05); c.lineTo(0, -.6); c.lineTo(.55, .05); c.stroke();
+  }),
+  /* L&S, piste prioritaire, et DT2, deuxième piste désignée : des états de la piste,
+     pas des objets. La vignette marque le HAFU touché (p. 173, 176-177). */
+  fa18_ls: { g:'fa18', label:'L&S', mark:'ls', tile:.5, draw(c){
+    c.beginPath();
+    for (let i = 0; i < 10; i++){
+      const r = i % 2 ? .18 : .45, t = -Math.PI / 2 + i * Math.PI / 5;
+      c.lineTo(Math.cos(t) * r, Math.sin(t) * r);
+    }
+    c.closePath(); c.fill();
+  }},
+  fa18_dt2: { g:'fa18', label:'DT2', mark:'dt2', tile:.5, draw(c){
+    c.beginPath(); c.moveTo(0, -.42); c.lineTo(.42, 0); c.lineTo(0, .42); c.lineTo(-.42, 0); c.closePath(); c.stroke();
+  }},
+  /* curseur d'acquisition du TDC : deux traits verticaux parallèles (p. 158) */
+  fa18_tdc: { g:'fa18', label:'Curseur TDC', upright:true, fixed:true, over:true, s0:.6, tile:.55, col:'#D1A94A', draw(c){
+    c.beginPath(); c.moveTo(-.16, -.5); c.lineTo(-.16, .5); c.moveTo(.16, -.5); c.lineTo(.16, .5); c.stroke();
+  }},
+});
+GROUPS.push(['fa18', 'Radar F/A-18C']);

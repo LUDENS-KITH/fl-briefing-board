@@ -39,6 +39,8 @@
   du NOAA, ou saisie depuis la mission pour coller au cockpit.
 - **Un briefing en plusieurs planches** — ingress, attaque, egress ; chaque phase part
   de la précédente.
+- **Kit radar F/A-18C** — l'écran d'attaque radar en RWS, TWS et STT, briques, HAFU,
+  L&S, DT2 et curseur, dessinés d'après le manuel du module, page par page.
 - **Export kneeboard DCS** — la planche, sa coupe et ses caps, au format du cockpit.
 
 Tout tient dans une page web : **aucune installation, aucun compte, rien à payer.**
@@ -95,6 +97,7 @@ sait **et ce qu'il n'a pas vérifié** :
 |---|---|
 | [docs/ETAT.md](docs/ETAT.md) | ce qui est vérifié, daté, et ce qui ne l'est pas |
 | [docs/PLAN.md](docs/PLAN.md) | ce qui vient ensuite : lots, ordre, critères de fin |
+| [docs/RADAR.md](docs/RADAR.md) | kit radar : la source de chaque libellé et de chaque symbole |
 | [docs/MODELE.md](docs/MODELE.md) | le contrat interne du moteur |
 | [docs/DEVELOPPER.md](docs/DEVELOPPER.md) | structure, outils, tests |
 | [docs/SOUTENIR.md](docs/SOUTENIR.md) | Ko-Fi, invitations Discord, crédits des soutiens |

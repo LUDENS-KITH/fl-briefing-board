@@ -3,6 +3,44 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.3 — 2026-09-30
+
+Lot 2 du [plan d'action](docs/PLAN.md), premier module décidé par Vince : le F/A-18C.
+
+### Ajouté
+- **Kit radar F/A-18C**, un groupe de la palette : écrans RDR ATTK en **RWS, TWS et STT**
+  (20 boutons et leurs libellés, B-scope, échelle des distances, B-sweep, chevron
+  d'élévation, horizon et vecteur vitesse), **briques**, **HAFU** ami, inconnu et
+  hostile avec leur **tige de cap**, marques **L&S** et **DT2**, **curseur TDC**.
+- Chaque élément cite sa page du manuel ED dans [docs/RADAR.md](docs/RADAR.md) ; ce que
+  le manuel ne donne pas n'est pas dessiné, et la liste en est tenue.
+- Un écran se pose **sous** les pistes et reste traversable ; `↑` `↓` règlent son
+  échelle, `←` `→` son azimut balayé.
+- **L&S et DT2 sont des états de piste** : posés sur un HAFU, uniques par planche, comme
+  dans l'avion.
+- Planche **« Radar »** dans la démo : un écran TWS ancré, ses pistes et sa légende.
+- Banc de saisie : 6 scénarios de plus, 21 en tout.
+
+### Modifié
+- Une forme peut être **droite** (elle ne tourne pas, seule sa tige suit le cap),
+  **à taille fixe au geste** (la poignée redimensionne encore), **carrée** à la
+  désignation, **posée dessous**, **posée par-dessus** ou porter une **couleur
+  d'identité** : champs `upright`, `stem`, `fixed`, `box`, `under`, `over`, `col`
+  ([MODELE.md](docs/MODELE.md) §8).
+- `draw(c, o)` reçoit l'objet.
+
+### Constaté en construisant
+- **Un HAFU se saisissait au lieu de recevoir sa L&S** : avec une forme choisie, toucher
+  une piste la déplace. L&S et DT2 sont devenus des marques de la piste, ce que dit le
+  manuel (p. 173, 176) ; le curseur TDC se pose par-dessus.
+- Les premiers scénarios du lot échouaient faute de vignettes, puis parce que la palette
+  plantait sur `draw(c)` sans objet : des échecs qui ne prouvaient rien. Le moteur a été
+  modifié en deux temps pour qu'ils échouent sur le comportement.
+
+### Vérifié en exécutant
+Banc 21/21 · rendu relu en image : pages RWS, TWS et STT, vignettes, planche de démo,
+kneeboard · démo publique v1.2 vérifiée après fusion du lot 1, aucune erreur console.
+
 ## v1.2 — 2026-09-30
 
 Lot 1 du [plan d'action](docs/PLAN.md), demandé par Vince : ancrer une forme, et

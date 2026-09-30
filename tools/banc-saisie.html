@@ -272,6 +272,78 @@ test('Exports PNG et kneeboard : rien ne marque l\'objet ancré sélectionné', 
   ok(got[1] === got[3], 'le kneeboard diffère selon la sélection');
 }, true);
 
+/* ---------- lot 2 : kit radar F/A-18C ---------- */
+
+test('Écran radar : posé dessous, une forme choisie se pose dessus sans le saisir', async (ok) => {
+  const a = await open();
+  a.tile('fa18_hafu_h'); a.click(300, 200);             // une piste posée avant l'écran
+  a.tile('fa18_tws'); a.click(520, 360);
+  ok(a.s('objs.length === 2 && objs[0].k') === 'fa18_tws', `ordre : ${a.s('objs.map(o => o.k).join()')}`);
+  const pos = a.s('JSON.stringify([objs[0].x, objs[0].y])');
+  a.tile('fa18_brick'); a.click(520, 360);
+  ok(a.s('objs.length') === 3, `objets : ${a.s('objs.length')}`);
+  ok(a.s('JSON.stringify([objs[0].x, objs[0].y])') === pos, 'l\'écran a bougé');
+});
+
+test('Écran radar : ↑ ↓ changent l\'échelle, ← → l\'azimut, annulables', async (ok) => {
+  const a = await open();
+  a.tile('fa18_rws'); a.click(520, 360);
+  a.key('v'); a.click(520, 360);
+  ok(a.s('sel && sel.k') === 'fa18_rws', 'écran non sélectionné');
+  a.key('ArrowUp');
+  ok(a.s('objs[0].rng') === 80, `échelle après ↑ : ${a.s('objs[0].rng')}`);
+  a.key('ArrowDown'); a.key('ArrowDown');
+  ok(a.s('objs[0].rng') === 20, `échelle après ↓ ↓ : ${a.s('objs[0].rng')}`);
+  a.key('ArrowLeft');
+  ok(a.s('objs[0].az') === 80, `azimut après ← : ${a.s('objs[0].az')}`);
+  a.key('z', { ctrlKey: true });
+  ok(a.s('objs[0].az === undefined && objs[0].rng') === 20, `après Ctrl+Z : az ${a.s('objs[0].az')}, échelle ${a.s('objs[0].rng')}`);
+});
+
+test('Piste HAFU : le geste de pose oriente la tige, la taille et la couleur d\'identité restent', async (ok) => {
+  const a = await open();
+  a.tile('fa18_hafu_h'); a.drag(400, 300, 400, 390);
+  ok(Math.abs(a.s('objs[0].a') - Math.PI) < .05, `cap de la tige : ${a.s('objs[0].a')}`);
+  ok(a.s('objs[0].s === SHAPES.fa18_hafu_h.s0'), `taille : ${a.s('objs[0].s')}`);
+  ok(a.s('objs[0].c') === '#FF4D4D', `couleur : ${a.s('objs[0].c')}`);
+});
+
+test('Écran radar : se saisit par son coin à l\'outil Sélection, sa poignée l\'agrandit', async (ok) => {
+  const a = await open();
+  a.tile('fa18_rws'); a.click(520, 360);
+  const r = a.s('SIZE * objs[0].s');
+  a.key('v'); a.click(520 + r * .95, 360 - r * .95);
+  ok(a.s('sel === objs[0]'), 'coin de l\'écran non saisi');
+  const h = JSON.parse(a.s('JSON.stringify(handleList(toScreen(sel))[0] || null)'));
+  ok(h, 'aucune poignée');
+  if (h) a.drag(h.x, h.y, h.x + 40, h.y - 40);
+  ok(a.s('objs[0].s > SHAPES.fa18_rws.s0'), `taille après la poignée : ${a.s('objs[0].s')}`);
+});
+
+test('L&S et DT2 se posent sur une piste HAFU, une seule de chaque par planche', async (ok) => {
+  const a = await open();
+  a.tile('fa18_hafu_h'); a.click(400, 300);
+  a.tile('fa18_hafu_u'); a.click(560, 300);
+  a.tile('fa18_ls'); a.click(400, 300);
+  ok(a.s('objs.length') === 2, `objets : ${a.s('objs.length')}`);
+  ok(a.s('objs[0].mark') === 'ls', `marque de la 1re piste : ${a.s('objs[0].mark')}`);
+  ok(a.s('JSON.stringify([objs[0].x, objs[0].y])') === '[400,300]', 'la piste a bougé');
+  a.click(560, 300);
+  ok(a.s('!objs[0].mark && objs[1].mark') === 'ls', 'deux L&S sur la planche');
+  a.tile('fa18_dt2'); a.click(400, 300);
+  ok(a.s('objs[0].mark') === 'dt2', `DT2 : ${a.s('objs[0].mark')}`);
+  a.click(700, 500);
+  ok(a.s('objs.length') === 2 && /piste/i.test(a.toast()), `sur le vide : ${a.s('objs.length')} objets, message « ${a.toast()} »`);
+});
+
+test('Curseur TDC : se pose par-dessus une piste sans la saisir', async (ok) => {
+  const a = await open();
+  a.tile('fa18_hafu_h'); a.click(400, 300);
+  a.tile('fa18_tdc'); a.click(400, 300);
+  ok(a.s('objs.length') === 2 && a.s('objs[1].k') === 'fa18_tdc', `objets : ${a.s('objs.map(o => o.k).join()')}`);
+  ok(a.s('JSON.stringify([objs[0].x, objs[0].y])') === '[400,300]', 'la piste a bougé');
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc
