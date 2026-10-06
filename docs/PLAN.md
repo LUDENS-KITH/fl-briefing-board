@@ -28,7 +28,7 @@ demande de Vince du 2026-10-06.
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | v1.7 | engagé le 2026-09-30, livré |
 | 7 | Animation entre phases | proposition | M | — | v1.8 | engagé le 2026-09-30, livré |
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | v1.9 | engagé le 2026-09-30, livré |
-| 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | livré le 2026-10-06, fusion à valider |
+| 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | en ligne le 2026-10-06 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -414,7 +414,7 @@ et sur trois missions réelles qui en portent :
 dans la DTC du vol choisi, et ses waypoints reviennent aux positions de la route à
 moins de 2 m ; le pilote démarre avec la route chargée.
 
-État au 2026-10-06 : livré, sauf le vol. `node tools/test_miz.js` 83/83 et banc 51/51,
+État au 2026-10-06 : en ligne (v1.10, démo publiée vérifiée), sauf le vol. `node tools/test_miz.js` 83/83 et banc 51/51,
 nouveaux tests rouges avant le code. Sur la Sandbox Colchide, la mission relue par
 l'interpréteur Lua de DCS ne diffère de l'originale que dans la table `DTC` des
 4 Hornet du vol ; la cartouche existante est reprise, waypoints remplacés. Reste à
@@ -464,5 +464,6 @@ avis contraire :
 | 2026-09-30 | Fusion du lot 6 ; lancement du lot 7 |
 | 2026-09-30 | Fusion du lot 7 ; lancement du lot 8 |
 | 2026-10-06 | Lot 9 : la route dans la DTC native, par un `.miz` complété, plutôt que par l'outil DCS-DTC ; lancement |
+| 2026-10-06 | Fusion du lot 9 : v1.10 en ligne |
 
-**À trancher par Vince :** la fusion du lot 9, qui publie la v1.10 en ligne.
+**À trancher par Vince :** rien. Les neuf lots du plan sont en ligne.
