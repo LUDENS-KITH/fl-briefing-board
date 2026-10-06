@@ -15,7 +15,8 @@ objs[]          la scène de la planche montée : objets ordonnés, du fond vers
 past[] future[] l'historique de la planche montée, en instantanés complets
 ```
 
-Une planche est `{ name, objs, wpN, nmPx, past, future }`. `load(i)` la monte dans
+Une planche est `{ name, objs, wpN, nmPx, past, future }`, plus `grid` pour une
+mission importée sans carte (voir « Route dans la DTC »). `load(i)` la monte dans
 les variables globales, `stash()` les y recopie. Tout le reste du moteur ne connaît
 que la planche montée : ajouter les planches n'a changé aucune fonction de dessin ni
 de geste.
@@ -240,6 +241,26 @@ l'installation du jeu (`projections.js`, écart de l'ordre de 4 cm). La projecti
 son inverse (série de Krüger, Newton) sont testés contre pyproj par
 `node tools/test_miz.js`. Sans projection mesurée, la planche est sans carte, `nmPx`
 tiré des mètres, et `prof.grid` fait écrire les caps « G ».
+
+### Route dans la DTC
+
+`dtcRoute()` ramène les waypoints de la route (`k: 'wp'`, variante `m`) aux mètres DCS :
+sur une carte, `MIZ.fromGeo()` par la projection mesurée du théâtre ; sans carte, le
+repère gardé à l'import, `grid = { theatre, top, left, k, ox, oy }` (`x = top − (py − oy) / k`,
+`y = left + (px − ox) / k`). `grid` suit la planche dans « + phase » et dans le fichier
+de briefing ; choisir ou ôter une carte l'efface, puisque les objets changent de repère.
+L'altitude suit la règle de la route liée, en pieds, convertie en mètres.
+
+`MIZ.withDtc(bytes, ref, pts)` écrit au format de l'éditeur de mission de DCS
+(`MissionEditor/modules/me_managerDTC.lua`, `CoreMods/aircraft/FA-18C/DTC`) : une
+cartouche est un fichier JSON `DTC/<nom>.dtc` de l'archive, et chaque unité la désigne
+dans sa table `DTC = { AutoLoad, Cartridges = { { name, default } } }`. Rubrique écrite :
+`WYPT` (`NAV_PTS`, séquence 1 dans `NAV_ROUTE`, `mirror_NAV_PTS = false`, théâtre) ; ETA
+comme l'éditeur, heure de départ de la mission puis distance à 463 km/h. La mission
+n'est pas réécrite : `parseLua()` garde la place de chaque valeur dans le texte
+(`SPAN`), et seule la table `DTC` des F/A-18C du vol est remplacée ou insérée. Les autres
+entrées de l'archive sont recopiées compressées, telles quelles. Vérifié par
+`node tools/test_miz.js`.
 
 ### Mode présentation
 

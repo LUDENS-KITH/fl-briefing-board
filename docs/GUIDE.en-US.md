@@ -81,6 +81,30 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
 - Ground units are recognized as air defence by their DCS type; others (tanks,
   trucks…) are not imported.
 
+## Loading the Route into the F/A-18C DTC
+
+**⇩ DTC**, then pick the DCS mission (`.miz`) to use as a base: the board's waypoints
+are written into the data cartridge (DTC) of the F/A-18Cs of one flight in that
+mission. The board hands back a **copy**, `<mission> - FL Briefing.miz`; the original
+mission is not modified. The pilot who takes the aircraft starts with the points
+loaded, with no third-party tool.
+
+- **Numbers do not change**: waypoint 3 on the board is 3 in the jet (1 to 59). Its
+  altitude is the profile's, above sea level, and its label becomes the point's note.
+  The points form sequence 1, in number order.
+- Several playable F/A-18C flights: pick the one that receives the route.
+- **An existing cartridge is the base**: radios, countermeasures, TACAN and navigation
+  settings are kept, only the waypoints are replaced. The new cartridge is named
+  "*old* - FL Briefing"; the old one stays in the mission. Without a cartridge, the
+  flight gets one holding only the waypoints.
+- The cartridge is **loaded at start-up** for every F/A-18C in the flight.
+- A **DCS reference** is needed: a board on a map, or the board of a mission imported
+  without a map (and its phases), and a mission **on the same theatre**.
+- Writing again onto the copy replaces the board's cartridge without duplicating it.
+- On a server, the mission in rotation is what counts: whoever prepares it puts the copy
+  there.
+- Only the **F/A-18C** is covered for now.
+
 ## Presentation Mode
 
 To lead the briefing over a screen share: **▶ Présenter** (or `F5`). The board goes full

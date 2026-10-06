@@ -49,7 +49,11 @@ const MIZ = (() => {
   const toGeo = (p, x, y) => tmInverse((x - p.x0) / p.k0, (y - p.y0) / p.k0, p.lon0);
   const fromGeo = (p, lat, lon) => { const [N, E] = tm(lat, lon, p.lon0); return [p.k0 * N + p.x0, p.k0 * E + p.y0]; };
 
-  /* ---------- table Lua : le sous-ensemble qu'écrit l'éditeur de mission ---------- */
+  /* ---------- table Lua : le sous-ensemble qu'écrit l'éditeur de mission ----------
+     Chaque table garde, sous la clé SPAN, sa place dans le texte : l'accolade ouvrante
+     (at) et l'étendue de chaque valeur (vals). withDtc() s'en sert pour réécrire une
+     valeur sans toucher au reste du fichier. */
+  const SPAN = Symbol('span');
   function parseLua(src){
     let i = src.indexOf('=') + 1;                           // « mission = { … } »
     const fail = what => { throw new Error(`table Lua illisible (${what}, caractère ${i})`); };
@@ -84,20 +88,23 @@ const MIZ = (() => {
       return src.slice(start, end).replace(/^\r?\n/, '');
     }
     function table(){
-      const t = {}; let k = 1; i++;
+      const t = {}, vals = {}; let k = 1;
+      t[SPAN] = { at: i++, vals };
       for (;;){
         ws();
         if (src[i] === '}'){ i++; return t; }
+        let key;
         if (src[i] === '[' && src[i + 1] !== '[' && src[i + 1] !== '='){
-          i++; const key = value(); ws();
+          i++; key = value(); ws();
           if (src[i++] !== ']') fail('] attendu');
           ws(); if (src[i++] !== '=') fail('= attendu');
-          t[key] = value();
         } else {
           const id = /^[A-Za-z_]\w*\s*=(?!=)/.exec(src.slice(i, i + 80));
-          if (id){ i += id[0].length; t[id[0].replace(/\s*=$/, '')] = value(); }
-          else t[k++] = value();
+          if (id){ i += id[0].length; key = id[0].replace(/\s*=$/, ''); }
+          else key = k++;
         }
+        ws(); const from = i;
+        t[key] = value(); vals[key] = [from, i];
         ws();
         if (src[i] === ',' || src[i] === ';') i++;
       }
@@ -115,33 +122,74 @@ const MIZ = (() => {
     }
     return value();
   }
-  /* les valeurs d'une table numérotée [1], [2]…, dans l'ordre */
-  const list = t => t && typeof t === 'object'
-    ? Object.keys(t).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b).map(k => t[k]) : [];
+  /* les entrées d'une table numérotée [1], [2]…, dans l'ordre ; list() n'en garde que les valeurs */
+  const numbered = t => t && typeof t === 'object'
+    ? Object.keys(t).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b).map(k => [k, t[k]]) : [];
+  const list = t => numbered(t).map(e => e[1]);
 
   /* ---------- archive zip : répertoire central, entrées stockées ou « deflate » ---------- */
-  async function unzip(bytes){
+  /* les entrées telles qu'elles sont rangées, données encore compressées */
+  function zipEntries(bytes){
     const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     let p = bytes.length - 22;
     while (p >= 0 && dv.getUint32(p, true) !== 0x06054b50) p--;
     if (p < 0) throw new Error('ce fichier n\'est pas une archive .miz');
-    const count = dv.getUint16(p + 10, true), files = new Map();
+    const count = dv.getUint16(p + 10, true), out = [];
     p = dv.getUint32(p + 16, true);
     for (let k = 0; k < count && dv.getUint32(p, true) === 0x02014b50; k++){
-      const nlen = dv.getUint16(p + 28, true);
-      files.set(new TextDecoder().decode(bytes.subarray(p + 46, p + 46 + nlen)),
-                { method: dv.getUint16(p + 10, true), size: dv.getUint32(p + 20, true), at: dv.getUint32(p + 42, true) });
+      const nlen = dv.getUint16(p + 28, true), at = dv.getUint32(p + 42, true), csize = dv.getUint32(p + 20, true);
+      if (csize === 0xFFFFFFFF) throw new Error('archive trop grande (zip64)');
+      const s = at + 30 + dv.getUint16(at + 26, true) + dv.getUint16(at + 28, true), nameBytes = bytes.subarray(p + 46, p + 46 + nlen);
+      out.push({ name: new TextDecoder().decode(nameBytes), nameBytes, flags: dv.getUint16(p + 8, true),
+                 method: dv.getUint16(p + 10, true), time: dv.getUint16(p + 12, true), date: dv.getUint16(p + 14, true),
+                 crc: dv.getUint32(p + 16, true), csize, usize: dv.getUint32(p + 24, true), data: bytes.subarray(s, s + csize) });
       p += 46 + nlen + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
     }
-    return async name => {
-      const f = files.get(name);
-      if (!f) return null;
-      const s = f.at + 30 + dv.getUint16(f.at + 26, true) + dv.getUint16(f.at + 28, true), data = bytes.subarray(s, s + f.size);
-      if (f.method === 0) return new TextDecoder().decode(data);
-      if (f.method !== 8) throw new Error('compression inconnue dans l\'archive');
-      const out = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-      return new TextDecoder().decode(await new Response(out).arrayBuffer());
-    };
+    return out;
+  }
+  async function inflate(e){
+    if (e.method === 0) return e.data;
+    if (e.method !== 8) throw new Error('compression inconnue dans l\'archive');
+    const out = new Blob([e.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(out).arrayBuffer());
+  }
+  async function unzip(bytes){
+    const files = new Map(zipEntries(bytes).map(e => [e.name, e]));
+    return async name => files.has(name) ? new TextDecoder().decode(await inflate(files.get(name))) : null;
+  }
+
+  /* écrire : les entrées reprises telles quelles, données compressées comprises */
+  const CRC = Array.from({ length: 256 }, (_, n) => { for (let k = 0; k < 8; k++) n = n & 1 ? 0xEDB88320 ^ (n >>> 1) : n >>> 1; return n >>> 0; });
+  function crc32(u8){ let c = 0xFFFFFFFF; for (const b of u8) c = CRC[(c ^ b) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  async function newEntry(name, text){
+    const raw = new TextEncoder().encode(text), d = new Date();
+    const out = new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    const data = new Uint8Array(await new Response(out).arrayBuffer()), nameBytes = new TextEncoder().encode(name);
+    return { name, nameBytes, flags: /^[\x20-\x7e]*$/.test(name) ? 0 : 0x800, method: 8, crc: crc32(raw),
+             csize: data.length, usize: raw.length, data,
+             time: d.getHours() << 11 | d.getMinutes() << 5 | d.getSeconds() >> 1,
+             date: (d.getFullYear() - 1980) << 9 | (d.getMonth() + 1) << 5 | d.getDate() };
+  }
+  function zipBytes(entries){
+    const parts = [], dir = []; let off = 0;
+    const head = (size, fill) => { const b = new Uint8Array(size), v = new DataView(b.buffer); fill(v); return b; };
+    for (const e of entries){
+      const flags = e.flags & ~8;                         // tailles connues : pas de descripteur après les données
+      const common = v => { v.setUint16(0, 20, true); v.setUint16(2, flags, true); v.setUint16(4, e.method, true);
+        v.setUint16(6, e.time, true); v.setUint16(8, e.date, true); v.setUint32(10, e.crc, true);
+        v.setUint32(14, e.csize, true); v.setUint32(18, e.usize, true); v.setUint16(22, e.nameBytes.length, true); };
+      const loc = head(30, v => { v.setUint32(0, 0x04034b50, true); common(new DataView(v.buffer, 4)); });
+      dir.push(head(46, v => { v.setUint32(0, 0x02014b50, true); v.setUint16(4, 20, true); common(new DataView(v.buffer, 6));
+                               v.setUint32(42, off, true); }), e.nameBytes);
+      parts.push(loc, e.nameBytes, e.data);
+      off += 30 + e.nameBytes.length + e.data.length;
+    }
+    const size = dir.reduce((t, b) => t + b.length, 0);
+    const end = head(22, v => { v.setUint32(0, 0x06054b50, true); v.setUint16(8, entries.length, true);
+                                v.setUint16(10, entries.length, true); v.setUint32(12, size, true); v.setUint32(16, off, true); });
+    const all = new Uint8Array(off + size + 22); let p = 0;
+    for (const b of [...parts, ...dir, end]){ all.set(b, p); p += b.length; }
+    return all;
   }
 
   /* ---------- le contenu d'une mission ---------- */
@@ -159,12 +207,14 @@ const MIZ = (() => {
       const c = (m.coalition || {})[side];
       if (!c) continue;
       if (c.bullseye) out.bullseye[side] = { x: +c.bullseye.x, y: +c.bullseye.y };
-      for (const country of list(c.country)){
+      for (const [ci, country] of numbered(c.country)){
         for (const cat of ['plane', 'helicopter'])
-          for (const g of list((country[cat] || {}).group)){
+          for (const [gi, g] of numbered((country[cat] || {}).group)){
             const units = list(g.units);
             if (!units.some(PLAYER)) continue;
-            out.flights.push({ name: say(g.name), side, cat, type: String(units[0].type || ''), units: units.length,
+            /* ref : le chemin du groupe dans la table, pour y revenir (withDtc) */
+            out.flights.push({ name: say(g.name), side, cat, ref: `${side}/${ci}/${cat}/${gi}`,
+                               type: String(units[0].type || ''), units: units.length,
               points: list((g.route || {}).points).map(p => ({ x: +p.x, y: +p.y, alt: +p.alt || 0,
                                                                agl: p.alt_type === 'RADIO', name: say(p.name) })) });
           }
@@ -191,7 +241,85 @@ const MIZ = (() => {
     return content(parseLua(text), dict ? parseLua(dict) : {});
   }
 
-  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz };
+  /* ---------- écrire la route dans la DTC du F/A-18C (lot 9) ----------
+     Format de l'éditeur de mission de DCS (MissionEditor/modules/me_managerDTC.lua,
+     CoreMods/aircraft/FA-18C/DTC) : une cartouche est un fichier JSON DTC/<nom>.dtc de
+     l'archive ; chaque unité la désigne par son nom dans sa table DTC. Points en mètres
+     DCS, altitudes en mètres, vitesses en km/h, ETA en secondes depuis minuit. */
+  const HORNET = 'FA-18C_hornet', WYPT_MAX = 59, KPH = 463, SUFFIX = ' - FL Briefing';
+  const luaStr = s => '"' + String(s).replace(/[\\"]/g, '\\$&').replace(/\n/g, '\\n').replace(/\r/g, '\\r')
+    .replace(/[\x00-\x1f]/g, c => '\\' + String(c.charCodeAt(0)).padStart(3, '0')) + '"';
+  const luaVal = v => typeof v === 'string' ? luaStr(v) : typeof v !== 'object' ? String(v)
+    : '{ ' + (Array.isArray(v) ? v.map((x, k) => `[${k + 1}] = ${luaVal(x)}, `)
+                               : Object.entries(v).map(([k, x]) => `[${luaStr(k)}] = ${luaVal(x)}, `)).join('') + '}';
+  /* nom de fichier : l'éditeur refuse * / ? < > | \ : " */
+  const cartName = s => s.replace(/[*/?<>|\\:"]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 60);
+
+  function hornetCartridge(base, name, theatre, pts, start){
+    const data = base ? JSON.parse(JSON.stringify(base.data || {})) : { type: HORNET, name: '' };
+    data.terrain = theatre;
+    let eta = start;
+    const route = {};
+    const navPts = pts.map((p, k) => {
+      if (k) eta += Math.hypot(p.x - pts[k - 1].x, p.y - pts[k - 1].y) / (KPH / 3.6);
+      route['STPT' + p.n] = { route_num: 1, wypt_num: p.n, alt: p.alt, altitudeType: 1, speed: KPH,
+                              ETA: Math.round(eta), FIX_Time: false, TGT: false };
+      return { id: 'STPT' + p.n, idOA: 'OA' + p.n, idOA_Line: `OA${p.n}Line`, wypt_num: p.n,
+               x: p.x, y: p.y, alt: p.alt, altitudeType: 1, velocityType: 3, note: p.note || '', text_note: '',
+               R1: true, R1_order: k + 1, R2: false, R3: false,
+               isOA: false, OA_Range: 0, OA_Bearing: 0, OA_X: 0, OA_Y: 0, OA_Alt: 0, OA_DeltaX: 0, OA_DeltaY: 0,
+               OA_Bearing_Units: 1, OA_Range_Units: 1, OA_Elevation_Units: 1 };
+    });
+    data.WYPT = { ...(data.WYPT && data.WYPT.NAV_SETTINGS && { NAV_SETTINGS: data.WYPT.NAV_SETTINGS }),
+                  NAV_PTS: navPts, NAV_ROUTE: [route, [], []], mirror_NAV_PTS: false, terrain: theatre };
+    return { name, type: HORNET, data };
+  }
+
+  /* bytes : la mission support ; ref : le vol (readMiz) ; pts : [{ n, x, y, alt, note }],
+     x/y en mètres DCS, alt en mètres au-dessus de la mer. Rend une nouvelle archive : la
+     mission d'origine n'est jamais modifiée. */
+  async function withDtc(bytes, ref, pts){
+    if (!pts.length) throw new Error('aucun waypoint à écrire');
+    const nums = pts.map(p => p.n);
+    if (nums.some(n => !(Number.isInteger(n) && n >= 1 && n <= WYPT_MAX)))
+      throw new Error(`le F/A-18C numérote ses waypoints de 1 à ${WYPT_MAX}`);
+    if (new Set(nums).size !== nums.length) throw new Error('un numéro de waypoint est en double');
+    const entries = zipEntries(bytes), byName = new Map(entries.map(e => [e.name, e]));
+    const text = async name => byName.has(name) ? new TextDecoder().decode(await inflate(byName.get(name))) : null;
+    const src = await text('mission');
+    if (!src) throw new Error('pas de fichier « mission » dans l\'archive : ce n\'est pas une mission DCS');
+    const m = parseLua(src), [side, ci, cat, gi] = String(ref).split('/');
+    const g = ((((((m.coalition || {})[side] || {}).country || {})[ci] || {})[cat] || {}).group || {})[gi];
+    if (!g) throw new Error('vol introuvable dans cette mission');
+    const units = list(g.units).filter(u => u && u.type === HORNET);
+    if (!units.length) throw new Error('ce vol n\'est pas un F/A-18C : seule sa DTC est écrite');
+    /* la cartouche par défaut du chef de vol sert de base : radios et réglages gardés */
+    const pick = u => { const c = list((u.DTC || {}).Cartridges); return (c.find(x => x && x.default) || c[0] || {}).name; };
+    const baseName = units.map(pick).find(Boolean), baseTxt = baseName ? await text(`DTC/${baseName}.dtc`) : null;
+    let base = null;
+    try { base = baseTxt && JSON.parse(baseTxt); } catch(_){}
+    if (base && base.type !== HORNET) base = null;
+    const dict = await text('l10n/DEFAULT/dictionary'), dk = dict ? parseLua(dict) : {};
+    const gname = typeof g.name === 'string' && g.name.startsWith('DictKey_') ? String(dk[g.name] ?? '') : String(g.name ?? '');
+    const name = base ? (base.name.endsWith(SUFFIX) ? base.name : cartName(base.name) + SUFFIX)
+                      : cartName(`FA-18C ${gname}`) + SUFFIX;
+    const cart = hornetCartridge(base, name, String(m.theatre || ''), [...pts].sort((a, b) => a.n - b.n), +m.start_time || 0);
+    /* la mission : seule la table DTC de chaque Hornet du vol change, le reste octet pour octet */
+    const edits = units.map(u => {
+      const keep = list((u.DTC || {}).Cartridges).filter(c => c && c.name && c.name !== name)
+                     .map(c => ({ name: String(c.name), default: false }));
+      const lua = luaVal({ AutoLoad: true, Cartridges: [...keep, { name, default: true }] });
+      const s = u[SPAN];
+      return s.vals.DTC ? [s.vals.DTC[0], s.vals.DTC[1], lua] : [s.at + 1, s.at + 1, `\n["DTC"] = ${lua},`];
+    }).sort((a, b) => b[0] - a[0]);
+    let out = src;
+    for (const [a, b, t] of edits) out = out.slice(0, a) + t + out.slice(b);
+    const file = `DTC/${name}.dtc`, mission = await newEntry('mission', out), dtc = await newEntry(file, JSON.stringify(cart, null, 2));
+    const next = entries.filter(e => e.name !== file).map(e => e.name === 'mission' ? mission : e);
+    return { bytes: zipBytes([...next, dtc]), cartridge: name, units: units.length };
+  }
+
+  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, WYPT_MAX };
 })();
 
 if (typeof module !== 'undefined') module.exports = MIZ;

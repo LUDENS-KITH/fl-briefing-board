@@ -198,6 +198,8 @@
   <input type="file" id="openfile" accept=".json,application/json" hidden>
   <button id="miz"   title="Importer une mission DCS (.miz) : la route d'un vol, le bullseye, les défenses aériennes et les navires, sur une nouvelle planche — un .miz se glisse aussi sur la page">⇧ Mission</button>
   <input type="file" id="mizfile" accept=".miz" hidden>
+  <button id="dtc"   title="Écrire la route de la planche dans la DTC des F/A-18C d'une mission DCS (.miz) : choisissez la mission, puis le vol — le tableau rend une copie, la mission d'origine n'est pas modifiée">⇩ DTC</button>
+  <input type="file" id="dtcfile" accept=".miz" hidden>
   <button id="png"   title="Exporter la planche en PNG, telle qu'à l'écran">⇩ PNG</button>
   <button id="kframe" title="Cadrer le kneeboard : un cadre aux proportions de la page, à déplacer par son bord et agrandir par sa poignée ; l'export kneeboard prend ce qu'il contient. Un second clic l'ôte.">⬚ Cadre</button>
   <button id="knee"  title="Exporter la planche au format kneeboard DCS (portrait 768 × 1157, aux proportions de la planchette du jeu) : le cadre s'il y en a un, sinon la planche ; à copier dans Saved Games\DCS\Kneeboard">⇩ Kneeboard</button>
@@ -266,7 +268,7 @@
 <div id="mizbox" hidden>
   <div class="card">
     <button id="mizclose" title="Fermer">×</button>
-    <h2>Quel vol importer ?</h2>
+    <h2 id="miztitle">Quel vol importer ?</h2>
     <p id="mizinfo"></p>
     <div id="mizlist"></div>
   </div>
@@ -316,8 +318,8 @@
 <script src="symbols.js?v=0.11"></script>
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
-<script src="miz.js?v=1.0"></script>
-<script src="board.js?v=1.9.2"></script>
+<script src="miz.js?v=1.1"></script>
+<script src="board.js?v=1.10"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

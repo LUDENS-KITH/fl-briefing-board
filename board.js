@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.9.2', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.10', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -228,6 +228,7 @@ function setTheatre(id){
   const th = THEATRES.find(t => t.id === id) || null;
   if (!th && !cam) return;
   snapshot();
+  delete boards[cur].grid;                 // les objets changent de repère : celui de l'import ne vaut plus (lot 9)
   if (!th){ convertPlan(true); cam = null; mapCfg = null; }            // retour au tableau sans carte
   else if (!cam){                                                     // première carte de la planche
     cam = fitCam(th.bounds); convertPlan(false);
@@ -327,7 +328,7 @@ function addBoard(){
   while (boards.some(x => x.name === 'Phase ' + n)) n++;
   boards.splice(cur + 1, 0, { name: 'Phase ' + n, objs: b.objs.map(snap), wpN: b.wpN, nmPx: b.nmPx,
                               prof: { ...b.prof }, map: b.map && { ...b.map }, cam: b.cam && { ...b.cam },
-                              magDec: b.magDec ?? null,
+                              ...(b.grid && { grid: { ...b.grid } }), magDec: b.magDec ?? null,
                               past: [], future: [] });
   load(cur + 1); renderTabs(); commit();
 }
@@ -1968,7 +1969,8 @@ const FILE_FORMAT = 'fl-briefing-board', FILE_VERSION = 1;
 /* un objet tel qu'il s'écrit : sans l'élément image, qui se recrée à la lecture */
 const record = o => { const { el, ...r } = snap(o); return r; };
 const boardsRecord = () => boards.map(b => ({ name: b.name, wpN: b.wpN, nmPx: b.nmPx || 0, prof: b.prof, map: b.map,
-                                              cam: b.cam, magDec: b.magDec ?? null, objs: b.objs.map(record) }));
+                                              cam: b.cam, magDec: b.magDec ?? null, ...(b.grid && { grid: b.grid }),
+                                              objs: b.objs.map(record) }));
 const blobData = blob => new Promise((ok, ko) => {
   const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => ko(r.error); r.readAsDataURL(blob);
 });
@@ -2011,11 +2013,13 @@ async function openBriefing(file){
                     && (o.t !== 'img' || blobs.has(o.id));
   const known = m => m && THEATRES.some(t => t.id === m.theatre) ? m : null;
   const okProf = p => p && typeof p === 'object' && p.ceil > 0 && p.range > 0 ? p : undefined;
+  const okGrid = g => g && typeof g === 'object' && typeof g.theatre === 'string' && g.k > 0
+                      && ['top', 'left', 'ox', 'oy'].every(k => Number.isFinite(g[k])) ? { grid: g } : {};
   leaveGesture();
   boards = j.boards.map(b => ({
     name: String(b.name || 'Phase').slice(0, 80), objs: (Array.isArray(b.objs) ? b.objs : []).filter(keep),
     wpN: b.wpN || 1, nmPx: +b.nmPx || 0, prof: okProf(b.prof), map: known(b.map), cam: known(b.map) && b.cam || null,
-    magDec: b.magDec ?? null, past: [], future: [] }));
+    ...(!known(b.map) && okGrid(b.grid)), magDec: b.magDec ?? null, past: [], future: [] }));
   for (const [id, blob] of blobs){ imgBlobs.set(id, blob); imgEls.delete(id); idbPut(id, blob).catch(() => {}); }
   for (const b of boards) for (const o of b.objs) if (o.t === 'img') o.el = imageOf(o.id);
   unit = j.unit === 'km' ? 'km' : 'nm'; $('unit').textContent = unit === 'km' ? 'km' : 'NM';
@@ -2042,18 +2046,20 @@ async function openMission(file){
   importMission(m, m.flights[0] || null, base);
 }
 /* plusieurs vols pilotables : le meneur choisit le sien */
-function chooseFlight(m, base){
-  const th = THEATRES.find(t => t.id === m.theatre);
-  $('mizinfo').textContent = `${base} · ${th ? th.name : m.theatre} · ${m.flights.length} vols pilotables`;
+const theatreName = id => (THEATRES.find(t => t.id === id) || { name: id }).name;
+function pickFlight(title, info, flights, then){
+  $('miztitle').textContent = title; $('mizinfo').textContent = info;
   $('mizlist').textContent = '';
-  for (const f of m.flights){
+  for (const f of flights){
     const b = document.createElement('button');
     b.textContent = `${f.name || 'Vol sans nom'} · ${f.type} ×${f.units} · ${f.points.length} point${f.points.length > 1 ? 's' : ''}`;
-    b.onclick = () => { $('mizbox').hidden = true; importMission(m, f, base); };
+    b.onclick = () => { $('mizbox').hidden = true; then(f); };
     $('mizlist').appendChild(b);
   }
   $('mizbox').hidden = false;
 }
+const chooseFlight = (m, base) => pickFlight('Quel vol importer ?',
+  `${base} · ${theatreName(m.theatre)} · ${m.flights.length} vols pilotables`, m.flights, f => importMission(m, f, base));
 $('mizbox').onclick = e => { if (e.target.id === 'mizbox' || e.target.id === 'mizclose') $('mizbox').hidden = true; };
 
 const SIDE_COL = { blue: '#2F8CFF', red: '#FF4D4D', neutrals: '#D1A94A' };
@@ -2065,7 +2071,7 @@ function importMission(m, f, base){
   if (!all.length){ toast('Rien à importer : ni vol pilotable, ni menace, ni bullseye'); return; }
   cancelGesture(); leaveGesture();
   split = true; fit();                                   // la route liée se lit dans la coupe
-  let pos, camM = null, nmPxM = 0;
+  let pos, camM = null, nmPxM = 0, grid = null;
   if (onMap){
     const geo = new Map(all.map(q => [q, MIZ.toGeo(proj, q.x, q.y)]));
     pos = q => { const [la, lo] = geo.get(q); return [lon2x(lo), lat2y(la)]; };
@@ -2079,6 +2085,7 @@ function importMission(m, f, base){
     const ox = (vw - de * k) / 2, oy = (vh - dn * k) / 2;
     pos = q => [ox + (q.y - left) * k, oy + (top - q.x) * k];
     nmPxM = 1852 * k;
+    grid = { theatre: m.theatre, top, left, k, ox, oy };   // le repère, pour revenir aux mètres DCS (lot 9)
   }
   const sym = (k, q, c, extra) => { const [x, y] = pos(q); return { t:'sym', k, x, y, a:0, s: SHAPES[k].s0 || 1, c, w:4, n:0, ...extra }; };
   const out = m.threats.map(t => sym(THREAT_SYM[t.kind], t, SIDE_COL[t.side] || SIDE_COL.neutrals, { lbl: t.name }));
@@ -2102,7 +2109,7 @@ function importMission(m, f, base){
                       range: [10, 20, 40, 80, 160].find(v => v >= nm * 1.08) || 160, linked: wps.length > 1,
                       ...(!onMap && { grid: true }) },
               map: onMap ? { theatre: m.theatre, style: $('mstyle').value || 'topo' } : null, cam: camM,
-              magDec: null, past: [], future: [] };
+              ...(grid && { grid }), magDec: null, past: [], future: [] };
   stash();
   boards.splice(cur + 1, 0, b);
   switchBoard(cur + 1);
@@ -2112,6 +2119,53 @@ function importMission(m, f, base){
 }
 $('miz').onclick = () => $('mizfile').click();
 $('mizfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openMission(f); };
+
+/* ---------- la route dans la DTC d'une mission (lot 9) ----------
+   Les waypoints de la planche s'écrivent dans la DTC des F/A-18C d'un vol de la mission
+   choisie comme support : le pilote démarre ses points chargés, sans outil tiers. Le
+   tableau rend une copie ; la mission d'origine n'est jamais modifiée (miz.js, withDtc).
+   Les positions reviennent aux mètres DCS par la projection mesurée du théâtre, ou, sur
+   une planche sans carte, par le repère gardé à l'import (grid). */
+function dtcRoute(){
+  const wps = objs.filter(o => o.t === 'sym' && o.k === 'wp' && (o.v || 'm') === 'm').sort((a, b) => a.n - b.n);
+  if (!wps.length) return { err: 'Aucun waypoint sur cette planche : posez la route avant de l\'écrire dans la DTC' };
+  const g = !mapCfg && boards[cur].grid, proj = mapCfg && PROJECTIONS[mapCfg.theatre];
+  if (mapCfg && !proj) return { err: 'Théâtre sans projection mesurée : la route ne peut pas être placée dans la mission' };
+  if (!mapCfg && !g) return { err: 'Planche sans repère DCS : importez la mission (⇧ Mission) ou choisissez une carte' };
+  let prev = null;                                          // altitude : la règle de la route liée
+  const pts = wps.map(w => {
+    const ft = w.alt ?? prev ?? 10000; prev = ft;
+    const [x, y] = proj ? MIZ.fromGeo(proj, y2lat(w.y), x2lon(w.x)) : [g.top - (w.y - g.oy) / g.k, g.left + (w.x - g.ox) / g.k];
+    return { n: w.n, x: Math.round(x), y: Math.round(y), alt: Math.round(ft * 0.3048), note: String(w.lbl || '').slice(0, 40) };
+  });
+  return { theatre: mapCfg ? mapCfg.theatre : g.theatre, pts };
+}
+async function writeDtc(file){
+  const r = dtcRoute();
+  if (r.err){ toast(r.err); return; }
+  let bytes, m;
+  try { bytes = new Uint8Array(await file.arrayBuffer()); m = await MIZ.readMiz(bytes); }
+  catch (e){ toast('Mission illisible : ' + e.message); return; }
+  if (m.theatre !== r.theatre){
+    toast(`Mission en ${theatreName(m.theatre)}, planche en ${theatreName(r.theatre)} : choisissez une mission du même théâtre`); return;
+  }
+  const hornets = m.flights.filter(f => f.type === 'FA-18C_hornet');
+  if (!hornets.length){ toast('Aucun vol F/A-18C pilotable dans cette mission : la DTC n\'est écrite que pour le F/A-18C'); return; }
+  const base = file.name.replace(/\.miz$/i, '').replace(/ - FL Briefing$/, '') || 'Mission';
+  const write = async f => {
+    let out;
+    try { out = await MIZ.withDtc(bytes, f.ref, r.pts); }
+    catch (e){ toast('DTC non écrite : ' + e.message); return; }
+    const url = URL.createObjectURL(new Blob([out.bytes], { type: 'application/zip' }));
+    download(url, `${base} - FL Briefing.miz`);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast(`DTC de ${f.name} (${out.units} F/A-18C) : ${r.pts.length} waypoint${r.pts.length > 1 ? 's' : ''} — cartouche « ${out.cartridge} »`);
+  };
+  if (hornets.length === 1) return write(hornets[0]);
+  pickFlight('Dans la DTC de quel vol ?', `${base} · ${hornets.length} vols F/A-18C — la route de la planche y sera chargée`, hornets, write);
+}
+$('dtc').onclick = () => { const r = dtcRoute(); if (r.err) toast(r.err); else $('dtcfile').click(); };
+$('dtcfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) writeDtc(f); };
 
 $('about').onclick = () => {
   $('aboutver').textContent = 'v' + APP.version;

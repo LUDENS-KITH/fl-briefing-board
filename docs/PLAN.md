@@ -13,7 +13,8 @@ Faire du tableau un outil qu'un meneur tient pendant toute une séance :
 enseigner l'emploi du radar de son module sur le même tableau que la manœuvre.**
 
 Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8 sont des
-propositions, non engagées, rangées par rapport valeur / coût.
+propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
+demande de Vince du 2026-10-06.
 
 ## 2. Vue d'ensemble
 
@@ -27,6 +28,7 @@ propositions, non engagées, rangées par rapport valeur / coût.
 | 6 | Import d'une mission `.miz` | proposition | L | lot 4 | v1.7 | engagé le 2026-09-30, livré |
 | 7 | Animation entre phases | proposition | M | — | v1.8 | engagé le 2026-09-30, livré |
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | v1.9 | engagé le 2026-09-30, livré |
+| 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | livré le 2026-10-06, fusion à valider |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -383,6 +385,41 @@ une fois dans DCS — ce qui n'a jamais été fait (ETAT §3).
 - Banc 44/44. Dans Brave, un cadre posé, déplacé et réduit à la souris donne une page
   qui montre son contenu, lisible, sans le cadre.
 
+### Lot 9 — La route dans la DTC du F/A-18C
+
+**Objectif :** que la route préparée sur le tableau arrive dans l'avion. Le meneur
+choisit la mission comme support, le tableau rend une copie dont la cartouche de
+données (DTC) des F/A-18C d'un vol porte ces waypoints, et le pilote démarre ses points
+chargés, sans outil tiers.
+
+Choisi par Vince le 2026-10-06, de préférence à un export vers l'outil communautaire
+DCS-DTC : la DTC native vit dans le `.miz`, elle sert directement la mission que vole
+l'escadron. L'export DCS-DTC, pour un pilote seul sur le serveur d'un autre, reste une
+idée de suite, non engagée.
+
+**Inconnue levée avant le code : le format.** Lu dans l'éditeur de mission du jeu
+(`MissionEditor/modules/me_DTC.lua`, `me_managerDTC.lua`, `CoreMods/aircraft/FA-18C/DTC`)
+et sur trois missions réelles qui en portent :
+- une cartouche est un fichier JSON `DTC/<nom>.dtc` dans l'archive ; chaque unité la
+  désigne par son nom (`DTC = { AutoLoad, Cartridges = { { name, default } } }`) ;
+- les waypoints du Hornet (`WYPT.NAV_PTS`) sont en mètres DCS, comme le reste de la
+  mission : aucune conversion géographique de plus ;
+- 59 waypoints au plus, numérotés à partir de 1 ; trois séquences (`NAV_ROUTE`) ;
+  altitude en mètres, `altitudeType` 1 = au-dessus de la mer, 2 = du sol ;
+- l'éditeur ne lit d'une cartouche que les rubriques présentes, et ses waypoints
+  seulement si son théâtre est celui de la mission ; des missions réelles portent des
+  cartouches partielles (radios et contre-mesures seules).
+
+*Fait quand :* une mission de l'escadron passée par ⇩ DTC reste intègre, ne change que
+dans la DTC du vol choisi, et ses waypoints reviennent aux positions de la route à
+moins de 2 m ; le pilote démarre avec la route chargée.
+
+État au 2026-10-06 : livré, sauf le vol. `node tools/test_miz.js` 83/83 et banc 51/51,
+nouveaux tests rouges avant le code. Sur la Sandbox Colchide, la mission relue par
+l'interpréteur Lua de DCS ne diffère de l'originale que dans la table `DTC` des
+4 Hornet du vol ; la cartouche existante est reprise, waypoints remplacés. Reste à
+ouvrir une copie dans l'éditeur, puis à démarrer un Hornet dessus.
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -408,6 +445,11 @@ avis contraire :
 | À l'outil Sélection, un objet libre passe devant un objet ancré qui le recouvre | on ancre pour poser et saisir par-dessus |
 | Page du kneeboard aux proportions de la planchette DCS, 0,142 × 0,214, et non en 3:4 | le jeu étire toute image à sa planchette ; lu dans ses fichiers |
 | Le cadre du kneeboard garde sa largeur ; sa hauteur suit la zone du plan de la page | ce que montre le cadre est exactement ce que montre la page |
+| DTC : le numéro du waypoint sur le tableau est celui de l'avion (1 à 59) | ce que le pilote lit au kneeboard est ce qu'il trouve au cockpit ; le Hornet n'accepte pas 0 dans la DTC |
+| DTC : chargée au démarrage (`AutoLoad`) pour tous les F/A-18C du vol, la nouvelle cartouche par défaut | le but est de démarrer ses points chargés ; l'ancienne cartouche reste, au choix dans l'éditeur |
+| DTC : une cartouche existante sert de base, seuls les waypoints changent | radios, contre-mesures et TACAN sont le travail du concepteur de la mission |
+| DTC : le tableau rend une copie, jamais la mission d'origine | une mission de serveur se remplace en connaissance de cause, par celui qui la tient |
+| DTC : le F/A-18C d'abord | le seul module dont le format a été lu ; F-16C ensuite, un module à la fois |
 | Une marque de piste posée hors d'une piste désigne un écho (piste inconnue du F/A-18C, piste système du F-16C) au lieu d'être refusée | comme au cockpit (F/A-18C p. 176, F-16C p. 416) ; le refus passait pour une panne, signalée par Vince |
 
 **Décidé par Vince :**
@@ -421,5 +463,6 @@ avis contraire :
 | 2026-09-30 | Fusion du lot 5 ; lancement du lot 6 |
 | 2026-09-30 | Fusion du lot 6 ; lancement du lot 7 |
 | 2026-09-30 | Fusion du lot 7 ; lancement du lot 8 |
+| 2026-10-06 | Lot 9 : la route dans la DTC native, par un `.miz` complété, plutôt que par l'outil DCS-DTC ; lancement |
 
-**À trancher par Vince :** rien. Les huit lots du plan sont livrés.
+**À trancher par Vince :** la fusion du lot 9, qui publie la v1.10 en ligne.
