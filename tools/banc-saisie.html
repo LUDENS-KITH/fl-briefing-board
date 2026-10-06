@@ -98,8 +98,10 @@ function app(f){
       const dt = new w.DataTransfer(); dt.items.add(file);
       d.body.dispatchEvent(new w.DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
     },
-    openFile(file){
-      const i = d.getElementById('openfile'), dt = new w.DataTransfer(); dt.items.add(file);
+    openFile(file){ this.pick('openfile', file); },
+    /* un fichier choisi dans la boîte de dialogue d'un champ <input type="file"> */
+    pick(id, file){
+      const i = d.getElementById(id), dt = new w.DataTransfer(); dt.items.add(file);
       i.files = dt.files; i.dispatchEvent(new w.Event('change'));
     },
     /* le téléchargement intercepté : son nom et son texte */
@@ -808,6 +810,89 @@ test('En présentation, le cadre ne se montre pas', async (ok) => {
   const sans = a.s('(drawFrame(), cv.toDataURL())');
   a.key('Escape');
   ok(avec === sans, 'le tableau présenté diffère selon le cadre');
+});
+
+/* ---------- lot 9 : la route dans la DTC d'une mission ---------- */
+
+/* la mission choisie comme support par le bouton ⇩ DTC ; le .miz rendu, intercepté et lu */
+async function dtc(a, file){
+  const got = []; a.w.download = (url, name) => got.push({ url, name });
+  a.button('#dtc');
+  if (file) a.pick('dtcfile', file);
+  await pause(700);
+  if (!got.length) return null;
+  const MIZ = a.s('MIZ');                                   // une constante du script : lue dans le cadre
+  const bytes = new Uint8Array(await (await a.w.fetch(got[0].url)).arrayBuffer()), get = await MIZ.unzip(bytes);
+  const mission = MIZ.parseLua(await get('mission')), units = mission.coalition.blue.country[1].plane.group[1].units;
+  const name = units[1].DTC && MIZ.list(units[1].DTC.Cartridges).find(c => c.default).name;
+  const cart = name && JSON.parse(await get(`DTC/${name}.dtc`));
+  return { name: got[0].name, cart, units };
+}
+const COLT = [[-356437, 618211, 13], [-320000, 650000, 7620], [-300000, 680000, 150]];
+const near = (pts, want) => pts.length === want.length &&
+  pts.every((p, i) => Math.abs(p.x - want[i][0]) < 2 && Math.abs(p.y - want[i][1]) < 2 && Math.abs(p.alt - want[i][2]) < 2);
+
+test('DTC : la route d\'une planche carte s\'écrit dans la copie de la mission, aux positions DCS d\'origine', async (ok) => {
+  const a = await open();
+  const miz = () => a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]]);
+  a.drop(miz()); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(200);    // la route de COLT 2, trois points
+  const r = await dtc(a, miz());
+  ok(r, 'aucun fichier rendu');
+  if (!r) return;
+  ok(r.name === 'Rioni Gate - FL Briefing.miz', `fichier rendu : ${r.name}`);
+  ok(r.cart && r.cart.name === 'FA-18C UZI 1 - FL Briefing', `cartouche : ${r.cart && r.cart.name}`);
+  const P = r.cart ? r.cart.data.WYPT.NAV_PTS : [];
+  ok(near(P, COLT), `points : ${JSON.stringify(P.map(p => [p.wypt_num, Math.round(p.x), Math.round(p.y), p.alt]))}`);
+  ok(P.map(p => p.wypt_num).join() === '1,2,3', `numéros : ${P.map(p => p.wypt_num)}`);
+  ok(r.units[1].DTC.AutoLoad === true, 'chargement au démarrage non demandé');
+  ok(/UZI 1/.test(a.toast()) && /3 waypoints/.test(a.toast()), `message : « ${a.toast()} »`);
+});
+
+test('DTC : planche sans carte d\'une mission importée — même repère, y compris après enregistrement et réouverture', async (ok) => {
+  const a = await open();
+  const miz = () => a.miz('Overlord.miz', [['mission', MISSION('Normandy')]]);
+  a.drop(miz()); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(200);
+  const r = await dtc(a, miz());
+  ok(r && r.cart && near(r.cart.data.WYPT.NAV_PTS, COLT),
+     `points : ${r && r.cart && JSON.stringify(r.cart.data.WYPT.NAV_PTS.map(p => [Math.round(p.x), Math.round(p.y), p.alt]))}`);
+  ok(r && r.cart && r.cart.data.terrain === 'Normandy', `théâtre de la cartouche : ${r && r.cart && r.cart.data.terrain}`);
+  const f = await a.saved();
+  const b = await open();
+  b.openFile(b.json(JSON.parse(f.text))); await pause(300);
+  b.button('.tab.add');                                     // et sur la phase suivante
+  const r2 = await dtc(b, b.miz('Overlord.miz', [['mission', MISSION('Normandy')]]));
+  ok(r2 && r2.cart && near(r2.cart.data.WYPT.NAV_PTS, COLT), `après réouverture, phase 2 : ${b.toast()}`);
+});
+
+test('DTC : refus expliqués — pas de route, pas de repère, autre théâtre, aucun F/A-18C', async (ok) => {
+  const a = await open();
+  ok(!(await dtc(a)) && /waypoint/i.test(a.toast()), `planche vide : « ${a.toast()} »`);
+  a.tile('wp'); a.click(400, 300); a.key('Escape');
+  ok(!(await dtc(a)) && /repère/i.test(a.toast()), `planche sans repère : « ${a.toast()} »`);
+  a.drop(a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]])); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[0].click(); await pause(200);
+  ok(!(await dtc(a, a.miz('Overlord.miz', [['mission', MISSION('Normandy')]]))) && /Normandie|Normandy/.test(a.toast()),
+     `autre théâtre : « ${a.toast()} »`);
+  const viper = MISSION('Caucasus').replace('FA-18C_hornet', 'F-16C_50');
+  ok(!(await dtc(a, a.miz('Viper.miz', [['mission', viper]]))) && /F\/A-18C/.test(a.toast()), `aucun Hornet : « ${a.toast()} »`);
+});
+
+test('DTC : plusieurs vols F/A-18C — le meneur choisit, seuls les Hornet sont proposés', async (ok) => {
+  const a = await open();
+  const deux = MISSION('Caucasus').replace('["name"] = "COLT 2", ["units"] = { [1] = { ["type"] = "F-16C_50", ["skill"] = "Client", }, [2] = { ["type"] = "F-16C_50",',
+                                           '["name"] = "COLT 2", ["units"] = { [1] = { ["type"] = "FA-18C_hornet", ["skill"] = "Client", }, [2] = { ["type"] = "FA-18C_hornet",');
+  a.drop(a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]])); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(200);
+  const got = []; a.w.download = (url, name) => got.push({ url, name });
+  a.button('#dtc'); a.pick('dtcfile', a.miz('Rioni Gate.miz', [['mission', deux]])); await pause(500);
+  const choix = [...a.d.querySelectorAll('#mizlist button')].map(b => b.textContent);
+  ok(!a.d.getElementById('mizbox').hidden && choix.length === 2 && /UZI 1/.test(choix[0]) && /COLT 2/.test(choix[1]),
+     `vols proposés : ${choix.join(' | ')}`);
+  ok(/DTC/.test(a.d.getElementById('miztitle').textContent), `titre : ${a.d.getElementById('miztitle').textContent}`);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(500);
+  ok(got.length === 1 && /COLT 2/.test(a.toast()), `rendu : ${got.length} fichier, « ${a.toast()} »`);
 });
 
 (async () => {

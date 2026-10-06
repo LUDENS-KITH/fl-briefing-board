@@ -53,6 +53,8 @@
   d'écran.
 - **L'import d'une mission DCS** — glissez le `.miz` : la route du vol, le bullseye, les
   défenses aériennes et les navires se posent sur la carte, au mètre près.
+- **La route dans la DTC du F/A-18C** — la route préparée sur le tableau s'écrit dans la
+  cartouche de données d'une copie de la mission : le pilote démarre ses points chargés.
 
 Tout tient dans une page web : **aucune installation, aucun compte, rien à payer.**
 

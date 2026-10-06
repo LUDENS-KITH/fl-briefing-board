@@ -3,6 +3,33 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.10 — 2026-10-06
+
+Lot 9 du [plan d'action](docs/PLAN.md), engagé par Vince : la route du tableau dans la
+DTC du F/A-18C.
+
+### Ajouté
+- **⇩ DTC** écrit les waypoints de la planche dans la cartouche de données (DTC) des
+  F/A-18C d'un vol d'une mission DCS choisie comme support, et rend une copie
+  `<mission> - FL Briefing.miz` : le pilote démarre ses points chargés, sans outil tiers.
+  La mission d'origine n'est jamais modifiée.
+- Format lu dans l'éditeur de mission du jeu (`me_managerDTC.lua`,
+  `CoreMods/aircraft/FA-18C/DTC`) et sur des cartouches réelles : fichier JSON
+  `DTC/<nom>.dtc` dans l'archive, référence dans la table `DTC` de chaque unité.
+- Une cartouche déjà présente sert de base : radios, contre-mesures, TACAN et réglages
+  de navigation gardés, seuls les waypoints remplacés.
+- Le repère d'une mission importée sans carte est gardé avec la planche, ses phases et
+  le fichier de briefing.
+
+### Vérifié en exécutant
+`node tools/test_miz.js` 83/83, rouge avant le code · banc 51/51, les 4 nouveaux
+scénarios rouges avant le code, et deux fois mis en échec par des mutations (repère
+perdu en « + phase », x et y inversés) · mission réelle de l'escadron (Sandbox
+Colchide, 9,7 Mo) : archive intègre (`unzip -t`), mission relue par l'interpréteur Lua de
+DCS, **11 différences, toutes dans la table DTC des 4 Hornet du vol** ; cartouche
+d'origine reprise à l'identique hors waypoints, points aux champs exacts de l'éditeur.
+**Pas encore chargée dans un cockpit.**
+
 ## v1.9.2 — 2026-10-01
 
 ### Corrigé — trouvé en vérifiant la DT2 sur la démo publiée

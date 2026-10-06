@@ -107,6 +107,9 @@ par événements pointeur réels, pas en relisant le code.
 | Import de mission | `node tools/test_miz.js` : projection et inverse contre pyproj à 1 mm près, table Lua, archive zip ; en échec sur six calculs faussés | conforme | 2026-09-30 |
 | Import de mission | missions réelles de l'escadron : départ piste de Goudaouta sur le point de référence du terrain (0,00 km) ; sept départs parking à 0,3 – 1,1 km du point de référence de leur terrain | conforme | 2026-09-30 |
 | Import de mission | 3 scénarios au banc, rouges avant le code : choix du vol, route et altitudes, bullseye, SAM, carte, route liée ; planche en grille à l'échelle exacte et caps « G » ; .miz illisible refusé ; 37/37 · deux missions réelles importées dans Brave en `file://`, capture relue | conforme | 2026-09-30 |
+| Route dans la DTC | `node tools/test_miz.js` 83/83, rouge avant le code : archive relue par zlib (CRC, tailles), entrées non touchées identiques, mission inchangée hors références `DTC`, cartouche au format de l'éditeur, reprise d'une cartouche existante, réécriture sans doublon, cinq refus | conforme | 2026-10-06 |
+| Route dans la DTC | 4 scénarios au banc, rouges avant le code : planche carte et planche sans carte ramenées aux positions DCS d'origine à moins de 2 m, après enregistrement, réouverture et « + phase » ; refus expliqués (pas de route, pas de repère, autre théâtre, aucun F/A-18C) ; choix du vol parmi les seuls Hornet ; mis en échec par deux mutations ; 51/51 | conforme | 2026-10-06 |
+| Route dans la DTC | mission réelle Sandbox Colchide (9,7 Mo, cartouche Hornet existante) : `unzip -t` sans erreur ; mission relue par `luae.exe` de DCS, 11 différences, toutes dans la table `DTC` des 4 Hornet du vol choisi ; cartouche d'origine reprise (ALR67, COMM, TCN, réglages de navigation identiques), waypoints aux champs exacts de l'éditeur | conforme | 2026-10-06 |
 | Présentation | 3 scénarios au banc, rouges avant le code : barres et palette masquées, tableau pleine largeur, Échap en sort ; phases au clavier, outils et Ctrl+Z muets ; laser hors objets et hors historique, éteint en 1,8 s ; 34/34 | conforme | 2026-09-30 |
 | Présentation | Brave sans interface, vrais événements souris et clavier, en `file://` : clic sur ▶ Présenter → plein écran accordé ; laser tracé ; → phase suivante ; Échap quitte plein écran et présentation, les barres reviennent ; capture relue | conforme | 2026-09-30 |
 | Fichier de briefing | Brave sans interface, en `file://` comme le raccourci : image déposée relue après rechargement ; briefing de 2 planches enregistré dans un profil, ouvert dans un second profil vierge : identique | conforme | 2026-09-30 |
@@ -147,6 +150,11 @@ par événements pointeur réels, pas en relisant le code.
   une page modifiée par DCS depuis l'édition du manuel resterait fausse ; un écart vu en
   vol ouvre une correction ;
 - **les réglages des écrans radar au doigt** : échelle et azimut se changent au clavier.
+- **la DTC écrite par le tableau, dans le jeu** : son format est lu dans l'éditeur de
+  mission et sur des cartouches réelles, et la mission produite est relue par
+  l'interpréteur Lua de DCS ; mais aucune copie n'a encore été ouverte dans l'éditeur ni
+  chargée dans un cockpit. Le chargement au démarrage (`AutoLoad`) et une cartouche qui
+  ne contient que les waypoints sont à confirmer au premier vol.
 
 ## 4. Périmètre livré
 
@@ -190,7 +198,7 @@ palette masquable, annuler/rétablir par instantanés, export PNG horodaté,
 reprise locale **images comprises** (IndexedDB) ; **fichier de briefing** `.json` à
 enregistrer et ouvrir, images comprises ; **mode présentation** (plein écran, phases au
 clavier, pointeur laser) ; **import de mission `.miz`** (route, bullseye, défenses
-aériennes, navires) ; **animation entre phases** en présentation ; **cadrage du
+aériennes, navires) ; **route écrite dans la DTC du F/A-18C** d'une copie de la mission ; **animation entre phases** en présentation ; **cadrage du
 kneeboard**.
 
 ## 5. Hors périmètre — décidé, pas oublié

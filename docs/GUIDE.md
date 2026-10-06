@@ -86,6 +86,30 @@ nouvelle planche.
 - Les unités au sol reconnues comme défense aérienne le sont par leur type DCS ; les
   autres (chars, camions…) ne sont pas importées.
 
+## Charger la route dans la DTC du F/A-18C
+
+**⇩ DTC**, puis choisissez la mission DCS (`.miz`) qui sert de support : les waypoints
+de la planche sont écrits dans la cartouche de données (DTC) des F/A-18C d'un vol de
+cette mission. Le tableau rend une **copie**, `<mission> - FL Briefing.miz` ; la mission
+d'origine n'est pas modifiée. Le pilote qui prend l'avion démarre ses points chargés,
+sans outil tiers.
+
+- **Le numéro ne change pas** : le waypoint 3 du tableau est le 3 dans l'avion (de 1 à
+  59). Son altitude est celle de la coupe, au-dessus de la mer, et son étiquette devient
+  la note du point. Les points forment la séquence 1, dans l'ordre des numéros.
+- Plusieurs vols F/A-18C pilotables : choisissez celui qui reçoit la route.
+- **Une cartouche déjà là sert de base** : radios, contre-mesures, TACAN et réglages de
+  navigation sont gardés, seuls les waypoints sont remplacés. La nouvelle cartouche
+  s'appelle « *ancienne* - FL Briefing » ; l'ancienne reste dans la mission. Sans
+  cartouche, le vol en reçoit une qui ne contient que les waypoints.
+- La cartouche est **chargée au démarrage** pour tous les F/A-18C du vol.
+- Il faut un **repère DCS** : une planche sur carte, ou la planche d'une mission importée
+  sans carte (et ses phases), et une mission **du même théâtre**.
+- Réécrire sur la copie remplace la cartouche du tableau sans la doubler.
+- Sur un serveur, c'est la mission en rotation qui compte : celui qui la prépare y met
+  la copie.
+- Seul le **F/A-18C** est couvert pour l'instant.
+
 ## Mode présentation
 
 Pour mener le briefing en partage d'écran : **▶ Présenter** (ou `F5`). Le tableau passe
