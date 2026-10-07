@@ -1827,6 +1827,24 @@ $('clear').onclick = () => {
     snapshot(); objs = []; sel = null; wpN = 1; commit();
   }
 };
+/* nouveau briefing (lot 11) : tout le tableau repart de zéro — planches, images,
+   historique. Les préférences d'affichage restent : ce sont des réglages du poste.
+   Comme ⇧ Ouvrir, il remplace tout et ne s'annule pas : on le dit avant. */
+$('new').onclick = () => {
+  stash();
+  if (boards.length === 1 && !boards[0].objs.length && !boards[0].map){ toast('Le tableau est déjà vierge'); return; }
+  const n = boards.length;
+  if (!confirm(`Commencer un nouveau briefing ?\n\n${n > 1 ? `Les ${n} planches` : 'La planche'} et leurs images seront `
+             + 'effacées de ce navigateur, sans retour par Annuler. Pour les garder, annulez puis enregistrez le '
+             + 'briefing (⇩ Briefing).')) return;
+  cancelGesture(); leaveGesture(); anim = null;
+  boards = [{ name:'Phase 1', objs:[], wpN:1, nmPx:0, past:[], future:[] }];
+  for (const el of imgEls.values()) URL.revokeObjectURL(el.src);
+  imgBlobs.clear(); imgEls.clear();
+  load(0); renderTabs(); setTool('select'); commit();
+  if (!DEMO) idbKeep(new Set()).catch(() => {});
+  toast('Nouveau briefing : tableau vierge');
+};
 $('scale').onclick = () => {
   if (cam){ alert('Sur une carte, l\'échelle est automatique : distances et caps viennent de la carte.'); return; }
   const r = (sel && sel.t === 'ruler') ? sel : [...objs].reverse().find(o => o.t === 'ruler');

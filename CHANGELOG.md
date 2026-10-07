@@ -5,8 +5,8 @@ Les dates sont celles de la livraison effective. Chaque version note ce qui a é
 
 ## v1.11 — 2026-10-07
 
-Lot 10 du [plan d'action](docs/PLAN.md), demandé par Vince : accrocher un symbole à un
-autre.
+Lots 10 et 11 du [plan d'action](docs/PLAN.md), demandés par Vince : accrocher un
+symbole à un autre ; repartir d'un tableau vierge.
 
 ### Ajouté
 - **🔗 Accrocher** (touche `J`) : sélectionner un symbole ou un texte, 🔗, toucher le
@@ -16,6 +16,10 @@ autre.
 - Copie (`Ctrl+D`), « + phase », animation entre phases, fichier de briefing et export
   kneeboard gardent l'accroche.
 - Démo : l'hippodrome TEXACO et son ravitailleur accroché, sur Ingress et Attaque.
+- **✚ Nouveau** : un nouveau briefing, sur un tableau vierge. Le tableau se garde dans le
+  navigateur et revenait à chaque ouverture ; Effacer ne vidait que la planche affichée.
+  Après confirmation, toutes les planches et leurs images sont effacées ; les
+  préférences d'affichage restent.
 
 ### Corrigé — signalé par Vince
 - **Sur une carte, un ravitailleur posé sur un hippodrome s'en écartait au zoom.** Un
@@ -24,7 +28,10 @@ autre.
   dans le repère du dessin de son hôte.
 
 ### Vérifié en exécutant
-Banc 60/60 : les 8 nouveaux scénarios rouges avant le code, mis en échec par deux
+Nouveau briefing : 3 scénarios rouges avant le code (banc 64/64), et un vrai clic dans
+la démo sous Brave (confirmation, tableau vierge, message).
+
+Accroche : banc 60/60, les 8 nouveaux scénarios rouges avant le code, mis en échec par deux
 mutations (zoom ignoré dans le repère de l'hôte, glissé non détecté), plus un témoin du défaut
 (non accroché, l'écart passe de 20,-43 px à 56,6,-121,6 px en trois crans de zoom) ·
 `node tools/test_magnetic.js`, `test_miz.js` 83/83, `test_radar.js` 26/26 · démo dans

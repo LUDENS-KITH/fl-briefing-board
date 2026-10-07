@@ -237,6 +237,11 @@ d'une image reste possible.
   ou glisser le fichier sur la page) sur un autre poste, ou le passer au meneur
   suivant : il remplace le tableau affiché, après confirmation. Un fichier qui n'est pas
   un briefing est refusé, et le tableau reste tel quel.
+- **Nouveau briefing** (✚ Nouveau) : le tableau se garde tout seul dans le navigateur et
+  revient à chaque ouverture. Pour repartir d'une page blanche, ✚ Nouveau efface toutes
+  les planches et leurs images, après confirmation, et ne s'annule pas : enregistrez
+  d'abord (⇩ Briefing) ce que vous voulez garder. Unité, cap vrai ou magnétique, fond et
+  coupe restent réglés. **Effacer**, lui, ne vide que la planche affichée.
 - Annuler / rétablir, export **PNG** horodaté, fond sombre ou clair, palette
   masquable.
 - **Kneeboard DCS** (⇩ Kneeboard) : PNG portrait 768 × 1157, à copier dans

@@ -48,7 +48,8 @@
 - **Export kneeboard DCS** — la planche, ou le cadre qu'on y pose, avec sa coupe et ses
   caps, aux proportions de la planchette du jeu.
 - **Un fichier de briefing** — tout le tableau, images comprises, à préparer sur un poste
-  et à mener sur un autre, ou à passer au meneur suivant.
+  et à mener sur un autre, ou à passer au meneur suivant. ✚ Nouveau repart d'un tableau
+  vierge.
 - **Un mode présentation** — plein écran, phases au clavier, pointeur laser, et la
   manœuvre qui se déroule d'une phase à l'autre : pour mener le briefing en partage
   d'écran.
