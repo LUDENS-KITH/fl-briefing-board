@@ -32,7 +32,7 @@ demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lo
 | 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | en ligne le 2026-10-07 |
 | 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
 | 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | en ligne le 2026-10-07 |
-| 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | engagé le 2026-10-08 |
+| 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | en ligne le 2026-10-08 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -632,8 +632,9 @@ plus petit libre ; les liens des guides finissent en `.html`.
 **Documentation** : GUIDE FR et EN-US (gestes), MODELE (`wpN` retiré), ETAT §2,
 CHANGELOG v1.13.
 
-État au 2026-10-08 : livré sur la branche `lot-13-numeros`, fusion à valider. Banc
-71/71, les 6 scénarios nouveaux rouges avant le code ; vrais clics dans Brave.
+État au 2026-10-08 : fusionné (#17), v1.13 en ligne. Banc 71/71, les 6 scénarios
+nouveaux rouges avant le code ; vrais clics dans Brave, en local puis sur la démo
+publique (1-2-3-4 posés, 2 supprimé, le suivant porte 2).
 
 ## 8. Hors plan
 
@@ -693,5 +694,6 @@ avis contraire :
 | 2026-10-07 | Lot 12 : ravitailleurs et AWACS de la mission importée ; lancement |
 | 2026-10-07 | Fusion du lot 12 : v1.12 en ligne |
 | 2026-10-08 | Lot 13 : numéros de waypoint au plus petit libre ; lancement |
+| 2026-10-08 | Fusion du lot 13 : v1.13 en ligne |
 
-**À trancher par Vince :** la fusion du lot 13.
+**À trancher par Vince :** rien. Les treize lots du plan sont en ligne.
