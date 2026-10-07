@@ -159,6 +159,49 @@ function zip(files){
   return new Uint8Array(Buffer.concat([...locals, dir, end]));
 }
 
+/* 5. lot 12 : les appareils de soutien — ravitailleurs et AWACS de l'IA, à leur tâche DCS.
+   Formes lues dans l'éditeur du jeu (me_action_edit_panel.lua) et sur une mission réelle. */
+const soutien = `mission =
+{
+  ["theatre"] = "Caucasus",
+  ["coalition"] =
+  {
+    ["blue"] = { ["country"] = { [1] = { ["name"] = "USA", ["plane"] = { ["group"] = {
+      [1] = { ["name"] = "UZI 1", ["units"] = { [1] = { ["type"] = "FA-18C_hornet", ["skill"] = "Client", }, },
+              ["route"] = { ["points"] = { [1] = { ["x"] = -356437, ["y"] = 618211, ["alt"] = 13, }, }, }, },
+      [2] = { ["name"] = "DictKey_GroupName_7", ["task"] = "Refueling", ["frequency"] = 251,
+              ["units"] = { [1] = { ["type"] = "KC135MPRS", ["skill"] = "High", }, },
+              ["route"] = { ["points"] = {
+                [1] = { ["x"] = -286904, ["y"] = 548487, ["alt"] = 7620, ["alt_type"] = "BARO",
+                        ["task"] = { ["id"] = "ComboTask", ["params"] = { ["tasks"] = {
+                          [1] = { ["id"] = "Tanker", ["params"] = {}, },
+                          [2] = { ["id"] = "WrappedAction", ["params"] = { ["action"] = { ["id"] = "ActivateBeacon",
+                                  ["params"] = { ["type"] = 4, ["frequency"] = 1036000000, ["channel"] = 12, ["modeChannel"] = "Y", ["callsign"] = "TEX", }, }, }, },
+                          [3] = { ["id"] = "WrappedAction", ["params"] = { ["action"] = { ["id"] = "SetFrequency",
+                                  ["params"] = { ["frequency"] = 251000000, ["modulation"] = 0, }, }, }, },
+                          [4] = { ["id"] = "Orbit", ["params"] = { ["altitude"] = 6096, ["pattern"] = "Race-Track", ["speed"] = 180.05, }, },
+                        }, }, }, },
+                [2] = { ["x"] = -293668, ["y"] = 643613, ["alt"] = 7620, ["alt_type"] = "BARO", },
+              }, }, },
+      [3] = { ["name"] = "Arco sans tâche", ["units"] = { [1] = { ["type"] = "KC130", ["skill"] = "High", }, },
+              ["route"] = { ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, ["alt"] = 6000, }, }, }, },
+    }, }, }, }, },
+    ["red"] = { ["country"] = { [1] = { ["name"] = "Russia", ["plane"] = { ["group"] = {
+      [1] = { ["name"] = "Mainstay", ["task"] = "AWACS",
+              ["units"] = { [1] = { ["type"] = "A-50", ["skill"] = "High", }, },
+              ["route"] = { ["points"] = {
+                [1] = { ["x"] = -200000, ["y"] = 700000, ["alt"] = 9000, },
+                [2] = { ["x"] = -210000, ["y"] = 720000, ["alt"] = 9000,
+                        ["task"] = { ["id"] = "ComboTask", ["params"] = { ["tasks"] = {
+                          [1] = { ["id"] = "ControlledTask", ["params"] = { ["task"] = { ["id"] = "Orbit",
+                                  ["params"] = { ["altitude"] = 10000, ["pattern"] = "Anchored", ["speed"] = 200,
+                                                 ["hotLegDir"] = 1.5708, ["legLength"] = 92500, ["width"] = 37000, ["clockWise"] = false, }, }, }, },
+                        }, }, }, },
+              }, }, },
+    }, }, }, }, },
+  },
+}`;
+
 (async () => {
   const m = await MIZ.readMiz(zip([['options', 'options = {}', true], ['mission', mission], ['l10n/DEFAULT/dictionary', dictionary]]));
   eq('théâtre', m.theatre, 'Caucasus');
@@ -171,6 +214,22 @@ function zip(files){
   eq('menaces : groupes de défense aérienne et navires', m.threats.map(t => [t.name, t.kind, t.side]),
      [['SA-11 Kutaïssi', 'sam', 'red'], ['Alerte', 'radar', 'red'], ['Kouznetsov', 'carrier', 'red'], ['Escorte', 'ship', 'red']]);
   eq('menace : position du groupe', [m.threats[0].x, m.threats[0].y], [-284000, 683000]);
+
+  /* 5. lot 12 : ravitailleurs et AWACS */
+  const ms = await MIZ.readMiz(zip([['mission', soutien], ['l10n/DEFAULT/dictionary', 'dictionary = { ["DictKey_GroupName_7"] = "Texaco 11", }']]));
+  const sup = ms.support || [];
+  eq('soutien : les deux appareils à tâche, pas celui sans tâche', sup.map(a => [a.name, a.role, a.side, a.type]),
+     [['Texaco 11', 'tanker', 'blue', 'KC135MPRS'], ['Mainstay', 'awacs', 'red', 'A-50']]);
+  eq('soutien : les vols joueurs restent seuls dans flights', ms.flights.map(f => f.name), ['UZI 1']);
+  const tx = sup[0] || {}, aw = sup[1] || {};
+  eq('ravitailleur : route', (tx.points || []).map(p => [p.x, p.y, p.alt]), [[-286904, 548487, 7620], [-293668, 643613, 7620]]);
+  eq('ravitailleur : orbite Race-Track du point 1 au point 2, altitude de l\'orbite', tx.orbit,
+     { pattern: 'Race-Track', at: 0, to: 1, alt: 6096 });
+  eq('ravitailleur : TACAN et fréquence', [tx.tacan, tx.freq], ['12Y TEX', 251]);
+  eq('AWACS : orbite Anchored dans une tâche contrôlée', aw.orbit,
+     { pattern: 'Anchored', at: 1, to: null, alt: 10000, hot: 1.5708, len: 92500, width: 37000 });
+  eq('AWACS : ni TACAN ni fréquence', [aw.tacan, aw.freq], ['', null]);
+  eq('mission du lot 6 : aucun soutien (ravitailleur sans tâche)', (m.support || []).length, 0);
 
   let err = '';
   try { await MIZ.readMiz(new Uint8Array([1, 2, 3, 4])); } catch (e){ err = e.message; }

@@ -80,6 +80,14 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
   a "G" (grid).
 - Ground units are recognized as air defence by their DCS type; others (tanks,
   trucks…) are not imported.
+- AI **tankers** and **AWACS**, recognized by their group's task in the editor
+  ("Refueling", "AWACS"), come along too, from both sides: their **route** dashed, their
+  **orbit** as a racetrack symbol, and the aircraft attached to it, labelled — "Texaco 11
+  · FL200 · TCN 12Y TEX · 251.000". The level is the orbit's, which governs in flight.
+  The racetrack is a symbol, not drawn to scale: the mission gives neither a Race-Track's
+  width nor a circle's radius, the AI flies them. A Race-Track sits in the middle of its
+  leg, from the point carrying the orbit to the next one. Other AI aircraft are not
+  imported.
 
 ## Loading the Route into the F/A-18C DTC
 

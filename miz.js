@@ -198,10 +198,41 @@ const MIZ = (() => {
   const EWR = /EWR|1L13|55G6|Dog Ear/i;
   const CARRIER = /CVN|Stennis|Vinson|Roosevelt|Lincoln|Washington|Truman|Forrestal|KUZNECOW|Kuznetsov|LHA|Tarawa|Invincible|Hermes/i;
   const PLAYER = u => u && (u.skill === 'Client' || u.skill === 'Player');
+  /* appareils de soutien de l'IA, reconnus à la tâche de leur groupe (lot 12) */
+  const ROLES = { Refueling: 'tanker', AWACS: 'awacs' };
+  /* les tâches d'un point de route, déballées : une tâche contrôlée porte la sienne,
+     une action enveloppée (WrappedAction) la sienne */
+  const pointTasks = p => list((((p || {}).task || {}).params || {}).tasks)
+    .map(t => t && t.id === 'ControlledTask' ? ((t.params || {}).task || {}) : t)
+    .map(t => t && t.id === 'WrappedAction' ? (((t.params || {}).action) || {}) : t || {});
+  /* l'orbite déclarée sur la route (me_action_edit_panel.lua) : Circle autour du point,
+     Race-Track du point au suivant, Anchored par sa branche chaude. Son altitude
+     gouverne en vol, pas celle du point. */
+  function orbitOf(points){
+    for (const [i, p] of points.entries()){
+      const o = pointTasks(p).find(t => t.id === 'Orbit');
+      if (!o) continue;
+      const q = o.params || {}, pattern = String(q.pattern || 'Circle');
+      const out = { pattern, at: i, to: pattern === 'Race-Track' && points[i + 1] ? i + 1 : null,
+                    alt: Number.isFinite(+q.altitude) && q.altitude !== undefined ? +q.altitude : +p.alt || 0 };
+      if (pattern === 'Anchored') Object.assign(out, { hot: +q.hotLegDir || 0, len: +q.legLength || 0, width: +q.width || 0 });
+      return out;
+    }
+    return null;
+  }
+  /* de quoi joindre l'appareil : TACAN (ActivateBeacon) et radio (SetFrequency, sinon le groupe) */
+  function contactOf(g, points){
+    const acts = points.flatMap(pointTasks);
+    const bc = (acts.find(a => a.id === 'ActivateBeacon') || {}).params;
+    const sf = (acts.find(a => a.id === 'SetFrequency') || {}).params;
+    const mhz = sf && +sf.frequency > 0 ? +sf.frequency / 1e6 : +g.frequency > 0 ? +g.frequency : null;
+    return { tacan: bc && bc.channel ? `${bc.channel}${bc.modeChannel || ''}${bc.callsign ? ' ' + bc.callsign : ''}` : '',
+             freq: mhz };
+  }
 
   function content(m, dict){
     const say = s => typeof s === 'string' && s.startsWith('DictKey_') ? String(dict[s] ?? '') : String(s ?? '');
-    const out = { theatre: String(m.theatre || ''), bullseye: {}, flights: [], threats: [] };
+    const out = { theatre: String(m.theatre || ''), bullseye: {}, flights: [], threats: [], support: [] };
     const at = (g, units) => ({ x: +(g.x ?? (units[0] || {}).x), y: +(g.y ?? (units[0] || {}).y) });
     for (const side of ['blue', 'red', 'neutrals']){
       const c = (m.coalition || {})[side];
@@ -211,7 +242,15 @@ const MIZ = (() => {
         for (const cat of ['plane', 'helicopter'])
           for (const [gi, g] of numbered((country[cat] || {}).group)){
             const units = list(g.units);
-            if (!units.some(PLAYER)) continue;
+            if (!units.some(PLAYER)){
+              const role = cat === 'plane' && ROLES[g.task];
+              if (!role || !units.length) continue;
+              const pts = list((g.route || {}).points);
+              out.support.push({ name: say(g.name), side, role, type: String(units[0].type || ''),
+                                 points: pts.map(p => ({ x: +p.x, y: +p.y, alt: +p.alt || 0 })),
+                                 orbit: orbitOf(pts), ...contactOf(g, pts) });
+              continue;
+            }
             /* ref : le chemin du groupe dans la table, pour y revenir (withDtc) */
             out.flights.push({ name: say(g.name), side, cat, ref: `${side}/${ci}/${cat}/${gi}`,
                                type: String(units[0].type || ''), units: units.length,
