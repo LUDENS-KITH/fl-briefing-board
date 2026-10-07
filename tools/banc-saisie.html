@@ -1072,6 +1072,68 @@ test('Accroche : un texte accroché au ravitailleur suit l\'orbite (chaîne)', a
   ok(same(JSON.parse(tx()), [t0[0] - 100, t0[1] + 50], 1), `texte : ${JSON.stringify(t0)} → ${tx()}`);
 });
 
+/* ---------- lot 11 : nouveau briefing ---------- */
+const idbImages = a => new Promise(r => {
+  const q = a.w.indexedDB.open('fl-briefing-board', 1);
+  q.onupgradeneeded = () => q.result.createObjectStore('images');
+  q.onsuccess = () => { const g = q.result.transaction('images').objectStore('images').getAllKeys();
+                        g.onsuccess = () => { r(g.result.length); q.result.close(); }; g.onerror = () => r(-1); };
+  q.onerror = () => r(-1);
+});
+async function garni(a){
+  a.drop(await a.png('carte.png', 80, 50)); await pause(300);
+  a.tile('fighter'); a.click(400, 300);
+  a.button('.tab.add');
+  a.tile('sam'); a.click(600, 300);
+  a.button('#unit');                                        // km : une préférence, pas le briefing
+  await pause(100);
+}
+
+test('Nouveau briefing confirmé : tableau vierge, gardé vierge à la réouverture, images retirées', async (ok) => {
+  let a = await open();
+  await garni(a);
+  ok(a.s('boards.length') === 2 && await idbImages(a) === 1, `préparation : ${a.s('boards.length')} planches, ${await idbImages(a)} image`);
+  let asked = '';
+  a.w.confirm = m => (asked = m, true);
+  a.button('#new'); await pause(300);
+  ok(/2 planches/.test(asked) && /Briefing/.test(asked), `question posée : « ${asked} »`);
+  ok(a.s('boards.length') === 1 && a.s('boards[0].name') === 'Phase 1', `planches : ${a.s('boards.map(b => b.name).join()')}`);
+  ok(a.s('objs.length') === 0 && a.s('cam') === null && a.s('past.length') === 0, `objets ${a.s('objs.length')}, historique ${a.s('past.length')}`);
+  ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
+  ok(a.s('unit') === 'km', `unité : ${a.s('unit')}`);
+  ok(await idbImages(a) === 0, `images gardées en IndexedDB : ${await idbImages(a)}`);
+  a = await reload(); await pause(400);
+  ok(a.s('boards.length') === 1 && a.s('objs.length') === 0, `réouverture : ${a.s('boards.length')} planches, ${a.s('objs.length')} objets`);
+  ok(a.s('unit') === 'km', `réouverture, unité : ${a.s('unit')}`);
+});
+
+test('Nouveau briefing refusé : rien ne change', async (ok) => {
+  const a = await open();
+  await garni(a);
+  a.w.confirm = () => false;
+  a.button('#new'); await pause(200);
+  ok(a.s('boards.length') === 2 && a.s('boards.flatMap(b => b.objs).length') >= 3,
+     `planches ${a.s('boards.length')}, objets ${a.s('boards.flatMap(b => b.objs).length')}`);
+});
+
+test('Nouveau briefing sur un tableau vierge : pas de question, un message', async (ok) => {
+  const a = await open();
+  let asked = 0;
+  a.w.confirm = () => (asked++, true);
+  a.button('#new');
+  ok(asked === 0, 'une question a été posée');
+  ok(/vierge/i.test(a.toast()), `message : « ${a.toast()} »`);
+});
+
+test('Effacer ne vide que la planche affichée', async (ok) => {
+  const a = await open();
+  await garni(a);
+  a.w.confirm = () => true;
+  a.button('#clear');
+  ok(a.s('objs.length') === 0, `planche affichée : ${a.s('objs.length')} objets`);
+  ok(a.s('boards.length') === 2 && a.s('boards[0].objs.length') === 2, `autre planche : ${a.s('boards[0].objs.length')} objets`);
+}, true);
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

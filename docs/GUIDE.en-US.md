@@ -235,6 +235,11 @@ drag and drop your own background image.
   page) on another computer, or hand it to the next flight lead: it replaces the board
   on screen, after confirmation. A file that is not a briefing is refused, and the board
   stays as it is.
+- **New briefing** (✚ Nouveau): the board saves itself in the browser and comes back
+  every time you open it. To start from a blank page, ✚ Nouveau erases every board and
+  its images, after confirmation, and cannot be undone: save first (⇩ Briefing) what you
+  want to keep. Unit, true or magnetic heading, background and profile view stay as
+  set. **Effacer** (clear) only empties the board on screen.
 - Undo / redo, timestamped PNG export, dark or light background, hideable palette.
 - **DCS kneeboard** (⇩ Kneeboard): portrait PNG, 768 × 1157, to copy into
   `Saved Games\DCS\Kneeboard\`. These are the proportions of the in-game kneeboard,

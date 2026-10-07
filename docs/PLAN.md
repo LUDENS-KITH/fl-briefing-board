@@ -14,7 +14,7 @@ enseigner l'emploi du radar de son module sur le même tableau que la manœuvre.
 
 Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8 sont des
 propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
-demande de Vince du 2026-10-06, le lot 10 à celle du 2026-10-07.
+demande de Vince du 2026-10-06, les lots 10 et 11 à celles du 2026-10-07.
 
 ## 2. Vue d'ensemble
 
@@ -30,6 +30,7 @@ demande de Vince du 2026-10-06, le lot 10 à celle du 2026-10-07.
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | v1.9 | engagé le 2026-09-30, livré |
 | 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | en ligne le 2026-10-06 |
 | 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | engagé le 2026-10-07 |
+| 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | engagé le 2026-10-07 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -497,6 +498,48 @@ planches Ingress et Attaque).
 ignoré dans le repère de l'hôte, glissé non détecté). La transition entre phases et la
 page kneeboard sont vérifiées sur la démo dans Brave, pas au banc.
 
+### Lot 11 — Nouveau briefing
+
+**Objectif :** repartir d'un tableau vierge en un geste, sans traîner le briefing
+précédent à chaque ouverture.
+
+Demandé par Vince le 2026-10-07 : « à chaque fois que j'ouvre FL Briefing Board, il est
+déjà documenté avec les éléments que j'ai moi-même positionnés ».
+
+**Constat, lu dans le code.** Le tableau s'enregistre à chaque geste dans le navigateur
+(`commit()` → `localStorage`, images en IndexedDB) et `boot()` le relit à l'ouverture :
+c'est voulu, pour ne rien perdre d'une séance à l'autre. Mais rien ne permet de tout
+repartir de zéro : **Effacer** ne vide que la planche affichée — les autres phases, leurs
+noms et les images de fond restent. Il faudrait supprimer chaque planche une à une.
+
+| | |
+|---|---|
+| Commande | bouton **✚ Nouveau** dans la barre, à côté de ⇩ Briefing et ⇧ Ouvrir. Pas de raccourci : `Ctrl+N` appartient au navigateur |
+| Confirmation | toujours, en disant ce qui sera perdu (nombre de planches) et comment le garder : annuler, puis ⇩ Briefing. Refusée : rien ne change |
+| Effet | une seule planche « Phase 1 », vide, sans carte, sans échelle ni déclinaison saisie, historique vide, outil Sélection ; le stockage du navigateur est réécrit aussitôt et les images de fond retirées d'IndexedDB. La réouverture montre le tableau vierge |
+| Gardé | les préférences d'affichage, qui ne sont pas le briefing : NM / km, cap vrai / magnétique, aérodromes, fond sombre ou clair, coupe affichée |
+| Déjà vierge | pas de question : un message le dit |
+| Démo | remet la démo à blanc dans la page, sans rien écrire chez le visiteur (comme le reste de la démo) |
+| Effacer | inchangé : la planche affichée seulement, annulable par `Ctrl+Z` |
+
+Un nouveau briefing ne s'annule pas par `Ctrl+Z` : il remplace tout, comme ⇧ Ouvrir.
+D'où la confirmation, et le rappel d'enregistrer d'abord.
+
+**Fait quand** — au banc, scénarios rouges avant le code :
+
+1. Tableau garni (deux planches, un symbole, une image de fond, km) : ✚ Nouveau, confirmé
+   → une planche « Phase 1 » vide, sans carte, historique vide, outil Sélection ; l'unité
+   reste km ; à la réouverture, toujours vierge ; IndexedDB ne garde plus d'image.
+2. Confirmation refusée : planches et objets intacts.
+3. Tableau déjà vierge : aucune question, un message.
+4. Effacer ne vide toujours que la planche affichée (non-régression).
+
+**Documentation** : GUIDE FR et EN-US, MODELE §7 (persistance), ETAT §2, CHANGELOG
+v1.11, README.
+
+État au 2026-10-07 : livré dans la même PR que le lot 10 (#13), fusion à valider. Banc
+64/64, les 3 scénarios rouges avant le code ; vrai clic dans la démo sous Brave.
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -529,6 +572,7 @@ avis contraire :
 | DTC : le F/A-18C d'abord | le seul module dont le format a été lu ; F-16C ensuite, un module à la fois |
 | L'accroche se range dans le repère du dessin de l'hôte, en tailles de symbole, et non en terrain | c'est ce repère que voit le pilote : un symbole garde sa taille à l'écran quand la carte zoome |
 | Accrocher : un symbole ou un texte, à un symbole de la même vue | les seuls objets de taille fixe à l'écran ; ce qui suit le terrain (zone, cercle, flèche) y reste déjà |
+| Nouveau briefing : préférences d'affichage gardées, pas de raccourci | ce sont des réglages du poste, pas le briefing ; `Ctrl+N` ouvre une fenêtre du navigateur |
 | La copie d'un objet accroché reste accrochée ; touche `J` pour accrocher | deux ravitailleurs sur une orbite ; `J` est libre, `A` est la flèche |
 | Une marque de piste posée hors d'une piste désigne un écho (piste inconnue du F/A-18C, piste système du F-16C) au lieu d'être refusée | comme au cockpit (F/A-18C p. 176, F-16C p. 416) ; le refus passait pour une panne, signalée par Vince |
 
@@ -546,5 +590,6 @@ avis contraire :
 | 2026-10-06 | Lot 9 : la route dans la DTC native, par un `.miz` complété, plutôt que par l'outil DCS-DTC ; lancement |
 | 2026-10-06 | Fusion du lot 9 : v1.10 en ligne |
 | 2026-10-07 | Lot 10 : accrocher un symbole à un autre ; lancement |
+| 2026-10-07 | Lot 11 : nouveau briefing, dans la même PR que le lot 10 (v1.11) ; lancement |
 
-**À trancher par Vince :** la fusion du lot 10.
+**À trancher par Vince :** la fusion des lots 10 et 11 (PR #13).

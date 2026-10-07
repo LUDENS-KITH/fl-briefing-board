@@ -453,6 +453,11 @@ en v0.1 (voir [ETAT.md](ETAT.md) §6).
 
 La démo n'écrit ni en localStorage ni en IndexedDB.
 
+**✚ Nouveau** (lot 11) remplace `boards` par une planche « Phase 1 » vide, vide
+`imgBlobs` et `imgEls`, puis `commit()` réécrit la clé et `idbKeep(new Set())` vide le
+magasin d'images. Les préférences du poste (`unit`, `split`, `showAF`, `headRef`, `dark`)
+restent. Comme `openBriefing()`, il ne laisse pas d'historique : il demande confirmation.
+
 ### Fichier de briefing
 
 `⇩ Briefing` écrit un `.json` : `{ format: 'fl-briefing-board', version: 1, app, saved,
