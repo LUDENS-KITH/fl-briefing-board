@@ -189,6 +189,10 @@ d'une image reste possible.
 - **Poser et orienter d'un seul geste** : cliquer la forme dans la palette, appuyer
   sur le tableau et — sans relâcher — tirer dans la direction du cap. La distance
   donne la taille. Un simple clic pose à la taille par défaut, cap au nord.
+- **Numéros de waypoint** : un nouveau waypoint (posé ou copié) prend le **plus petit
+  numéro libre** de la vue. Supprimez le 2 d'une route 1-2-3-4 : le prochain waypoint
+  sera le 2, puis le 5. Tout supprimé, on repart de 1. Les autres gardent leur numéro,
+  pour rester ceux de la mission importée et de la DTC.
 - **Reprendre** : toucher une forme existante la saisit, sans changer d'outil —
   y compris **par le bout d'aile** ; l'outil sélection (`V`) attrape aussi flèches,
   traits et carte de fond ; la poignée bleue tourne et redimensionne ; `←` `→`

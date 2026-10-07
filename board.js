@@ -14,13 +14,13 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.12', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.13', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
 let objs = [], draft = null, sel = null, drag = null, textTarget = null;
 let tool = 'select', symKey = 'fighter', color = '#2F8CFF', width = 4, ls = 'solid', dark = true;
-let wpN = 1, nmPx = 0;                  // numéro du prochain waypoint ; pixels par mille nautique
+let nmPx = 0;                           // pixels par mille nautique
 let tb = 1;                             // grossissement des textes : > 1 seulement pendant l'export kneeboard
 let bare = false;                       // dessin d'export : sans les aides d'édition (cadre du kneeboard)
 let unit = 'nm', measOn = false;        // unité d'affichage des distances ; cotes sur les prochains traits
@@ -312,12 +312,20 @@ function settle(list = objs){
   for (const o of list) visit(o);
 }
 /* accrocher la sélection : elle attend qu'on touche son hôte */
+/* le numéro d'un nouveau waypoint : le plus petit libre dans sa vue (plan ou coupe).
+   Un point supprimé rend son numéro au lieu de laisser un trou ; les autres gardent le
+   leur, pour rester ceux de la mission importée et de la DTC. */
+function freeWp(v = 'm'){
+  const used = new Set(objs.filter(o => o.t === 'sym' && SHAPES[o.k] && SHAPES[o.k].num && (o.v || 'm') === v).map(o => o.n));
+  let n = 1; while (used.has(n)) n++;
+  return n;
+}
 let hooking = null;
 
 /* ---------- historique par instantanés ---------- */
 let past = [], future = [];
 const snap  = o => ({ ...o, pts: o.pts && o.pts.map(p => p.slice()) });
-const state = () => ({ objs: objs.map(snap), wpN, nmPx, prof: { ...prof }, magDec,
+const state = () => ({ objs: objs.map(snap), nmPx, prof: { ...prof }, magDec,
                        map: mapCfg && { ...mapCfg }, cam: cam && { ...cam } });
 function snapshot(){
   past.push(state());
@@ -330,7 +338,7 @@ function restore(from, to){
   to.push(state());
   const s = from.pop();
   const mapBefore = JSON.stringify(mapCfg || null);
-  objs = s.objs; wpN = s.wpN; nmPx = s.nmPx || 0; sel = null;
+  objs = s.objs; nmPx = s.nmPx || 0; sel = null;
   if (s.prof) prof = { ...s.prof };
   magDec = s.magDec ?? null;
   /* la caméra n'est rendue que si la carte change : annuler un déplacement de symbole
@@ -344,12 +352,12 @@ function restore(from, to){
 /* ---------- planches (phases du briefing) ---------- */
 let boards = [], cur = 0;
 
-function stash(){ boards[cur] = { ...boards[cur], objs, wpN, nmPx, prof: { ...prof }, magDec,
+function stash(){ boards[cur] = { ...boards[cur], objs, nmPx, prof: { ...prof }, magDec,
                                   map: mapCfg && { ...mapCfg }, cam: cam && { ...cam }, past, future }; }
 function load(i){
   cur = i;
   const b = boards[i];
-  objs = withUids(b.objs); wpN = b.wpN || 1; nmPx = b.nmPx || 0; past = b.past || []; future = b.future || [];
+  objs = withUids(b.objs); nmPx = b.nmPx || 0; past = b.past || []; future = b.future || [];
   prof = b.prof ? { ...b.prof } : { ceil: 40000, range: 40 };
   mapCfg = b.map ? { ...b.map } : null; cam = b.cam ? { ...b.cam } : null;
   magDec = b.magDec ?? null;
@@ -369,7 +377,7 @@ function addBoard(){
   const b = boards[cur];
   let n = boards.length + 1;
   while (boards.some(x => x.name === 'Phase ' + n)) n++;
-  boards.splice(cur + 1, 0, { name: 'Phase ' + n, objs: b.objs.map(snap), wpN: b.wpN, nmPx: b.nmPx,
+  boards.splice(cur + 1, 0, { name: 'Phase ' + n, objs: b.objs.map(snap), nmPx: b.nmPx,
                               prof: { ...b.prof }, map: b.map && { ...b.map }, cam: b.cam && { ...b.cam },
                               ...(b.grid && { grid: { ...b.grid } }), magDec: b.magDec ?? null,
                               past: [], future: [] });
@@ -1216,7 +1224,7 @@ const touches = new Map();
 function cancelGesture(){
   if (draft){ draft = null; past.pop(); }
   else if (drag){
-    if (drag.saved && drag.m !== 'pan'){ const s = past.pop(); if (s){ objs = s.objs; wpN = s.wpN; } }
+    if (drag.saved && drag.m !== 'pan'){ const s = past.pop(); if (s) objs = s.objs; }
     drag = null; sel = null;
   }
 }
@@ -1379,7 +1387,7 @@ cv.addEventListener('pointerdown', e => {
     const g = !sh.over && grab(x, y);
     if (g){ sel = g; drag = { m:'move', o:g, x, y }; draw(); return; }
     snapshot();
-    const o = { t:'sym', k:symKey, x, y, a:0, s:sh.s0 || 1, c: sh.col || color, w:width, n: sh.num ? wpN++ : 0 };
+    const o = { t:'sym', k:symKey, x, y, a:0, s:sh.s0 || 1, c: sh.col || color, w:width, n: sh.num ? freeWp(view) : 0 };
     if (view === 'p') o.v = 'p';
     if (sh.under) insertLow(o); else objs.push(o);      // un écran passe sous ce qu'on posera dessus
     sel = o;
@@ -1773,7 +1781,7 @@ $('dup').onclick = () => {
   const o = snap(sel); delete o.locked; delete o.uid; move(o, 24 / kk, 24 / kk);   // la copie naît libre, et neuve
   const host = hostOf(o);                                   // accrochée : au même hôte, à sa place décalée
   if (host) o.hook = hookFrom(o, host);
-  if (o.t === 'sym' && SHAPES[o.k].num) o.n = wpN++;
+  if (o.t === 'sym' && SHAPES[o.k].num) o.n = freeWp(o.v || 'm');
   objs.push(o); sel = o; commit();
 };
 /* ancrer : la sélection ne se déplace plus, ne tourne plus, ne s'efface plus ; on pose
@@ -1824,7 +1832,7 @@ function toast(msg, ms = 2200){
 }
 $('clear').onclick = () => {
   if (objs.length && confirm(`Effacer la planche « ${boards[cur].name} » ?`)){
-    snapshot(); objs = []; sel = null; wpN = 1; commit();
+    snapshot(); objs = []; sel = null; commit();
   }
 };
 /* nouveau briefing (lot 11) : tout le tableau repart de zéro — planches, images,
@@ -1838,7 +1846,7 @@ $('new').onclick = () => {
              + 'effacées de ce navigateur, sans retour par Annuler. Pour les garder, annulez puis enregistrez le '
              + 'briefing (⇩ Briefing).')) return;
   cancelGesture(); leaveGesture(); anim = null;
-  boards = [{ name:'Phase 1', objs:[], wpN:1, nmPx:0, past:[], future:[] }];
+  boards = [{ name:'Phase 1', objs:[], nmPx:0, past:[], future:[] }];
   for (const el of imgEls.values()) URL.revokeObjectURL(el.src);
   imgBlobs.clear(); imgEls.clear();
   load(0); renderTabs(); setTool('select'); commit();
@@ -2075,7 +2083,7 @@ $('decl').onclick = () => {
 const FILE_FORMAT = 'fl-briefing-board', FILE_VERSION = 1;
 /* un objet tel qu'il s'écrit : sans l'élément image, qui se recrée à la lecture */
 const record = o => { const { el, ...r } = snap(o); return r; };
-const boardsRecord = () => boards.map(b => ({ name: b.name, wpN: b.wpN, nmPx: b.nmPx || 0, prof: b.prof, map: b.map,
+const boardsRecord = () => boards.map(b => ({ name: b.name, nmPx: b.nmPx || 0, prof: b.prof, map: b.map,
                                               cam: b.cam, magDec: b.magDec ?? null, ...(b.grid && { grid: b.grid }),
                                               objs: b.objs.map(record) }));
 const blobData = blob => new Promise((ok, ko) => {
@@ -2125,7 +2133,7 @@ async function openBriefing(file){
   leaveGesture();
   boards = j.boards.map(b => ({
     name: String(b.name || 'Phase').slice(0, 80), objs: (Array.isArray(b.objs) ? b.objs : []).filter(keep),
-    wpN: b.wpN || 1, nmPx: +b.nmPx || 0, prof: okProf(b.prof), map: known(b.map), cam: known(b.map) && b.cam || null,
+    nmPx: +b.nmPx || 0, prof: okProf(b.prof), map: known(b.map), cam: known(b.map) && b.cam || null,
     ...(!known(b.map) && okGrid(b.grid)), magDec: b.magDec ?? null, past: [], future: [] }));
   for (const [id, blob] of blobs){ imgBlobs.set(id, blob); imgEls.delete(id); idbPut(id, blob).catch(() => {}); }
   for (const b of boards) for (const o of b.objs) if (o.t === 'img') o.el = imageOf(o.id);
@@ -2237,7 +2245,7 @@ function importMission(m, f, base){
   /* coupe : plafond au-dessus du point le plus haut, largeur sur la longueur de la route */
   const maxFt = Math.max(0, ...wps.map(q => q.alt * 3.28084));
   const nm = wps.slice(1).reduce((s, q, i) => s + Math.hypot(q.x - wps[i].x, q.y - wps[i].y) / 1852, 0);
-  const b = { name: base, objs: out, wpN: wps.length + 1, nmPx: nmPxM,
+  const b = { name: base, objs: out, nmPx: nmPxM,
               prof: { ceil: [10000, 20000, 40000, 60000].find(v => v >= maxFt * 1.1) || 60000,
                       range: [10, 20, 40, 80, 160].find(v => v >= nm * 1.08) || 160, linked: wps.length > 1,
                       ...(!onMap && { grid: true }) },
@@ -2579,7 +2587,7 @@ function demoBoards(){
     sym('blast', gx(71), groundY() - 10, 0, O, .7, { v:'p' }),
   ];
   const view = { x: (bx + kx) / 2, y: (by + ky) / 2 + (ky - by) * .1, z: zoom };
-  const board = (name, objs) => ({ name, objs, wpN: 4, nmPx: 0, prof: { ceil, range, linked: true },
+  const board = (name, objs) => ({ name, objs, nmPx: 0, prof: { ceil, range, linked: true },
     map: { theatre: 'Caucasus', style: 'topo' }, cam: { ...view }, magDec: null, past: [], future: [] });
   /* une planche sans carte : l'écran radar du F/A-18C en TWS, tel qu'on l'explique au
      briefing (docs/RADAR.md) — écran ancré, pistes posées dessus */
@@ -2611,7 +2619,7 @@ function demoBoards(){
     { t:'text', s:'jaune : piste TWS · blanc : piste système', x:640, y:164, c:G, w:2 },
     { t:'text', s:'trait sous le carré : cible chaude', x:640, y:188, c:WH, w:2 },
   ];
-  const flat = (name, objs) => ({ name, objs, wpN:1, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
+  const flat = (name, objs) => ({ name, objs, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
                                   magDec:null, past:[], future:[] });
   /* l'interception vue par le radar du porteur : trois bandits, trois aspects — de face,
      au travers, qui s'éloigne. Le panneau du bas montre la vue radar liée. */
@@ -2625,7 +2633,7 @@ function demoBoards(){
     sym('fighter', h3x, h3y, 0, R, 1, { lbl:'BANDIT 3' }),
   ];
   return [board('Ingress', ingress), board('Attaque', attaque),
-          { ...board('Interception', interception), wpN:1, prof:{ ceil, range, linked:false, pane:'fa18', rrng:40 } },
+          { ...board('Interception', interception), prof:{ ceil, range, linked:false, pane:'fa18', rrng:40 } },
           flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
 
@@ -2635,15 +2643,15 @@ function demoBoards(){
   if (!data){
     try {
       const v2 = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
-      if (v2 && Array.isArray(v2.objs)) data = { cur:0, boards:[{ name:'Phase 1', objs:v2.objs, wpN:v2.wpN }] };
+      if (v2 && Array.isArray(v2.objs)) data = { cur:0, boards:[{ name:'Phase 1', objs:v2.objs }] };
     } catch(_){}
   }
   boards = (data && Array.isArray(data.boards) && data.boards.length)
     ? data.boards.map(b => ({ name: b.name || 'Phase', objs: Array.isArray(b.objs) ? b.objs : [],
-                              wpN: b.wpN || 1, nmPx: b.nmPx || 0, prof: b.prof,
+                              nmPx: b.nmPx || 0, prof: b.prof,
                               map: b.map || null, cam: b.cam || null, magDec: b.magDec ?? null,
                               past: [], future: [] }))
-    : [{ name:'Phase 1', objs:[], wpN:1, nmPx:0, past:[], future:[] }];
+    : [{ name:'Phase 1', objs:[], nmPx:0, past:[], future:[] }];
   if (data && data.unit === 'km'){ unit = 'km'; $('unit').textContent = 'km'; }
   split = !!(data && data.split);
   if (data && data.showAF === false) showAF = false;

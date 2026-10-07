@@ -1196,6 +1196,66 @@ test('Import : ravitailleur et AWACS posés, accrochés à leur orbite, route ti
   ok(a.s('objs.some(o => o.t === "sym" && o.k === "wp")'), 'la route du vol joueur a disparu');
 });
 
+/* ---------- lot 13 : numéros de waypoint ---------- */
+const WPX = [200, 300, 400, 500, 600], WPY = 300;
+const wpNums = a => a.s(`objs.filter(o => o.t === 'sym' && o.k === 'wp').map(o => o.n).join()`);
+function poseWps(a, n){ a.tile('wp'); for (let i = 0; i < n; i++) a.click(WPX[i], WPY); }
+function delWp(a, i){ a.key('v'); a.click(WPX[i], WPY); a.key('Delete'); }
+
+test('Waypoints : tous supprimés, le suivant repart de 1', async (ok) => {
+  const a = await open();
+  poseWps(a, 3);
+  ok(wpNums(a) === '1,2,3', `posés : ${wpNums(a)}`);
+  for (let i = 0; i < 3; i++) delWp(a, i);
+  ok(wpNums(a) === '', `restants : ${wpNums(a)}`);
+  a.tile('wp'); a.click(WPX[4], WPY);
+  ok(wpNums(a) === '1', `nouveau waypoint : ${wpNums(a)}`);
+});
+
+test('Waypoints : le dernier supprimé rend son numéro', async (ok) => {
+  const a = await open();
+  poseWps(a, 3);
+  delWp(a, 2);
+  a.tile('wp'); a.click(WPX[4], WPY);
+  ok(wpNums(a) === '1,2,3', `numéros : ${wpNums(a)}`);
+});
+
+test('Waypoints : un trou au milieu est comblé, puis la suite reprend', async (ok) => {
+  const a = await open();
+  poseWps(a, 4);
+  delWp(a, 1);
+  ok(wpNums(a) === '1,3,4', `après suppression : ${wpNums(a)}`);
+  a.tile('wp'); a.click(WPX[4], WPY);
+  ok(a.s('objs.at(-1).n') === 2, `le nouveau porte ${a.s('objs.at(-1).n')}`);
+  a.click(WPX[1], WPY + 120);
+  ok(a.s('objs.at(-1).n') === 5, `le suivant porte ${a.s('objs.at(-1).n')}`);
+});
+
+test('Waypoints : la copie prend le plus petit numéro libre', async (ok) => {
+  const a = await open();
+  poseWps(a, 3);
+  delWp(a, 0);
+  a.key('v'); a.click(WPX[2], WPY);
+  a.button('#dup');
+  ok(a.s('objs.at(-1).n') === 1, `la copie porte ${a.s('objs.at(-1).n')}`);
+});
+
+test('Waypoints : un briefing ouvert, au compteur d\'avant, numérote au plus petit libre', async (ok) => {
+  const a = await open();
+  const wp = (n, x) => ({ t:'sym', k:'wp', x, y:WPY, a:0, s:1, c:'#ffcc00', w:3, n });
+  a.openFile(a.json({ format:'fl-briefing-board', version:1, boards:[{ name:'Phase 1', wpN:9, objs:[wp(1, WPX[0]), wp(4, WPX[1])] }], images:{} }));
+  await pause(400);
+  ok(wpNums(a) === '1,4', `ouverts : ${wpNums(a)}`);
+  a.tile('wp'); a.click(WPX[4], WPY);
+  ok(a.s('objs.at(-1).n') === 2, `le nouveau porte ${a.s('objs.at(-1).n')}`);
+});
+
+test('Guides du panneau ⓘ : la page mise en forme, pas le Markdown brut', async (ok) => {
+  const a = await open();
+  const links = [...a.d.querySelectorAll('a[href^="docs/"]')].map(l => l.getAttribute('href'));
+  ok(links.length >= 3 && links.every(h => /\.html$/.test(h)), `liens : ${links.join(', ')}`);
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

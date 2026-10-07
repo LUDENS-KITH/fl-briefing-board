@@ -14,7 +14,7 @@ enseigner l'emploi du radar de son module sur le même tableau que la manœuvre.
 
 Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8 sont des
 propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
-demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07.
+demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lot 13 à celle du 2026-10-08.
 
 ## 2. Vue d'ensemble
 
@@ -32,6 +32,7 @@ demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07.
 | 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | en ligne le 2026-10-07 |
 | 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
 | 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | en ligne le 2026-10-07 |
+| 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | engagé le 2026-10-08 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -601,6 +602,39 @@ et Overlord 1 posés et étiquetés. Constat en passant, sans verdict : son « W
 Tanker » est à 7,6 NM de la branche droite du Texaco, au même niveau ; la largeur réelle
 de l'hippodrome n'étant pas écrite, rien ne dit qu'il est hors de l'orbite.
 
+### Lot 13 — Numéros de waypoint
+
+**Objectif :** qu'un waypoint posé après des suppressions prenne un numéro qui suit la
+route, pas celui d'un compteur.
+
+Demandé par Vince le 2026-10-08 : « la valeur au centre s'incrémente automatiquement de
++1, même si les waypoints des numéros précédents ont été supprimés ».
+
+**Constat.** Chaque planche gardait un compteur `wpN`, augmenté à chaque pose ou copie
+de waypoint, jamais diminué par une suppression (seul « Effacer » le remettait à 1).
+Trois effets : des trous dans la numérotation affichée ; ces trous recopiés tels quels
+dans la DTC (le waypoint 7 du tableau devient le STPT 7) ; et, après assez de poses et
+de suppressions, un compteur au-delà de 59 qui fait refuser l'export DTC d'une planche
+de trois points.
+
+| | |
+|---|---|
+| Règle | un nouveau waypoint, posé ou copié, prend le **plus petit numéro libre** parmi les waypoints de sa vue (plan ou coupe) |
+| Les autres | gardent leur numéro : pas de renumérotation, pour rester ceux de la mission importée (« WP10 - RDV Tanker ») et de la DTC |
+| Modèle | `wpN` disparaît ; un fichier qui le porte s'ouvre, le champ est ignoré |
+| En passant | les liens Guides du panneau ⓘ visaient le Markdown brut (`docs/GUIDE.md`, servi en texte) ; ils visent la page que GitHub Pages en fait (`docs/GUIDE.html`) |
+
+**Fait quand** — tests rouges avant le code, au banc : tout supprimé, le suivant est 1 ;
+le dernier supprimé rend son numéro ; un trou au milieu est comblé, puis la suite reprend ;
+la copie prend le plus petit libre ; un briefing ouvert avec un vieux compteur numérote au
+plus petit libre ; les liens des guides finissent en `.html`.
+
+**Documentation** : GUIDE FR et EN-US (gestes), MODELE (`wpN` retiré), ETAT §2,
+CHANGELOG v1.13.
+
+État au 2026-10-08 : livré sur la branche `lot-13-numeros`, fusion à valider. Banc
+71/71, les 6 scénarios nouveaux rouges avant le code ; vrais clics dans Brave.
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -633,6 +667,7 @@ avis contraire :
 | DTC : le F/A-18C d'abord | le seul module dont le format a été lu ; F-16C ensuite, un module à la fois |
 | L'accroche se range dans le repère du dessin de l'hôte, en tailles de symbole, et non en terrain | c'est ce repère que voit le pilote : un symbole garde sa taille à l'écran quand la carte zoome |
 | Accrocher : un symbole ou un texte, à un symbole de la même vue | les seuls objets de taille fixe à l'écran ; ce qui suit le terrain (zone, cercle, flèche) y reste déjà |
+| Waypoint : plus petit numéro libre, sans renuméroter les autres | renuméroter casserait l'accord avec la mission importée et les étiquettes qui citent un numéro ; un compteur laissait des trous jusque dans la DTC |
 | Import : ravitailleurs et AWACS seulement, à leur tâche DCS | ce sont eux qu'un pilote cherche au briefing ; les autres appareils de l'IA (CAP, cibles) seraient un autre lot |
 | Orbite importée en symbole, pas à l'échelle | la mission ne donne ni la largeur d'un Race-Track ni le rayon d'un Circle : les dessiner serait inventer |
 | Nouveau briefing : préférences d'affichage gardées, pas de raccourci | ce sont des réglages du poste, pas le briefing ; `Ctrl+N` ouvre une fenêtre du navigateur |
@@ -657,5 +692,6 @@ avis contraire :
 | 2026-10-07 | Fusion des lots 10 et 11 : v1.11 en ligne |
 | 2026-10-07 | Lot 12 : ravitailleurs et AWACS de la mission importée ; lancement |
 | 2026-10-07 | Fusion du lot 12 : v1.12 en ligne |
+| 2026-10-08 | Lot 13 : numéros de waypoint au plus petit libre ; lancement |
 
-**À trancher par Vince :** rien. Les douze lots du plan sont en ligne.
+**À trancher par Vince :** la fusion du lot 13.

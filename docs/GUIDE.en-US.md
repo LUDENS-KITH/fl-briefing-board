@@ -188,6 +188,10 @@ drag and drop your own background image.
 - **Place and orient in one gesture:** choose a shape, press on the board, keep the
   pointer down and drag toward the desired heading. Drag length controls size. A simple
   click places the shape at default size, heading north.
+- **Waypoint numbers:** a new waypoint (placed or duplicated) takes the **lowest free
+  number** in its view. Delete 2 from a 1-2-3-4 route: the next waypoint is 2, then 5.
+  Delete them all and numbering restarts at 1. The others keep their number, so they
+  stay those of the imported mission and the DTC.
 - **Grab again:** touching an existing shape grabs it without switching tools, including
   by a wingtip. The selection tool (`V`) also grabs arrows, lines and background maps.
   The blue handle rotates and resizes; `←` and `→` rotate by one degree, with `Shift`
