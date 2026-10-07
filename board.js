@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.10', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.11', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -271,6 +271,49 @@ let uidN = 0;
 const newUid = () => 'o' + Date.now().toString(36) + (uidN++).toString(36);
 const withUids = list => { for (const o of list) if (!o.uid) o.uid = newUid(); return list; };
 
+/* ---------- accroche (lot 10) ----------
+   Un objet accroché (champ hook) se range dans le repère du dessin de son hôte : en
+   tailles de symbole, axes tournés avec lui. Sa position se déduit de l'hôte au zoom
+   courant : sur une carte, l'hôte garde sa taille à l'écran quand la carte zoome, ce
+   qui est posé sur lui aussi. Un objet qui a bougé depuis son dernier placement
+   (glissé, tourné, recalé) garde sa nouvelle place : c'est son accroche qui suit. */
+const placed = new WeakMap();                    // objet → { x, y, a } à son dernier placement
+const validHook = k => !!k && typeof k.to === 'string' && Number.isFinite(k.u) && Number.isFinite(k.v);
+const hostOf = o => validHook(o.hook) && objs.find(h => h !== o && h.uid === o.hook.to) || null;
+/* le repère de l'hôte : sa taille dessinée, rendue en unités de sa vue, et son cap */
+function hookFrame(h){
+  const sh = SHAPES[h.k] || {}, k = (h.v || 'm') === 'm' ? camK() : 1;
+  return { S: SIZE * (h.s || 1) / k, a: sh.upright ? 0 : (h.a || 0) };
+}
+function hookFrom(o, h){
+  const { S, a } = hookFrame(h), dx = (o.x - h.x) / S, dy = (o.y - h.y) / S, c = Math.cos(a), s = Math.sin(a);
+  return { to: h.uid, u: dx * c + dy * s, v: dy * c - dx * s, ...(typeof o.a === 'number' && { da: o.a - a }) };
+}
+function hookPlace(o, h){
+  const { S, a } = hookFrame(h), { u, v, da } = o.hook, c = Math.cos(a), s = Math.sin(a);
+  o.x = h.x + (u * c - v * s) * S; o.y = h.y + (u * s + v * c) * S;
+  if (Number.isFinite(da) && typeof o.a === 'number') o.a = a + da;
+}
+/* place chaque objet accroché après son hôte (une chaîne se résout de proche en proche) */
+function settle(list = objs){
+  const byUid = new Map(), done = new Set();
+  for (const o of list) if (o.uid) byUid.set(o.uid, o);
+  const visit = o => {
+    if (done.has(o)) return;
+    done.add(o);
+    const h = validHook(o.hook) && byUid.get(o.hook.to);
+    if (!h || h === o || (h.v || 'm') !== (o.v || 'm') || !Number.isFinite(h.x)) return;
+    visit(h);
+    const p = placed.get(o);
+    if (p && (p.x !== o.x || p.y !== o.y || p.a !== o.a)) o.hook = hookFrom(o, h);
+    else hookPlace(o, h);
+    placed.set(o, { x: o.x, y: o.y, a: o.a });
+  };
+  for (const o of list) visit(o);
+}
+/* accrocher la sélection : elle attend qu'on touche son hôte */
+let hooking = null;
+
 /* ---------- historique par instantanés ---------- */
 let past = [], future = [];
 const snap  = o => ({ ...o, pts: o.pts && o.pts.map(p => p.slice()) });
@@ -310,7 +353,7 @@ function load(i){
   prof = b.prof ? { ...b.prof } : { ceil: 40000, range: 40 };
   mapCfg = b.map ? { ...b.map } : null; cam = b.cam ? { ...b.cam } : null;
   magDec = b.magDec ?? null;
-  sel = null; draft = null; drag = null;
+  sel = null; draft = null; drag = null; hooking = null;
   syncMapUI();
 }
 function leaveGesture(){ finishZone(); closeText(true); }
@@ -405,6 +448,7 @@ function draw(){
 }
 function drawFrame(){
   const w = stage.clientWidth, h = planH();
+  settle();
   route = computeRoute();
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = BG();
@@ -1020,6 +1064,14 @@ function handles(o){
     ctx.beginPath(); ctx.arc(h.x, h.y, 7, 0, 7); ctx.fill(); ctx.stroke();
   }
   if (o.locked) pin(b.x + b.w + 6, b.y - 6);
+  /* l'accroche : un pointillé vers l'hôte, ou vers les objets accrochés à la sélection */
+  const src = o.__src || o, host = hostOf(src);
+  ctx.strokeStyle = ctx.fillStyle = '#2F8CFF'; ctx.lineWidth = 1.5;
+  for (const p of [...(host ? [host] : []), ...objs.filter(c => hostOf(c) === src)]){
+    const q = toScreen(p);
+    ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+    ctx.setLineDash([]); ctx.beginPath(); ctx.arc(q.x, q.y, 3, 0, 7); ctx.fill();
+  }
   ctx.restore();
 }
 /* l'épingle d'un objet ancré, au coin du cadre de sélection — jamais dans un export,
@@ -1121,6 +1173,7 @@ function hit(o, x, y){
 /* on désigne à l'écran : les tolérances (12 px, rayon d'un symbole) sont des pixels
    écran, quel que soit le zoom de la carte */
 const topmost = (x, y, keep) => {
+  settle();                                     // un zoom pas encore dessiné a pu déplacer un objet accroché
   const [sx, sy] = view === 'm' ? w2s(x, y) : [x, y];
   for (let i = objs.length-1; i >= 0; i--)
     if (inView(objs[i]) && keep(objs[i]) && hit(toScreen(objs[i]), sx, sy)) return objs[i];
@@ -1176,6 +1229,7 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 function backToSelect(){
   closeText(true);
   cancelGesture();
+  if (hooking){ hooking = null; $('toast').hidden = true; }   // l'accroche en attente est abandonnée
   sel = null;
   setTool('select');
   commit();
@@ -1279,6 +1333,7 @@ cv.addEventListener('pointerdown', e => {
     startPan(sx, sy); return;
   }
   closeText(true);
+  if (hooking){ hookTo(x, y); return; }                              // 🔗 : ce qu'on touche est l'hôte
   if (draft && draft.t === 'zone' && (draft.v || 'm') !== view) finishZone();
   if (PROF_TOOLS.includes(tool) && view !== 'p') return;            // outils propres à la coupe
 
@@ -1408,7 +1463,8 @@ cv.addEventListener('pointermove', e => {
   if (draft && draft.t === 'zone'){ draft.hov = [x, y]; draw(); return; }
 
   if (!draft){
-    cv.style.cursor = view === 'p' && prof.pane ? 'default'
+    cv.style.cursor = hooking ? 'alias'
+      : view === 'p' && prof.pane ? 'default'
       : cam && view === 'm' && (tool === 'pan' || spaceHeld) ? 'grab'
       : view === 'p' && prof.linked && routeHit(x, y) ? 'ns-resize'
       : cursorOver(tool === 'select' ? pick(x, y) : tool === 'sym' ? grab(x, y) : null);
@@ -1655,7 +1711,7 @@ for (const [g, titre] of GROUPS){
 pal.addEventListener('click', e => {
   const b = e.target.closest('.tile'); if (!b) return;
   finishZone();
-  symKey = b.dataset.k; tool = 'sym'; sel = null; draw();
+  symKey = b.dataset.k; tool = 'sym'; sel = null; hooking = null; draw();
   pal.querySelectorAll('.tile').forEach(t => t.classList.toggle('on', t === b));
   document.querySelectorAll('[data-tool]').forEach(t => t.classList.remove('on'));
 });
@@ -1663,7 +1719,7 @@ pal.addEventListener('click', e => {
 /* un seul outil courant, que le bouton soit dans la barre ou dans le bandeau de la coupe */
 function setTool(t){
   finishZone();
-  tool = t;
+  tool = t; hooking = null;
   document.querySelectorAll('[data-tool]').forEach(x => x.classList.toggle('on', x.dataset.tool === t));
   pal.querySelectorAll('.tile').forEach(x => x.classList.remove('on'));
   if (tool !== 'select') sel = null;
@@ -1715,6 +1771,8 @@ $('dup').onclick = () => {
   snapshot();
   const kk = (sel.v || 'm') === 'm' ? camK() : 1;
   const o = snap(sel); delete o.locked; delete o.uid; move(o, 24 / kk, 24 / kk);   // la copie naît libre, et neuve
+  const host = hostOf(o);                                   // accrochée : au même hôte, à sa place décalée
+  if (host) o.hook = hookFrom(o, host);
   if (o.t === 'sym' && SHAPES[o.k].num) o.n = wpN++;
   objs.push(o); sel = o; commit();
 };
@@ -1726,13 +1784,43 @@ $('lock').onclick = () => {
   if (sel.locked) delete sel.locked; else sel.locked = true;
   commit();
 };
+/* accrocher (lot 10) : la sélection libre attend qu'on touche son hôte ; accrochée, elle
+   se décroche sur place */
+$('hook').onclick = () => {
+  if (!sel){ toast('Sélectionnez d\'abord l\'objet à accrocher (outil Sélection, V)'); return; }
+  if (sel.t !== 'sym' && sel.t !== 'text'){ toast('Seuls un symbole ou un texte s\'accrochent'); return; }
+  if (hostOf(sel)){ snapshot(); delete sel.hook; commit(); toast('Décroché : il reste à sa place'); return; }
+  leaveGesture();
+  hooking = sel;
+  toast('Touchez le symbole auquel l\'accrocher — Échap pour annuler', 8000);
+  draw();
+};
+const shapeName = o => o.lbl || (SHAPES[o.k] || {}).label || 'symbole';
+/* l'objet lui-même ne compte pas : toucher le ravitailleur posé sur l'orbite désigne l'orbite */
+function hookTo(x, y){
+  const o = hooking;
+  hooking = null;
+  if (!objs.includes(o)){ draw(); return; }
+  const h = topmost(x, y, c => c !== o && c.t === 'sym');
+  if (!h){ toast('Rien d\'accroché : touchez un symbole'); draw(); return; }
+  if ((h.v || 'm') !== (o.v || 'm')){ toast('Rien d\'accroché : l\'hôte doit être dans la même vue'); draw(); return; }
+  for (let p = h, n = 0; p && n < 64; p = hostOf(p), n++)
+    if (p === o){ toast(`Boucle refusée : ${shapeName(h)} est déjà accroché à cet objet`); draw(); return; }
+  snapshot();
+  withUids([h]);
+  o.hook = hookFrom(o, h);
+  placed.set(o, { x: o.x, y: o.y, a: o.a });
+  sel = o;
+  commit();
+  toast(`Accroché à ${shapeName(h)} : il le suit au zoom, au déplacement, en rotation`);
+}
 /* un refus n'est jamais muet : message bref en haut du tableau */
 const LOCKED = 'Objet ancré — 📌 ou K pour le libérer';
 let toastT = 0;
-function toast(msg){
+function toast(msg, ms = 2200){
   const t = $('toast');
   t.textContent = msg; t.hidden = false;
-  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2200);
+  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms);
 }
 $('clear').onclick = () => {
   if (objs.length && confirm(`Effacer la planche « ${boards[cur].name} » ?`)){
@@ -1863,8 +1951,9 @@ async function kneeboardCanvas(){
     ctx.beginPath(); ctx.rect(area.x, area.y, area.w, area.h); ctx.clip();
     if (ecam){
       const keepCam = cam; cam = ecam; vp = { w: area.w, h: area.h };
-      try { ctx.translate(area.x, area.y); drawPlan(area.w, area.h); }
-      finally { cam = keepCam; vp = null; }
+      /* un autre zoom que l'écran : les objets accrochés se replacent sur leur hôte */
+      try { settle(); ctx.translate(area.x, area.y); drawPlan(area.w, area.h); }
+      finally { cam = keepCam; vp = null; settle(); }
     } else {
       ctx.setTransform(k, 0, 0, k, ox, oy);
       for (const o of planObjs) drawObj(o);
@@ -2361,6 +2450,7 @@ addEventListener('keydown', e => {
   if (cam && (e.key === '+' || e.key === '=')){ const [w, h] = viewSize(); zoomAt(w / 2, h / 2, .5); return; }
   if (cam && e.key === '-'){ const [w, h] = viewSize(); zoomAt(w / 2, h / 2, -.5); return; }
   if (k === 'k'){ $('lock').click(); return; }
+  if (k === 'j'){ $('hook').click(); return; }
   const map = { v:'select', p:'pen', a:'arrow', l:'line', c:'circle', r:'rect', t:'text', e:'erase',
                 z:'zone', m:'ruler', h:'pan' };
   if (map[k]) bar.querySelector(`[data-tool="${map[k]}"]`).click();
@@ -2421,6 +2511,10 @@ function demoBoards(){
     sym('wp', kx - d(60), ky + d(40), 0, G, 1, { n:3, alt:500 }),
     sym('sam', kx + d(90), ky - d(60), 0, R, 1, { lbl:'SA-11' }),
     sym('awacs', bx - d(160), by - d(230), 1.57, G, .8, { lbl:'MAGIC' }),
+    /* l'hippodrome du ravitailleur, et le ravitailleur accroché sur sa branche nord, cap
+       le long de la branche (lot 10) : il y reste à tout zoom */
+    sym('orbit', bx - d(210), by - d(95), .35, G, 2.2),
+    sym('tanker', bx - d(210), by - d(95), 0, G, .7, { lbl:'TEXACO', hook: { to:'c8', u:.2, v:-.42, da:Math.PI / 2 } }),
   ]);
   const ingress = [...common(),
     sym('fighter', bx - d(150), by + d(40), .8, B, 1, { lbl:'UZI 1-1', uid:'uzi11' }),   // en mer, en approche

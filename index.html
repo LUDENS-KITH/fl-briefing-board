@@ -178,6 +178,7 @@
   <span class="sep"></span>
   <button id="dup"   title="Dupliquer la sélection (Ctrl+D)">⧉</button>
   <button id="lock"  title="Ancrer / libérer la sélection (K) — ancrée, elle ne se déplace plus et ne s'efface plus ; on pose par-dessus">📌</button>
+  <button id="hook"  title="Accrocher la sélection à un symbole, puis touchez ce symbole (J) — accrochée, elle le suit au zoom, au déplacement, en rotation ; 🔗 de nouveau pour la décrocher">🔗</button>
   <button id="flip"  title="Flèche double sens">⇄</button>
   <button id="front" title="Mettre au premier plan">↑</button>
   <button id="undo"  title="Annuler (Ctrl+Z)">↶</button>
@@ -257,7 +258,7 @@
       </span>
     </div>
     <div id="tabs"></div>
-    <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
+    <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · 🔗 ou J : accrocher à un symbole · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
     <div id="toast" hidden></div>
     <div id="pbadge" hidden></div>
   </div>
@@ -319,7 +320,7 @@
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="miz.js?v=1.1"></script>
-<script src="board.js?v=1.10"></script>
+<script src="board.js?v=1.11"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

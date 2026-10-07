@@ -895,6 +895,183 @@ test('DTC : plusieurs vols F/A-18C — le meneur choisit, seuls les Hornet sont 
   ok(got.length === 1 && /COLT 2/.test(a.toast()), `rendu : ${got.length} fichier, « ${a.toast()} »`);
 });
 
+/* ---------- lot 10 : accrocher un symbole à un autre ----------
+   L'orbite (hippodrome) est posée par un glissé vers le haut : cap 0, taille ≈ 3. Le
+   ravitailleur est posé à l'écart puis glissé sur la branche du haut, à l'outil Sélection :
+   avec une forme choisie, toucher l'orbite la saisirait au lieu de poser. */
+const ORB = [500, 350], BRANCH = [520, 307];
+async function orbitTanker(a, { map = false } = {}){
+  if (map) a.map();
+  a.tile('orbit'); a.drag(ORB[0], ORB[1], ORB[0], ORB[1] - 150);
+  a.tile('tanker'); a.click(800, 520);
+  a.key('v'); a.drag(800, 520, BRANCH[0], BRANCH[1]);
+  await pause(450);
+}
+/* l'écart du ravitailleur à l'orbite, en pixels écran, tel que le voit le pilote */
+const GAP = `(() => { const t = objs.find(o => o.k === 'tanker'), b = objs.find(o => o.k === 'orbit');
+  const p = w2s(t.x, t.y), q = w2s(b.x, b.y); return JSON.stringify([p[0] - q[0], p[1] - q[1]]); })()`;
+const gap = a => JSON.parse(a.s(GAP));
+const same = (p, q, tol = .5) => Math.abs(p[0] - q[0]) <= tol && Math.abs(p[1] - q[1]) <= tol;
+const fmt = p => p.map(v => v.toFixed(1)).join(', ');
+const hooked = (a, k = 'tanker') => a.s(`(() => { const o = objs.find(o => o.k === '${k}'); return !!(o && o.hook && objs.some(h => h.uid === o.hook.to)); })()`);
+/* sélectionner le ravitailleur, 🔗, toucher l'orbite par son bord gauche, loin du ravitailleur */
+function hookTanker(a){ a.key('v'); a.click(...BRANCH); a.key('j'); a.click(ORB[0] - 60, ORB[1]); }
+async function zoomSteps(a, key, n){ for (let i = 0; i < n; i++) a.key(key); await pause(450); }
+
+test('Accroche, carte : non accroché, le ravitailleur quitte l\'orbite au zoom (le constat)', async (ok) => {
+  const a = await open();
+  await orbitTanker(a, { map: true });
+  const g0 = gap(a);
+  await zoomSteps(a, '-', 2);
+  ok(!same(gap(a), g0, 2), `écart inchangé au dézoom (${fmt(g0)} → ${fmt(gap(a))}) : le témoin ne voit plus le défaut`);
+}, true);
+
+test('Accroche, carte : accroché, le ravitailleur reste sur la branche à tout zoom', async (ok) => {
+  const a = await open();
+  await orbitTanker(a, { map: true });
+  hookTanker(a);
+  ok(hooked(a), `ravitailleur non accroché (message : « ${a.toast()} »)`);
+  ok(/accroch/i.test(a.toast()), `accroche muette (message : « ${a.toast()} »)`);
+  const g0 = gap(a);
+  await zoomSteps(a, '+', 3);
+  ok(same(gap(a), g0), `zoom avant : ${fmt(g0)} → ${fmt(gap(a))}`);
+  await zoomSteps(a, '-', 6);
+  ok(same(gap(a), g0), `zoom arrière : ${fmt(g0)} → ${fmt(gap(a))}`);
+});
+
+test('Accroche, sans carte : l\'orbite déplacée, tournée, agrandie emmène son ravitailleur', async (ok) => {
+  const a = await open();
+  await orbitTanker(a);
+  hookTanker(a);
+  const g0 = gap(a), a0 = a.s(`objs.find(o => o.k === 'tanker').a`);
+  a.key('v'); a.drag(ORB[0] - 60, ORB[1], ORB[0] - 160, ORB[1] + 50);          // glisser l'orbite
+  await pause(50);
+  ok(same(gap(a), g0), `déplacée : ${fmt(g0)} → ${fmt(gap(a))}`);
+  const c = JSON.parse(a.s(`JSON.stringify(w2s(sel.x, sel.y))`));
+  const h = JSON.parse(a.s('JSON.stringify(handleList(toScreen(sel))[0])'));
+  const r = Math.hypot(h.x - c[0], h.y - c[1]);
+  a.drag(h.x, h.y, c[0] + r, c[1]);                                            // un quart de tour à droite
+  await pause(50);
+  const turned = [-g0[1], g0[0]];                                              // (x, y) → (−y, x)
+  ok(same(gap(a), turned, 1), `tournée : attendu ${fmt(turned)}, lu ${fmt(gap(a))}`);
+  const a1 = a.s(`objs.find(o => o.k === 'tanker').a`);
+  ok(Math.abs(a1 - a0 - Math.PI / 2) < .02, `cap du ravitailleur : ${a0.toFixed(2)} → ${a1.toFixed(2)}`);
+  const h2 = JSON.parse(a.s('JSON.stringify(handleList(toScreen(sel))[0])'));
+  a.drag(h2.x, h2.y, c[0] + 2 * r, c[1]);                                      // deux fois plus grande
+  await pause(50);
+  ok(same(gap(a), [2 * turned[0], 2 * turned[1]], 1.5), `agrandie : attendu ${fmt(turned.map(v => 2 * v))}, lu ${fmt(gap(a))}`);
+});
+
+test('Accroche : le ravitailleur glissé reste accroché à sa nouvelle place', async (ok) => {
+  const a = await open();
+  await orbitTanker(a, { map: true });
+  hookTanker(a);
+  a.key('v'); a.drag(...BRANCH, BRANCH[0] - 40, BRANCH[1]);
+  await pause(450);
+  ok(hooked(a), 'décroché en le glissant');
+  const g0 = gap(a);
+  ok(Math.abs(g0[0] - (BRANCH[0] - 40 - ORB[0])) < 2, `pas à sa nouvelle place : ${fmt(g0)}`);
+  await zoomSteps(a, '-', 3);
+  ok(same(gap(a), g0), `au zoom : ${fmt(g0)} → ${fmt(gap(a))}`);
+});
+
+test('Accroche : 🔗 décroche, Ctrl+Z raccroche, Ctrl+Y décroche ; réouverture et fichier la gardent', async (ok) => {
+  const a = await open();
+  await orbitTanker(a);
+  hookTanker(a);
+  a.key('v'); a.click(...BRANCH); a.button('#hook');
+  ok(!hooked(a), '🔗 ne décroche pas');
+  ok(/décroch/i.test(a.toast()), `décroche muette (message : « ${a.toast()} »)`);
+  a.key('z', { ctrlKey: true });
+  ok(hooked(a), 'Ctrl+Z ne raccroche pas');
+  a.key('y', { ctrlKey: true });
+  ok(!hooked(a), 'Ctrl+Y ne décroche pas');
+  a.key('z', { ctrlKey: true });
+  const b = await reload();
+  ok(hooked(b), 'réouverture : décroché');
+  const f = await b.saved();
+  const c = await open();
+  c.openFile(c.json(JSON.parse(f.text))); await pause(300);
+  ok(hooked(c), 'fichier rouvert : décroché');
+  c.key('v'); c.drag(ORB[0] - 60, ORB[1], ORB[0] - 160, ORB[1]);
+  await pause(50);
+  ok(Math.abs(gap(c)[0] - (BRANCH[0] - ORB[0])) < 1, `fichier rouvert : l'orbite part seule (${fmt(gap(c))})`);
+});
+
+test('Accroche : refus expliqués ; toucher l\'objet lui-même désigne l\'hôte dessous ; Échap abandonne', async (ok) => {
+  const a = await open();
+  await orbitTanker(a);
+  a.key('Escape');
+  a.key('j');
+  ok(/sélection/i.test(a.toast()), `sans sélection : « ${a.toast()} »`);
+  a.key('z'); a.click(100, 100); a.click(200, 100); a.click(200, 200); a.key('Enter');
+  a.key('v'); a.click(150, 130); a.key('j');
+  ok(/symbole|texte/i.test(a.toast()) && a.s('!objs.some(o => o.t === "zone" && o.hook)'), `zone : « ${a.toast()} »`);
+  a.key('v'); a.click(...BRANCH); a.key('j'); a.click(900, 150);
+  ok(!hooked(a) && /rien|symbole/i.test(a.toast()), `le vide : « ${a.toast()} »`);
+  a.key('v'); a.click(...BRANCH); a.key('j'); a.key('Escape');
+  ok(a.s('sel') === null && a.s('tool') === 'select', 'Échap : la sélection reste');
+  a.click(ORB[0] - 60, ORB[1]);
+  ok(!hooked(a), 'Échap : l\'accroche a eu lieu quand même');
+  a.key('v'); a.click(...BRANCH); a.key('j'); a.click(...BRANCH);
+  ok(hooked(a), `le ravitailleur touché : l'orbite dessous n'est pas prise (« ${a.toast()} »)`);
+  const n = a.s('past.length');
+  a.key('v'); a.click(ORB[0] - 60, ORB[1]); a.key('j'); a.click(...BRANCH);
+  ok(!hooked(a, 'orbit') && /boucle/i.test(a.toast()), `boucle : « ${a.toast()} »`);
+  ok(a.s('past.length') === n, 'un refus laisse une entrée d\'historique');
+});
+
+test('Accroche : hôte supprimé, l\'objet reste ; Ctrl+Z rend l\'hôte et l\'accroche', async (ok) => {
+  const a = await open();
+  await orbitTanker(a);
+  hookTanker(a);
+  const t0 = a.s(`JSON.stringify((({ x, y }) => [x, y])(objs.find(o => o.k === 'tanker')))`);
+  a.key('v'); a.click(ORB[0] - 60, ORB[1]); a.key('Delete');
+  ok(a.s('objs.length') === 1, `objets : ${a.s('objs.length')}`);
+  ok(a.s(`JSON.stringify((({ x, y }) => [x, y])(objs.find(o => o.k === 'tanker')))`) === t0, 'le ravitailleur a bougé');
+  ok(!hooked(a), 'toujours accroché à un hôte effacé');
+  a.key('z', { ctrlKey: true });
+  ok(hooked(a), 'Ctrl+Z : l\'accroche ne revient pas');
+  a.key('v'); a.drag(ORB[0] - 60, ORB[1], ORB[0] - 160, ORB[1]);
+  await pause(50);
+  ok(Math.abs(gap(a)[0] - (BRANCH[0] - ORB[0])) < 1, `l'orbite rendue part seule (${fmt(gap(a))})`);
+});
+
+test('Accroche : la copie suit l\'hôte, « + phase » garde l\'accroche', async (ok) => {
+  const a = await open();
+  await orbitTanker(a);
+  hookTanker(a);
+  a.key('v'); a.click(...BRANCH); a.key('d', { ctrlKey: true });
+  ok(a.s(`objs.filter(o => o.k === 'tanker' && o.hook).length`) === 2, 'la copie n\'est pas accrochée');
+  const rel = () => a.s(`JSON.stringify(objs.filter(o => o.k === 'tanker').map(t => { const b = objs.find(o => o.k === 'orbit'); return [Math.round(t.x - b.x), Math.round(t.y - b.y)]; }))`);
+  const r0 = rel();
+  ok(JSON.parse(r0)[1][0] - JSON.parse(r0)[0][0] === 24, `copie pas décalée de 24 px : ${r0}`);
+  a.key('v'); a.drag(ORB[0] - 60, ORB[1], ORB[0] - 160, ORB[1] + 40);
+  await pause(50);
+  ok(rel() === r0, `orbite glissée : ${r0} → ${rel()}`);
+  a.button('.tab.add');
+  ok(hooked(a), '« + phase » : décroché');
+  a.key('v'); a.drag(ORB[0] - 160, ORB[1] + 40, ORB[0] - 60, ORB[1]);
+  await pause(50);
+  ok(rel() === r0, `nouvelle phase, orbite glissée : ${r0} → ${rel()}`);
+});
+
+test('Accroche : un texte accroché au ravitailleur suit l\'orbite (chaîne)', async (ok) => {
+  const a = await open();
+  await orbitTanker(a);
+  hookTanker(a);
+  a.key('t'); a.click(BRANCH[0] + 40, BRANCH[1] - 90);
+  const ti = a.d.getElementById('ti'); ti.value = 'TEXACO';
+  ti.dispatchEvent(new a.w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  a.key('v'); a.click(BRANCH[0] + 50, BRANCH[1] - 90); a.key('j'); a.click(...BRANCH);
+  ok(a.s(`!!objs.find(o => o.t === 'text').hook`), `texte non accroché : « ${a.toast()} »`);
+  const tx = () => a.s(`JSON.stringify((({ x, y }) => [Math.round(x), Math.round(y)])(objs.find(o => o.t === 'text')))`);
+  const t0 = JSON.parse(tx());
+  a.key('v'); a.drag(ORB[0] - 60, ORB[1], ORB[0] - 160, ORB[1] + 50);
+  await pause(50);
+  ok(same(JSON.parse(tx()), [t0[0] - 100, t0[1] + 50], 1), `texte : ${JSON.stringify(t0)} → ${tx()}`);
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

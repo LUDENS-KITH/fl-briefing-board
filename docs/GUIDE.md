@@ -194,6 +194,16 @@ d'une image reste possible.
   SAM, bullseye, image de fond. Couleur, trait et étiquette restent modifiables ; une
   copie naît libre. Pour libérer : outil Sélection, toucher l'objet, puis 📌 ou `K`. Sur
   une carte, glisser sur un objet ancré déplace la carte.
+- **Accrocher** (🔗 ou `J`) : un ravitailleur posé sur la branche de son hippodrome, une
+  piste sur son écran radar, y restent. Sélectionner l'objet, 🔗, puis toucher le
+  symbole qui le porte — toucher l'objet lui-même désigne le symbole dessous. Accroché,
+  il garde sa place sur ce symbole **à tout zoom de la carte** (un symbole garde sa
+  taille à l'écran : ce qui est posé dessus aussi), et le suit quand on le déplace, le
+  tourne ou l'agrandit, cap compris. On peut encore le glisser ou le tourner : il reste
+  accroché à sa nouvelle place. 🔗 de nouveau le décroche, sur place. Sélectionné, un
+  pointillé le relie au centre de son hôte. Un symbole ou un texte s'accroche, à un
+  symbole ; un texte peut s'accrocher au ravitailleur accroché à l'orbite. Une copie
+  (`Ctrl+D`) reste accrochée au même hôte ; effacer l'hôte laisse l'objet en place.
 - **Étiqueter** : double-clic sur une forme — « UZI 1-1 · FL250 · 450 kt ». L'étiquette
   suit la forme ; la vider la supprime.
 - **Courber une flèche** : la tracer droite, puis tirer la **poignée du milieu**.
@@ -243,7 +253,7 @@ d'une image reste possible.
 **Raccourcis** — `V` sélection · `A` flèche · `L` trait · `P` crayon · `C` cercle ·
 `R` rectangle · `Z` zone · `M` règle · `T` texte · `E` gomme · `H` main · `Ctrl+Z` /
 `Ctrl+Y` / `Ctrl+D` · `PgPréc` / `PgSuiv` planches · `+` / `−` zoom de la carte · `K`
-ancrer · `Échap` ou clic droit : retour à la sélection · `Ctrl+S` enregistrer le briefing ·
+ancrer · `J` accrocher · `Échap` ou clic droit : retour à la sélection · `Ctrl+S` enregistrer le briefing ·
 `Ctrl+O` l'ouvrir · `F5` présenter · glisser un `.miz` : importer la mission.
 
 ## Ce qu'il ne fait pas
