@@ -31,7 +31,7 @@ demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07.
 | 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | en ligne le 2026-10-06 |
 | 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | en ligne le 2026-10-07 |
 | 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
-| 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | engagé le 2026-10-07 |
+| 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | en ligne le 2026-10-07 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -594,7 +594,8 @@ et sur la mission :
 **Documentation** : GUIDE FR et EN-US (import), MODELE (import d'une mission), ETAT §2,
 CHANGELOG v1.12.
 
-État au 2026-10-07 : livré sur la branche `lot-12-soutien`, fusion à valider.
+État au 2026-10-07 : fusionné (#15), v1.12 en ligne ; la mission
+de Vince réimportée sur la démo publique montre Texaco 11 et Overlord 1 sur leurs orbites.
 `test_miz` 91/91 et banc 65/65, rouges avant le code. Sur la mission de Vince : Texaco 11
 et Overlord 1 posés et étiquetés. Constat en passant, sans verdict : son « WP10 - RDV
 Tanker » est à 7,6 NM de la branche droite du Texaco, au même niveau ; la largeur réelle
@@ -655,5 +656,6 @@ avis contraire :
 | 2026-10-07 | Lot 11 : nouveau briefing, dans la même PR que le lot 10 (v1.11) ; lancement |
 | 2026-10-07 | Fusion des lots 10 et 11 : v1.11 en ligne |
 | 2026-10-07 | Lot 12 : ravitailleurs et AWACS de la mission importée ; lancement |
+| 2026-10-07 | Fusion du lot 12 : v1.12 en ligne |
 
-**À trancher par Vince :** la fusion du lot 12.
+**À trancher par Vince :** rien. Les douze lots du plan sont en ligne.
