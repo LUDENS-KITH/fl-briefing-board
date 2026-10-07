@@ -15,7 +15,7 @@ objs[]          la scène de la planche montée : objets ordonnés, du fond vers
 past[] future[] l'historique de la planche montée, en instantanés complets
 ```
 
-Une planche est `{ name, objs, wpN, nmPx, past, future }`, plus `grid` pour une
+Une planche est `{ name, objs, nmPx, past, future }`, plus `grid` pour une
 mission importée sans carte (voir « Route dans la DTC »). `load(i)` la monte dans
 les variables globales, `stash()` les y recopie. Tout le reste du moteur ne connaît
 que la planche montée : ajouter les planches n'a changé aucune fonction de dessin ni
@@ -166,7 +166,6 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 | `symKey` | clé de `SHAPES` | forme que posera l'outil `sym` |
 | `color`, `width` | couleur FL, 2 / 4 / 8 | valeurs des **prochains** objets — et repeignent la sélection si elle existe |
 | `dark` | booléen | fond du tableau ; n'affecte aucun objet |
-| `wpN` | entier | prochain numéro de waypoint ; fait partie de l'historique |
 | `sel` | objet ou `null` | sélection courante (un seul objet) |
 | `draft` | objet ou `null` | objet en cours de tracé, pas encore dans `objs` |
 | `drag` | `{m, o, …}` ou `null` | geste en cours sur un objet existant |
@@ -442,7 +441,7 @@ désigne en premier.
 
 ## 6. Historique
 
-`past` et `future` contiennent des **instantanés complets** : `{ objs, wpN, nmPx }`, où
+`past` et `future` contiennent des **instantanés complets** : `{ objs, nmPx }`, où
 `objs` est copié objet par objet (`pts` dupliqué en profondeur, `el` partagé par
 référence — une image n'est jamais dupliquée). Plafond : 100 entrées.
 
@@ -455,7 +454,7 @@ en v0.1 (voir [ETAT.md](ETAT.md) §6).
 | | |
 |---|---|
 | Clé | `fl-briefing-board-v3` |
-| Contenu | `{ cur, unit, split, showAF, headRef, boards: [{ name, wpN, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
+| Contenu | `{ cur, unit, split, showAF, headRef, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
 | Images de fond | un objet `img` garde sa place, sa taille et son `id` ; ses octets vivent en **IndexedDB** (base `fl-briefing-board`, magasin `images`, clé = `id`). Au démarrage, `restoreImages()` les relit, retire les images introuvables en le disant, puis n'y garde que les `id` encore cités |
 | Écriture | à chaque `commit()` |
 | Échec | capturé et ignoré — le tableau reste utilisable, il ne se souvient pas |

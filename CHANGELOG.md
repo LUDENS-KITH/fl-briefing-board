@@ -3,6 +3,27 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.13 — 2026-10-08
+
+Lot 13 du [plan d'action](docs/PLAN.md), demandé par Vince : les numéros de waypoint.
+
+### Corrigé
+- **Un nouveau waypoint prend le plus petit numéro libre** de sa vue, posé ou copié. Le
+  compteur d'avant ne redescendait jamais : supprimer les waypoints 1 à 3 faisait
+  poser le 4, et la DTC du F/A-18C, limitée à 59, pouvait refuser une planche de trois
+  points. Les waypoints existants gardent leur numéro (mission importée, DTC).
+- Les liens **Guides** du panneau ⓘ ouvrent la page mise en forme, plus le Markdown brut.
+
+### Modèle
+- Le champ `wpN` disparaît des planches, de l'historique et des fichiers : le numéro se
+  déduit des waypoints présents. Un fichier qui le porte encore s'ouvre, le champ est
+  ignoré.
+
+### Vérifié en exécutant
+Banc 71/71, les 6 nouveaux scénarios rouges sur le moteur d'avant · `test_miz` 91/91,
+`test_radar` 26/26, déclinaison magnétique · dans Brave, vrais clics : 1-2-3-4 posés, 2
+supprimé, le suivant porte 2.
+
 ## v1.12 — 2026-10-07
 
 Lot 12 du [plan d'action](docs/PLAN.md), demandé par Vince : les ravitailleurs et AWACS
