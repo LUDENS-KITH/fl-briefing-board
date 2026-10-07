@@ -14,7 +14,9 @@ enseigner l'emploi du radar de son module sur le même tableau que la manœuvre.
 
 Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8 sont des
 propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
-demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lot 13 à celle du 2026-10-08.
+demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lot 13 à celle du 2026-10-08. Les lots 14 à 17
+forment le chantier **Visibilité** ([VISIBILITE.md](VISIBILITE.md)), demandé le 2026-10-08 :
+proposés, non engagés.
 
 ## 2. Vue d'ensemble
 
@@ -33,6 +35,10 @@ demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lo
 | 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
 | 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | en ligne le 2026-10-07 |
 | 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | en ligne le 2026-10-08 |
+| 14 | Visibilité : référencement technique (description, aperçu de partage, données structurées, texte lisible) | demande | S | D1 conseillée | v1.14 | proposé le 2026-10-08 |
+| 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.15 | proposé le 2026-10-08 |
+| 16 | Interface en anglais | demande | M-L | — | v1.16 | proposé le 2026-10-08 |
+| 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -636,6 +642,77 @@ CHANGELOG v1.13.
 nouveaux rouges avant le code ; vrais clics dans Brave, en local puis sur la démo
 publique (1-2-3-4 posés, 2 supprimé, le suivant porte 2).
 
+### Chantier Visibilité — lots 14 à 17
+
+Demandé par Vince le 2026-10-08 : « la mettre plus en avant, qu'elle ressorte des
+moteurs de recherche ». Constat, positionnement, ordre, diffusion et décisions D1 à D4 :
+[VISIBILITE.md](VISIBILITE.md). Ici, seulement ce qui se code et comment on sait que
+c'est fait.
+
+**Avant tout lot : D1, l'adresse.** Si le domaine change, il change avant la promotion.
+Le stockage du navigateur est lié à l'origine, et GitHub Pages redirige l'ancienne
+adresse : chaque briefing gardé sur `ludens-kith.github.io` deviendrait inatteignable.
+Bascule, si D1 la retient : fichier `CNAME` ; quelques jours avant, un bandeau dans le
+tableau « exportez vos briefings (⇩ Briefing) » ; liens du README, des guides, de
+SOUTENIR et du dépôt mis à jour ; HTTPS vérifié.
+
+#### Lot 14 — Référencement technique
+
+| | |
+|---|---|
+| Page du tableau | `<meta name="description">` (FR, 50 à 160 caractères) ; `<link rel="canonical">` sur l'adresse sans paramètre (`?demo` reste un lien, pas une page) ; Open Graph et carte Twitter avec `assets/readme/apercu-social.png` en adresse absolue ; données structurées `SoftwareApplication` (JSON-LD : nom, description, application web, gratuite, langues, éditeur LK Studio) |
+| Texte lisible | un bloc de présentation dans le HTML, lisible sans script (`<noscript>` et panneau ⓘ étoffé) : ce que fait l'outil, ses fonctions, les liens des guides |
+| Guides | `_config.yml` de Jekyll : titre, description, langue, image, pour que `docs/GUIDE.html` et `docs/GUIDE.en-US.html` portent les mêmes balises ; les documents internes (PLAN, ETAT, MODELE, banc) marqués `noindex` |
+| Plan du site | `sitemap.xml` (tableau, démo exclue, guides, présentations) ; `robots.txt` **seulement** si D1 donne un domaine, sinon il serait ignoré |
+| Vérification | le fichier de vérification Search Console que Vince obtient en déclarant le site |
+
+**Fait quand** — tests rouges avant le code :
+
+1. `node tools/test_seo.js` lit `index.html` et les guides servis : description
+   présente et de la bonne longueur, canonique sans paramètre, image Open Graph en
+   adresse absolue qui répond 200 en `image/png`, JSON-LD qui se parse et porte les
+   champs attendus, texte de présentation présent hors script.
+2. Sur la démo publiée : le validateur de données structurées de Google ne signale
+   aucune erreur, et un lien collé dans Discord affiche l'aperçu (capture).
+3. Banc de saisie inchangé (non-régression).
+
+#### Lot 15 — Pages de présentation
+
+Deux pages statiques, `en/` et `fr/`, liées par `hreflang`, qui sont l'adresse à partager
+et à classer ; le tableau reste à la racine, pour ne pas dérouter ceux qui l'ont en
+favori. Contenu : la phrase de présentation, quatre ou cinq fonctions illustrées
+(captures de la version publique, courtes animations), le bouton « Ouvrir le tableau »
+et « Voir la démo », « complète votre planificateur », une FAQ courte (gratuit ? hors
+ligne ? où vont mes données ? quels appareils pour la DTC ?), la mention de
+non-affiliation à Eagle Dynamics, LK Studio, Ko-Fi, Discord.
+
+**Fait quand** : `test_seo.js` étendu aux deux pages (titre, description,
+`hreflang` croisés, canonique, liens vers le tableau qui répondent 200) ; lisibles sur
+téléphone sans défilement horizontal (capture à 375 px de large) ; aucune image ne
+montre la couche des aérodromes.
+
+#### Lot 16 — Interface en anglais
+
+Toutes les chaînes affichées (boutons, info-bulles, aide, messages, boîtes de
+confirmation, étiquettes d'export) passent par un catalogue FR et EN-US ; la langue suit
+celle du navigateur et se règle dans l'interface ; le réglage est gardé ; `<html lang>`
+suit. Les identifiants DCS (types, noms de missions) ne se traduisent pas.
+
+**Fait quand** : un test rejoue l'application dans chaque langue et ne trouve aucune
+chaîne de l'autre langue à l'écran (texte visible, `title`, messages) ; le banc de saisie
+passe dans les deux langues ; les deux guides citent les libellés exacts de leur langue.
+
+#### Lot 17 — Mesure
+
+Un relevé hebdomadaire, dans un fichier du poste, des chiffres de Search Console
+(impressions, clics, requêtes, position) et du trafic GitHub (vues, visiteurs,
+référents : GitHub les efface après 14 jours). Si D3 retient un compteur de visites :
+réglé pour l'exemption de consentement de la CNIL, sans cookie, déclaré dans le guide.
+
+**Fait quand** : deux relevés successifs écrits et comparables ; si compteur, une
+visite de test vue dans son tableau de bord, et aucun cookie posé (vérifié dans le
+navigateur).
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -668,6 +745,9 @@ avis contraire :
 | DTC : le F/A-18C d'abord | le seul module dont le format a été lu ; F-16C ensuite, un module à la fois |
 | L'accroche se range dans le repère du dessin de l'hôte, en tailles de symbole, et non en terrain | c'est ce repère que voit le pilote : un symbole garde sa taille à l'écran quand la carte zoome |
 | Accrocher : un symbole ou un texte, à un symbole de la même vue | les seuls objets de taille fixe à l'écran ; ce qui suit le terrain (zone, cercle, flèche) y reste déjà |
+| Visibilité : l'adresse se décide avant toute promotion | le stockage du navigateur est lié à l'origine : un changement de domaine après coup rend inatteignables les briefings gardés par les visiteurs |
+| Visibilité : diffusion internationale après l'interface anglaise | une première impression sur une interface dans une autre langue ne se rejoue pas |
+| Visibilité : se présenter comme complémentaire des planificateurs | ils calculent (carburant, emports) ; le tableau sert à expliquer. Les affronter serait perdre sur leur terrain |
 | Waypoint : plus petit numéro libre, sans renuméroter les autres | renuméroter casserait l'accord avec la mission importée et les étiquettes qui citent un numéro ; un compteur laissait des trous jusque dans la DTC |
 | Import : ravitailleurs et AWACS seulement, à leur tâche DCS | ce sont eux qu'un pilote cherche au briefing ; les autres appareils de l'IA (CAP, cibles) seraient un autre lot |
 | Orbite importée en symbole, pas à l'échelle | la mission ne donne ni la largeur d'un Race-Track ni le rayon d'un Circle : les dessiner serait inventer |
@@ -695,5 +775,8 @@ avis contraire :
 | 2026-10-07 | Fusion du lot 12 : v1.12 en ligne |
 | 2026-10-08 | Lot 13 : numéros de waypoint au plus petit libre ; lancement |
 | 2026-10-08 | Fusion du lot 13 : v1.13 en ligne |
+| 2026-10-08 | Chantier Visibilité ouvert : lots 14 à 17 proposés, [VISIBILITE.md](VISIBILITE.md) |
 
-**À trancher par Vince :** rien. Les treize lots du plan sont en ligne.
+**À trancher par Vince :** le chantier Visibilité — D1 (adresse), D2 (ordre de diffusion),
+D3 (mesure), D4 (publications), voir [VISIBILITE.md §4](VISIBILITE.md#4-décisions-à-prendre-par-vince) ;
+puis l'engagement des lots 14 à 17.
