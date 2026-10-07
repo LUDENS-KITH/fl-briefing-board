@@ -237,6 +237,15 @@ théâtre, les bullseyes, les vols pilotables et leurs points, les défenses aé
 (reconnues au type DCS de leurs unités) et les navires. `openMission()` fait choisir le
 vol s'il y en a plusieurs ; `importMission()` bâtit une nouvelle planche.
 
+Depuis le lot 12, `support` liste les ravitailleurs et AWACS de l'IA (tâche du groupe
+`Refueling` ou `AWACS`) : `{ name, side, role, type, points, orbit, tacan, freq }`.
+`orbit` vient de la première tâche `Orbit` de la route, déballée d'une `ControlledTask`
+s'il le faut : `{ pattern, at, to, alt }` (`to`, point suivant d'un Race-Track, ou
+`null`), plus `hot`, `len`, `width` pour un Anchored. `alt` est celle de l'orbite, qui
+gouverne en vol. `tacan` vient d'`ActivateBeacon`, `freq` (MHz) de `SetFrequency`, sinon
+du groupe. `importMission()` en fait une route `stroke` tiretée, un symbole `orbit` et
+l'appareil accroché à lui (`hook`, lot 10).
+
 Les positions DCS sont en mètres, x vers le nord, y vers l'est. `MIZ.toGeo()` les porte
 en latitude/longitude par la projection du théâtre, **mesurée** et non recopiée :
 `tools/build_projections.py` ajuste une Mercator transverse WGS84 sur les balises de

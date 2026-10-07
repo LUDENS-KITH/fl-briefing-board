@@ -85,6 +85,14 @@ nouvelle planche.
   haut ; ses caps portent alors un « G » (grille).
 - Les unités au sol reconnues comme défense aérienne le sont par leur type DCS ; les
   autres (chars, camions…) ne sont pas importées.
+- Les **ravitailleurs** et les **AWACS** de l'IA, reconnus à la tâche de leur groupe dans
+  l'éditeur (« Refueling », « AWACS »), viennent aussi, des deux camps : leur **route**
+  en tireté, leur **orbite** en symbole d'hippodrome, et l'appareil accroché dessus,
+  étiqueté — « Texaco 11 · FL200 · TCN 12Y TEX · 251.000 ». Le niveau est celui de
+  l'orbite, qui commande en vol. L'hippodrome est un symbole, pas un tracé à l'échelle :
+  la mission ne donne ni la largeur d'un Race-Track ni le rayon d'un cercle, l'IA les
+  vole. Un Race-Track est posé au milieu de sa branche, du point qui porte l'orbite au
+  suivant. Les autres appareils de l'IA ne sont pas importés.
 
 ## Charger la route dans la DTC du F/A-18C
 

@@ -14,7 +14,7 @@ enseigner l'emploi du radar de son module sur le même tableau que la manœuvre.
 
 Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8 sont des
 propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
-demande de Vince du 2026-10-06, les lots 10 et 11 à celles du 2026-10-07.
+demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07.
 
 ## 2. Vue d'ensemble
 
@@ -31,6 +31,7 @@ demande de Vince du 2026-10-06, les lots 10 et 11 à celles du 2026-10-07.
 | 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | en ligne le 2026-10-06 |
 | 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | en ligne le 2026-10-07 |
 | 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
+| 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | engagé le 2026-10-07 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -541,6 +542,64 @@ v1.11, README.
 État au 2026-10-07 : en ligne (v1.11, PR #13 fusionnée ; vrai clic sur la démo publiée :
 confirmation, tableau vierge). Banc 64/64, les 3 scénarios rouges avant le code.
 
+### Lot 12 — Ravitailleurs et AWACS de la mission
+
+**Objectif :** qu'une mission importée montre aussi où trouver le ravitailleur et
+l'AWACS : leur position de travail, leur route, leur orbite, et de quoi les joindre.
+
+Demandé par Vince le 2026-10-07, sur sa mission « CAUCASUS - Entraînement Sol - FA-18C
+Multi 4 » : « pourquoi je ne peux pas voir les positions du ravitailleur ? de l'AWACS ?
+de leurs trajectoires ? »
+
+**Constat.** L'import du lot 6 ne retient des avions que les vols pilotables (une unité
+« Client » ou « Player », `miz.js`) ; un appareil piloté par l'ordinateur est écarté,
+route comprise. Sur la mission de Vince : *Texaco 11* (KC-135MPRS, tâche `Refueling`,
+orbite Race-Track sur son point 1, FL200, TACAN 12Y TEX, 251 MHz) et *Overlord 1*
+(E-2C, tâche `AWACS`, orbite Race-Track sur son dernier point) n'apparaissent pas.
+
+**Le format, lu dans l'éditeur du jeu** (`MissionEditor/modules/me_action_edit_panel.lua`)
+et sur la mission :
+- la tâche d'un groupe (`task`) dit son rôle : `Refueling`, `AWACS` ;
+- l'orbite est une tâche `Orbit` posée sur un point de route, `params.pattern` :
+  **Circle** autour du point ; **Race-Track** du point au point **suivant** — l'éditeur
+  ne le propose pas sans point suivant ; **Anchored**, branche chaude de cap
+  `hotLegDir` (radians), longueur `legLength` et largeur `width` (mètres) ;
+- `params.altitude` (m) et `params.speed` de l'orbite **gouvernent** en vol, pas ceux du
+  point ;
+- TACAN : action `ActivateBeacon` (`channel`, `modeChannel`, `callsign`) ; radio : la
+  fréquence du groupe (`frequency`, MHz) ou l'action `SetFrequency` (Hz).
+
+| | |
+|---|---|
+| Ce qui est importé | les groupes d'avions à la tâche `Refueling` (symbole ravitailleur) ou `AWACS` (symbole AWACS), des deux coalitions, à leur couleur. Les autres appareils de l'IA restent écartés : ce lot répond aux appareils de soutien |
+| Route | leur route réelle, en trait **tireté** (prévu), de point en point |
+| Orbite | un symbole d'orbite posé sur le point qui la porte : Race-Track au milieu de la branche, dans son axe ; Anchored dans l'axe de sa branche chaude ; Circle sur le point. **Un symbole, pas un tracé à l'échelle** : la largeur d'un Race-Track et le rayon d'un Circle sont volés par l'IA, la mission ne les écrit pas. Un Race-Track sans point suivant est posé sur son point, dans l'axe de l'arrivée |
+| Appareil | **accroché** à son orbite (lot 10), sur une branche, cap le long de la branche ; sans orbite, sur son premier point, tourné vers le suivant |
+| Étiquette | nom du groupe · niveau de l'orbite (sinon du premier point) · TACAN · fréquence — « Texaco 11 · FL200 · TCN 12Y TEX · 251.000 » |
+| Cadrage | la carte s'ouvre sur l'emprise de tout ce qui est importé, soutien compris |
+| Message | le bilan de l'import compte ravitailleurs et AWACS |
+
+**Fait quand** — tests rouges avant le code :
+
+1. `node tools/test_miz.js` : une mission fabriquée avec un ravitailleur Race-Track, un
+   AWACS Anchored et un ravitailleur sans tâche : seuls les deux premiers sont lus, avec
+   rôle, coalition, route, orbite (forme, point, altitude, branche ou paramètres),
+   TACAN et fréquence ; le ravitailleur sans tâche reste écarté.
+2. Au banc, import de cette mission : un symbole ravitailleur et un AWACS, chacun
+   accroché à une orbite, leurs routes en tireté, leurs étiquettes ; l'orbite du
+   Race-Track est au milieu de sa branche, dans son axe.
+3. Sur la mission réelle de Vince, dans Brave : Texaco 11 et Overlord 1 visibles, à leur
+   place, étiquetés.
+
+**Documentation** : GUIDE FR et EN-US (import), MODELE (import d'une mission), ETAT §2,
+CHANGELOG v1.12.
+
+État au 2026-10-07 : livré sur la branche `lot-12-soutien`, fusion à valider.
+`test_miz` 91/91 et banc 65/65, rouges avant le code. Sur la mission de Vince : Texaco 11
+et Overlord 1 posés et étiquetés. Constat en passant, sans verdict : son « WP10 - RDV
+Tanker » est à 7,6 NM de la branche droite du Texaco, au même niveau ; la largeur réelle
+de l'hippodrome n'étant pas écrite, rien ne dit qu'il est hors de l'orbite.
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -573,6 +632,8 @@ avis contraire :
 | DTC : le F/A-18C d'abord | le seul module dont le format a été lu ; F-16C ensuite, un module à la fois |
 | L'accroche se range dans le repère du dessin de l'hôte, en tailles de symbole, et non en terrain | c'est ce repère que voit le pilote : un symbole garde sa taille à l'écran quand la carte zoome |
 | Accrocher : un symbole ou un texte, à un symbole de la même vue | les seuls objets de taille fixe à l'écran ; ce qui suit le terrain (zone, cercle, flèche) y reste déjà |
+| Import : ravitailleurs et AWACS seulement, à leur tâche DCS | ce sont eux qu'un pilote cherche au briefing ; les autres appareils de l'IA (CAP, cibles) seraient un autre lot |
+| Orbite importée en symbole, pas à l'échelle | la mission ne donne ni la largeur d'un Race-Track ni le rayon d'un Circle : les dessiner serait inventer |
 | Nouveau briefing : préférences d'affichage gardées, pas de raccourci | ce sont des réglages du poste, pas le briefing ; `Ctrl+N` ouvre une fenêtre du navigateur |
 | La copie d'un objet accroché reste accrochée ; touche `J` pour accrocher | deux ravitailleurs sur une orbite ; `J` est libre, `A` est la flèche |
 | Une marque de piste posée hors d'une piste désigne un écho (piste inconnue du F/A-18C, piste système du F-16C) au lieu d'être refusée | comme au cockpit (F/A-18C p. 176, F-16C p. 416) ; le refus passait pour une panne, signalée par Vince |
@@ -593,5 +654,6 @@ avis contraire :
 | 2026-10-07 | Lot 10 : accrocher un symbole à un autre ; lancement |
 | 2026-10-07 | Lot 11 : nouveau briefing, dans la même PR que le lot 10 (v1.11) ; lancement |
 | 2026-10-07 | Fusion des lots 10 et 11 : v1.11 en ligne |
+| 2026-10-07 | Lot 12 : ravitailleurs et AWACS de la mission importée ; lancement |
 
-**À trancher par Vince :** rien. Les onze lots du plan sont en ligne.
+**À trancher par Vince :** la fusion du lot 12.

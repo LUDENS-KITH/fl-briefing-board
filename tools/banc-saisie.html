@@ -1134,6 +1134,68 @@ test('Effacer ne vide que la planche affichée', async (ok) => {
   ok(a.s('boards.length') === 2 && a.s('boards[0].objs.length') === 2, `autre planche : ${a.s('boards[0].objs.length')} objets`);
 }, true);
 
+/* ---------- lot 12 : ravitailleurs et AWACS de la mission ---------- */
+const SOUTIEN = `mission =
+{
+  ["theatre"] = "Caucasus",
+  ["coalition"] =
+  {
+    ["blue"] =
+    {
+      ["bullseye"] = { ["x"] = -291014, ["y"] = 617414, },
+      ["country"] = { [1] = { ["name"] = "USA", ["plane"] = { ["group"] = {
+        [1] = { ["name"] = "UZI 1", ["units"] = { [1] = { ["type"] = "FA-18C_hornet", ["skill"] = "Client", }, },
+                ["route"] = { ["points"] = {
+                  [1] = { ["x"] = -323714, ["y"] = 552000, ["alt"] = 13, ["alt_type"] = "BARO", ["name"] = "", },
+                  [2] = { ["x"] = -300000, ["y"] = 600000, ["alt"] = 6096, ["alt_type"] = "BARO", ["name"] = "RDV", }, }, }, },
+        [2] = { ["name"] = "Texaco 11", ["task"] = "Refueling", ["frequency"] = 251,
+                ["units"] = { [1] = { ["type"] = "KC135MPRS", ["skill"] = "High", }, },
+                ["route"] = { ["points"] = {
+                  [1] = { ["x"] = -286904, ["y"] = 548487, ["alt"] = 6096,
+                          ["task"] = { ["id"] = "ComboTask", ["params"] = { ["tasks"] = {
+                            [1] = { ["id"] = "WrappedAction", ["params"] = { ["action"] = { ["id"] = "ActivateBeacon",
+                                    ["params"] = { ["channel"] = 12, ["modeChannel"] = "Y", ["callsign"] = "TEX", }, }, }, },
+                            [2] = { ["id"] = "Orbit", ["params"] = { ["altitude"] = 6096, ["pattern"] = "Race-Track", ["speed"] = 180, }, },
+                          }, }, }, },
+                  [2] = { ["x"] = -293668, ["y"] = 643613, ["alt"] = 6096, }, }, }, },
+        [3] = { ["name"] = "Overlord 1", ["task"] = "AWACS",
+                ["units"] = { [1] = { ["type"] = "E-2C", ["skill"] = "High", }, },
+                ["route"] = { ["points"] = {
+                  [1] = { ["x"] = -289057, ["y"] = 601652, ["alt"] = 7620, },
+                  [2] = { ["x"] = -288714, ["y"] = 642000, ["alt"] = 7620,
+                          ["task"] = { ["id"] = "ComboTask", ["params"] = { ["tasks"] = {
+                            [1] = { ["id"] = "Orbit", ["params"] = { ["altitude"] = 7620, ["pattern"] = "Race-Track", ["speed"] = 154, }, },
+                          }, }, }, }, }, }, },
+      }, }, }, },
+    },
+  },
+}`;
+
+test('Import : ravitailleur et AWACS posés, accrochés à leur orbite, route tiretée, étiquette', async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Soutien.miz', [['mission', SOUTIEN]])); await pause(500);
+  const get = k => JSON.parse(a.s(`JSON.stringify(objs.filter(o => o.t === 'sym' && o.k === '${k}').map(o => ({ lbl: o.lbl, hook: o.hook, x: o.x, y: o.y, a: o.a, uid: o.uid })))`));
+  const tk = get('tanker'), aw = get('awacs'), orb = get('orbit');
+  ok(tk.length === 1 && aw.length === 1, `ravitailleurs ${tk.length}, AWACS ${aw.length} (« ${a.toast()} »)`);
+  ok(orb.length === 2, `orbites : ${orb.length}`);
+  if (tk.length !== 1 || aw.length !== 1 || orb.length !== 2) return;
+  ok(tk[0].hook && orb.some(o => o.uid === tk[0].hook.to), 'ravitailleur non accroché à une orbite');
+  ok(aw[0].hook && orb.some(o => o.uid === aw[0].hook.to), 'AWACS non accroché à une orbite');
+  ok(/Texaco 11/.test(tk[0].lbl) && /FL200/.test(tk[0].lbl) && /TCN 12Y TEX/.test(tk[0].lbl) && /251\.000/.test(tk[0].lbl),
+     `étiquette du ravitailleur : « ${tk[0].lbl} »`);
+  ok(/Overlord 1/.test(aw[0].lbl) && /FL250/.test(aw[0].lbl), `étiquette de l'AWACS : « ${aw[0].lbl} »`);
+  const routes = JSON.parse(a.s(`JSON.stringify(objs.filter(o => o.t === 'stroke' && o.ls === 'dash').map(o => o.pts))`));
+  ok(routes.length === 2 && routes.every(r => r.length === 2), `routes tiretées : ${routes.map(r => r.length).join(', ')}`);
+  /* l'orbite du Race-Track : au milieu de la branche, dans son axe */
+  const host = orb.find(o => o.uid === tk[0].hook.to), midOf = r => [(r[0][0] + r[1][0]) / 2, (r[0][1] + r[1][1]) / 2],
+        leg = [...routes].sort((p, q) => Math.hypot(...midOf(p).map((v, i) => v - [host.x, host.y][i])) - Math.hypot(...midOf(q).map((v, i) => v - [host.x, host.y][i])))[0];
+  const mid = [(leg[0][0] + leg[1][0]) / 2, (leg[0][1] + leg[1][1]) / 2], ax = Math.atan2(leg[1][1] - leg[0][1], leg[1][0] - leg[0][0]);
+  ok(Math.hypot(host.x - mid[0], host.y - mid[1]) < .5, `orbite à ${Math.hypot(host.x - mid[0], host.y - mid[1]).toFixed(1)} du milieu de la branche`);
+  ok(Math.abs(Math.sin(host.a - ax)) < .01, `orbite hors de l'axe : ${host.a.toFixed(3)} contre ${ax.toFixed(3)}`);
+  ok(/ravitailleur/i.test(a.toast()) && /AWACS/.test(a.toast()), `bilan : « ${a.toast()} »`);
+  ok(a.s('objs.some(o => o.t === "sym" && o.k === "wp")'), 'la route du vol joueur a disparu');
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc

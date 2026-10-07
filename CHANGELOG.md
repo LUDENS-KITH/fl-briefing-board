@@ -3,6 +3,26 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.12 — 2026-10-07
+
+Lot 12 du [plan d'action](docs/PLAN.md), demandé par Vince : les ravitailleurs et AWACS
+de la mission.
+
+### Ajouté
+- **Import `.miz` : ravitailleurs et AWACS de l'IA**, reconnus à la tâche de leur groupe
+  (`Refueling`, `AWACS`), des deux camps : route en tireté, orbite en symbole
+  d'hippodrome, appareil accroché dessus (lot 10), étiquette « nom · niveau de l'orbite ·
+  TACAN · fréquence ». Les trois formes d'orbite de l'éditeur sont lues (Circle,
+  Race-Track jusqu'au point suivant, Anchored par sa branche chaude) ; l'altitude est
+  celle de l'orbite, qui gouverne en vol.
+- Le bilan d'import compte ravitailleurs et AWACS ; la carte cadre aussi leurs routes.
+
+### Vérifié en exécutant
+`node tools/test_miz.js` 91/91, 6 contrôles rouges avant le code · banc 65/65, le
+nouveau scénario rouge sur le moteur d'avant · mission réelle de Vince dans Brave :
+Texaco 11 (FL200, TCN 12Y TEX, 251.000) et Overlord 1 (FL250, 260.000) posés sur leurs
+orbites, routes tiretées, bilan « 1 ravitailleur, 1 AWACS ».
+
 ## v1.11 — 2026-10-07
 
 Lots 10 et 11 du [plan d'action](docs/PLAN.md), demandés par Vince : accrocher un

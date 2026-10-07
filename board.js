@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.11', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.12', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -2173,8 +2173,8 @@ const SIDE_COL = { blue: '#2F8CFF', red: '#FF4D4D', neutrals: '#D1A94A' };
 const THREAT_SYM = { sam: 'sam', radar: 'radar', ship: 'ship', carrier: 'carrier' };
 function importMission(m, f, base){
   const proj = PROJECTIONS[m.theatre], onMap = !!(proj && THEATRES.some(t => t.id === m.theatre));
-  const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [];
-  const all = [...wps, ...m.threats, ...(be ? [be] : [])];
+  const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [], sup = m.support || [];
+  const all = [...wps, ...m.threats, ...(be ? [be] : []), ...sup.flatMap(a => a.points)];
   if (!all.length){ toast('Rien à importer : ni vol pilotable, ni menace, ni bullseye'); return; }
   cancelGesture(); leaveGesture();
   split = true; fit();                                   // la route liée se lit dans la coupe
@@ -2208,6 +2208,32 @@ function importMission(m, f, base){
     out.push({ ...sym(f.cat === 'helicopter' ? 'helo' : 'fighter', wps[0], SIDE_COL[f.side] || SIDE_COL.blue),
                a: Math.atan2(x1 - x0, -(y1 - y0)) });
   }
+  /* ravitailleurs et AWACS (lot 12) : leur route en tireté, leur orbite en symbole — la
+     mission n'en donne ni la largeur ni le rayon, l'IA les vole — et l'appareil accroché
+     sur une branche de l'orbite (lot 10), cap le long de la branche */
+  const routes = [];
+  for (const a of sup){
+    const col = SIDE_COL[a.side] || SIDE_COL.neutrals, P = a.points.map(pos);
+    if (P.length > 1) routes.push({ t:'stroke', pts: P.map(p => p.slice()), c: col, w: 2, ls: 'dash' });
+    const ft = Math.round(((a.orbit ? a.orbit.alt : (a.points[0] || {}).alt) || 0) * 3.28084 / 100) * 100;
+    const lbl = [a.name, ft ? altText(ft) : '', a.tacan && 'TCN ' + a.tacan, a.freq && a.freq.toFixed(3)].filter(Boolean).join(' · ');
+    const k = a.role === 'tanker' ? 'tanker' : 'awacs', s = (SHAPES[k].s0 || 1) * .7;
+    const o = a.orbit;
+    if (!o || !P[o.at]){                                   // sans orbite : sur son premier point, vers le suivant
+      const [x0, y0] = P[0] || [0, 0], [x1, y1] = P[1] || [x0, y0 - 1];
+      out.push({ t:'sym', k, x: x0, y: y0, a: Math.atan2(x1 - x0, -(y1 - y0)), s, c: col, w: 4, n: 0, lbl });
+      continue;
+    }
+    const [px, py] = P[o.at], next = o.to !== null && P[o.to], prev = P[o.at - 1];
+    let x = px, y = py, ax = 0;
+    if (next){ x = (px + next[0]) / 2; y = (py + next[1]) / 2; ax = Math.atan2(next[1] - py, next[0] - px); }
+    else if (o.pattern === 'Anchored') ax = o.hot - Math.PI / 2;        // cap de la branche chaude → axe à l'écran
+    else if (o.pattern === 'Race-Track' && prev) ax = Math.atan2(py - prev[1], px - prev[0]);   // sans point suivant : dans l'axe de l'arrivée
+    const host = { t:'sym', k:'orbit', x, y, a: ax, s: 2.2, c: col, w: 3, n: 0, uid: newUid() };
+    out.push(host, { t:'sym', k, x, y, a: ax + Math.PI / 2, s, c: col, w: 4, n: 0, lbl,
+                     hook: { to: host.uid, u: .2, v: -.42, da: Math.PI / 2 } });
+  }
+  out.unshift(...routes);                                  // les routes sous les symboles
   /* coupe : plafond au-dessus du point le plus haut, largeur sur la longueur de la route */
   const maxFt = Math.max(0, ...wps.map(q => q.alt * 3.28084));
   const nm = wps.slice(1).reduce((s, q, i) => s + Math.hypot(q.x - wps[i].x, q.y - wps[i].y) / 1852, 0);
@@ -2222,6 +2248,8 @@ function importMission(m, f, base){
   switchBoard(cur + 1);
   toast(`Mission importée : ${wps.length} point${wps.length > 1 ? 's' : ''} de route, ${m.threats.length} menace`
         + `${m.threats.length > 1 ? 's' : ''}${be ? ', bullseye' : ''}`
+        + [['tanker', 'ravitailleur', 'ravitailleurs'], ['awacs', 'AWACS', 'AWACS']]
+            .map(([r, one, many]) => { const n = sup.filter(a => a.role === r).length; return n ? `, ${n} ${n > 1 ? many : one}` : ''; }).join('')
         + (onMap ? '' : ' — théâtre sans projection mesurée : planche sans carte, nord de la grille en haut'));
 }
 $('miz').onclick = () => $('mizfile').click();
