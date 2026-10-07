@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-10-01**, version **v1.9.2**.
+> Document vivant. Dernière mise à jour : **2026-10-07**, version **v1.11**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 47 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 60 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
@@ -109,6 +109,8 @@ par événements pointeur réels, pas en relisant le code.
 | Import de mission | 3 scénarios au banc, rouges avant le code : choix du vol, route et altitudes, bullseye, SAM, carte, route liée ; planche en grille à l'échelle exacte et caps « G » ; .miz illisible refusé ; 37/37 · deux missions réelles importées dans Brave en `file://`, capture relue | conforme | 2026-09-30 |
 | Route dans la DTC | `node tools/test_miz.js` 83/83, rouge avant le code : archive relue par zlib (CRC, tailles), entrées non touchées identiques, mission inchangée hors références `DTC`, cartouche au format de l'éditeur, reprise d'une cartouche existante, réécriture sans doublon, cinq refus | conforme | 2026-10-06 |
 | Route dans la DTC | 4 scénarios au banc, rouges avant le code : planche carte et planche sans carte ramenées aux positions DCS d'origine à moins de 2 m, après enregistrement, réouverture et « + phase » ; refus expliqués (pas de route, pas de repère, autre théâtre, aucun F/A-18C) ; choix du vol parmi les seuls Hornet ; mis en échec par deux mutations ; 51/51 | conforme | 2026-10-06 |
+| Accroche | 8 scénarios au banc, rouges avant le code, et un témoin du défaut (non accroché, l'écart à l'orbite change au zoom) : écart écran constant à 0,5 px en zoom avant et arrière ; orbite déplacée, tournée d'un quart de tour (cap du ravitailleur compris), agrandie du double ; ravitailleur glissé resté accroché ; décroche, `Ctrl+Z` / `Ctrl+Y`, réouverture, fichier ; refus (sans sélection, zone, vide, boucle) et `Échap` ; hôte effacé puis rendu ; copie et « + phase » ; chaîne texte → ravitailleur → orbite ; 60/60 | conforme | 2026-10-07 |
+| Accroche | démo dans Brave, vrais gestes : écart écran identique aux zooms 7,6, 8,6, 10,1 ; page kneeboard à son zoom (7,86), ravitailleur sur sa branche ; mi-transition Ingress → Attaque ; pointillé vers l'hôte à la sélection | conforme | 2026-10-07 |
 | Route dans la DTC | mission réelle Sandbox Colchide (9,7 Mo, cartouche Hornet existante) : `unzip -t` sans erreur ; mission relue par `luae.exe` de DCS, 11 différences, toutes dans la table `DTC` des 4 Hornet du vol choisi ; cartouche d'origine reprise (ALR67, COMM, TCN, réglages de navigation identiques), waypoints aux champs exacts de l'éditeur | conforme | 2026-10-06 |
 | Présentation | 3 scénarios au banc, rouges avant le code : barres et palette masquées, tableau pleine largeur, Échap en sort ; phases au clavier, outils et Ctrl+Z muets ; laser hors objets et hors historique, éteint en 1,8 s ; 34/34 | conforme | 2026-09-30 |
 | Présentation | Brave sans interface, vrais événements souris et clavier, en `file://` : clic sur ▶ Présenter → plein écran accordé ; laser tracé ; → phase suivante ; Échap quitte plein écran et présentation, les barres reviennent ; capture relue | conforme | 2026-09-30 |

@@ -3,6 +3,36 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.11 — 2026-10-07
+
+Lot 10 du [plan d'action](docs/PLAN.md), demandé par Vince : accrocher un symbole à un
+autre.
+
+### Ajouté
+- **🔗 Accrocher** (touche `J`) : sélectionner un symbole ou un texte, 🔗, toucher le
+  symbole qui le porte. L'objet accroché garde sa place sur ce symbole à tout zoom de
+  la carte et le suit quand on le déplace, le tourne ou l'agrandit, cap compris. 🔗 de
+  nouveau le décroche. Chaînes possibles, boucles refusées ; refus jamais muets.
+- Copie (`Ctrl+D`), « + phase », animation entre phases, fichier de briefing et export
+  kneeboard gardent l'accroche.
+- Démo : l'hippodrome TEXACO et son ravitailleur accroché, sur Ingress et Attaque.
+
+### Corrigé — signalé par Vince
+- **Sur une carte, un ravitailleur posé sur un hippodrome s'en écartait au zoom.** Un
+  symbole garde sa taille à l'écran quand sa position suit le terrain : l'écart entre
+  deux symboles grandissait ou rétrécissait, pas leur dessin. Accroché, l'objet vit
+  dans le repère du dessin de son hôte.
+
+### Vérifié en exécutant
+Banc 60/60 : les 8 nouveaux scénarios rouges avant le code, mis en échec par deux
+mutations (zoom ignoré dans le repère de l'hôte, glissé non détecté), plus un témoin du défaut
+(non accroché, l'écart passe de 20,-43 px à 56,6,-121,6 px en trois crans de zoom) ·
+`node tools/test_magnetic.js`, `test_miz.js` 83/83, `test_radar.js` 26/26 · démo dans
+Brave, vrais gestes clavier et souris : écart écran du ravitailleur à l'orbite
+identique aux zooms 7,6, 8,6 et 10,1 ; page kneeboard (zoom 7,86) avec le ravitailleur
+sur sa branche, écran rendu intact après l'export ; ravitailleur sur l'orbite à
+mi-transition Ingress → Attaque ; pointillé d'accroche à la sélection.
+
 ## v1.10 — 2026-10-06
 
 Lot 9 du [plan d'action](docs/PLAN.md), engagé par Vince : la route du tableau dans la

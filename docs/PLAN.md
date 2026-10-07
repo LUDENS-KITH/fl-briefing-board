@@ -14,7 +14,7 @@ enseigner l'emploi du radar de son module sur le même tableau que la manœuvre.
 
 Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8 sont des
 propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
-demande de Vince du 2026-10-06.
+demande de Vince du 2026-10-06, le lot 10 à celle du 2026-10-07.
 
 ## 2. Vue d'ensemble
 
@@ -29,6 +29,7 @@ demande de Vince du 2026-10-06.
 | 7 | Animation entre phases | proposition | M | — | v1.8 | engagé le 2026-09-30, livré |
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | v1.9 | engagé le 2026-09-30, livré |
 | 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | en ligne le 2026-10-06 |
+| 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | engagé le 2026-10-07 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -420,6 +421,82 @@ l'interpréteur Lua de DCS ne diffère de l'originale que dans la table `DTC` de
 4 Hornet du vol ; la cartouche existante est reprise, waypoints remplacés. Reste à
 ouvrir une copie dans l'éditeur, puis à démarrer un Hornet dessus.
 
+### Lot 10 — Accrocher un symbole à un autre
+
+**Objectif :** qu'un symbole posé sur un autre y reste — un ravitailleur sur la branche
+de son hippodrome, une piste sur son écran radar — quel que soit le zoom de la carte,
+et qu'il suive l'autre quand on le déplace, le tourne ou l'agrandit.
+
+Demandé par Vince le 2026-10-07 : « si je crée un hippodrome, que je positionne un
+tanker, si je change l'échelle, tankers et hippodrome ne sont plus alignés ».
+
+**Constat, lu dans le code.** Sur une carte, un symbole a deux natures (MODELE §1,
+carte vivante) : sa **position** est un point du terrain, qui suit le zoom
+(`toScreen()`), sa **taille** est fixe à l'écran (`paintSym()`, `SIZE * s`). Poser le
+ravitailleur à 40 px du centre de l'orbite, c'est le poser à 40 px *de terrain* à ce
+zoom. Dézoomer d'un cran divise cet écart par deux à l'écran, l'orbite garde sa taille :
+le ravitailleur rentre dans la boucle. Sans carte, rien ne bouge au zoom (il n'y en a
+pas), mais déplacer ou tourner l'orbite la sépare de son ravitailleur. Les écrans radar
+du lot 2 ont le même défaut sur une carte : leurs pistes glissent hors de l'écran.
+
+**Pourquoi pas « ancrer ».** Le mot désigne déjà le 📌 du lot 1 (verrouiller un objet).
+Ici, c'est **accrocher** : un lien d'un objet vers un autre.
+
+| | |
+|---|---|
+| Donnée | un champ `hook: { to, u, v, da }` sur l'objet accroché. `to` est l'`uid` de l'hôte ; `u`, `v` sa place **dans le repère du dessin de l'hôte** — en tailles de symbole (`SIZE * s`), axes tournés avec lui ; `da` son cap relatif. Rien n'est stocké sur l'hôte |
+| Placement | la position d'un objet accroché se **déduit** de son hôte à chaque dessin et à chaque désignation, au zoom courant (`settle()`) : elle suit l'échelle exactement comme le dessin de l'hôte |
+| Le modifier | le glisser, le tourner, les flèches : il reste accroché, à sa nouvelle place. Le moteur voit qu'il a bougé depuis le dernier placement et recalcule `hook` à partir de sa position |
+| Ce qui s'accroche | un symbole ou un texte (tous deux de taille fixe à l'écran) |
+| Ce qui porte | un **symbole** de la même vue. Une zone, un cercle, une flèche suivent déjà le terrain : un symbole posé dessus y reste au zoom ; les y accrocher n'apporterait que l'entraînement, hors de ce lot |
+| Commande | bouton 🔗 dans la barre, à côté de 📌, et touche `J`. Sélection libre : 🔗, puis toucher l'hôte. Sélection accrochée : 🔗 la décroche, sur place. Chaque accroche et chaque décroche laisse une entrée d'historique |
+| Refus | jamais muets : rien de sélectionné · une sélection qui n'est ni symbole ni texte · toucher le vide ou un objet qui n'est pas un symbole · un objet qui lui est déjà accroché (une boucle). L'objet lui-même ne compte pas : toucher le ravitailleur posé sur l'orbite désigne l'orbite dessous. `Échap` et clic droit abandonnent l'accroche en cours |
+| Chaîne | un objet accroché peut porter à son tour (le texte « TEXACO » sur le ravitailleur sur l'orbite) ; jamais de boucle |
+| Hôte effacé | l'objet accroché reste à sa place, libre ; `Ctrl+Z` rend l'hôte et l'accroche |
+| Copie (`Ctrl+D`) | la copie d'un objet accroché reste accrochée au même hôte, à sa place décalée : deux ravitailleurs sur la même orbite. La copie d'un hôte part seule |
+| Phases et animation | « + phase » garde l'accroche (les `uid` sont conservés). En transition (lot 7), l'objet accroché suit son hôte interpolé |
+| Fichier, sauvegarde, kneeboard | `hook` s'écrit avec l'objet ; l'export kneeboard sur une carte, qui dessine à un autre zoom, replace les objets accrochés à ce zoom |
+| Affichage | sélectionné, un objet accroché montre un trait pointillé vers le centre de son hôte ; un hôte sélectionné, vers ses objets accrochés. Une aide d'édition : rien dans les exports |
+| Ancré et accroché | indépendants. Un objet ancré et accroché suit son hôte : l'ancrage refuse les gestes, pas l'entraînement |
+
+**Ce n'est pas un groupe** (ETAT §5) : pas de sélection multiple, chaque objet garde sa
+poignée et se sélectionne seul ; le lien va d'un objet à un seul hôte.
+
+**Points du code touchés** : `settle()` (nouveau) appelé par `drawFrame()`, `topmost()`
+et l'export kneeboard ; la branche `pointerdown` (mode d'accroche), `backToSelect()`,
+la duplication, `handles()`, le clavier, la barre, `#hint`, la démo.
+
+**Fait quand** — au banc, scénarios rouges avant le code :
+
+1. Sur une carte, ravitailleur posé sur la branche de l'orbite et accroché : après trois
+   crans de zoom avant puis trois arrière, son écart à l'orbite **en pixels écran**,
+   rapporté à la taille de l'orbite, n'a pas changé (à 0,5 px près). Non accroché, il
+   change (le constat, gardé comme témoin).
+2. Sans carte : glisser l'orbite emmène le ravitailleur du même vecteur ; la tourner par
+   sa poignée le fait tourner autour d'elle, cap compris ; l'agrandir écarte le
+   ravitailleur en proportion.
+3. Glisser le ravitailleur accroché : il reste accroché, à sa nouvelle place, qui tient
+   ensuite au zoom.
+4. 🔗 sur un objet accroché le décroche ; `Ctrl+Z` le raccroche, `Ctrl+Y` le décroche ;
+   l'accroche survit à la réouverture et à un fichier enregistré puis rouvert.
+5. Refus expliqués : 🔗 sans sélection, 🔗 sur une zone, 🔗 puis le vide, une boucle ;
+   toucher l'objet lui-même désigne l'hôte dessous ; `Échap` abandonne l'accroche en
+   cours sans rien changer.
+6. Hôte supprimé : l'objet accroché reste à sa place ; `Ctrl+Z` rend l'hôte, l'accroche
+   tient de nouveau.
+7. `Ctrl+D` sur l'objet accroché : la copie suit l'hôte elle aussi ; « + phase » : la
+   nouvelle planche garde l'accroche ; en transition, l'objet suit l'hôte.
+8. Chaîne : un texte accroché au ravitailleur accroché à l'orbite suit l'orbite.
+
+**Documentation** : GUIDE FR et EN-US, MODELE §2 (champ `hook`) et §4 (accroche),
+ETAT §2, CHANGELOG v1.11, aide `#hint`, démo (une orbite et son ravitailleur sur les
+planches Ingress et Attaque).
+
+État au 2026-10-07 : livré sur la branche `lot-10-accroche`, fusion à valider. Banc
+60/60, les 8 scénarios rouges avant le code, mis en échec par deux mutations (zoom
+ignoré dans le repère de l'hôte, glissé non détecté). La transition entre phases et la
+page kneeboard sont vérifiées sur la démo dans Brave, pas au banc.
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -450,6 +527,9 @@ avis contraire :
 | DTC : une cartouche existante sert de base, seuls les waypoints changent | radios, contre-mesures et TACAN sont le travail du concepteur de la mission |
 | DTC : le tableau rend une copie, jamais la mission d'origine | une mission de serveur se remplace en connaissance de cause, par celui qui la tient |
 | DTC : le F/A-18C d'abord | le seul module dont le format a été lu ; F-16C ensuite, un module à la fois |
+| L'accroche se range dans le repère du dessin de l'hôte, en tailles de symbole, et non en terrain | c'est ce repère que voit le pilote : un symbole garde sa taille à l'écran quand la carte zoome |
+| Accrocher : un symbole ou un texte, à un symbole de la même vue | les seuls objets de taille fixe à l'écran ; ce qui suit le terrain (zone, cercle, flèche) y reste déjà |
+| La copie d'un objet accroché reste accrochée ; touche `J` pour accrocher | deux ravitailleurs sur une orbite ; `J` est libre, `A` est la flèche |
 | Une marque de piste posée hors d'une piste désigne un écho (piste inconnue du F/A-18C, piste système du F-16C) au lieu d'être refusée | comme au cockpit (F/A-18C p. 176, F-16C p. 416) ; le refus passait pour une panne, signalée par Vince |
 
 **Décidé par Vince :**
@@ -465,5 +545,6 @@ avis contraire :
 | 2026-09-30 | Fusion du lot 7 ; lancement du lot 8 |
 | 2026-10-06 | Lot 9 : la route dans la DTC native, par un `.miz` complété, plutôt que par l'outil DCS-DTC ; lancement |
 | 2026-10-06 | Fusion du lot 9 : v1.10 en ligne |
+| 2026-10-07 | Lot 10 : accrocher un symbole à un autre ; lancement |
 
-**À trancher par Vince :** rien. Les neuf lots du plan sont en ligne.
+**À trancher par Vince :** la fusion du lot 10.

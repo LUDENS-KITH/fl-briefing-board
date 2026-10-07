@@ -28,7 +28,8 @@
 - **28 formes prêtes à poser** — chasseur, bombardier, ravitailleur, AWACS, hélicoptère,
   drone, missile, bombe, char, radar, menace sol-air, porte-avions, marqueurs tactiques.
   Posées et orientées d'un seul geste, recolorables, étiquetées (« UZI 1-1 · FL250 »),
-  ancrées pour poser par-dessus sans les bousculer.
+  ancrées pour poser par-dessus sans les bousculer, accrochées l'une à l'autre — le
+  ravitailleur reste sur la branche de son hippodrome à tout zoom de la carte.
 - **Les cartes des 14 théâtres DCS** — topographique, satellite ou plan routier, cadrées
   sur chaque théâtre. La carte est vivante : on zoome, on se déplace, tout suit le
   terrain. **Distances et caps exacts, sans étalonnage.**

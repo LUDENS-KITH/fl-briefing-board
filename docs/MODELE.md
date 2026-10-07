@@ -98,7 +98,9 @@ Douze types d'objets. Champs communs à tous : `t` (type), `c` (couleur CSS),
 `w` (épaisseur de trait en pixels). Les objets tracés portent aussi `ls` : `solid`,
 `dash` ou `dot`. Tout objet peut porter `locked: true` : il est **ancré** (§4). Tout
 objet porte un `uid`, posé à sa première écriture (`withUids()` dans `commit()` et
-`load()`) : « + phase » le garde, une copie Ctrl+D en reçoit un neuf.
+`load()`) : « + phase » le garde, une copie Ctrl+D en reçoit un neuf. Un `sym` ou un
+`text` peut porter `hook: { to, u, v, da }` : il est **accroché** au symbole d'`uid`
+`to` (§4, Objets accrochés) ; sa position est alors déduite, pas saisie.
 
 | `t` | Champs propres | Sens |
 |---|---|---|
@@ -188,6 +190,7 @@ consomme l'événement :
 0. bouton droit                                    → noté (rpress) ; déplace la carte s'il y en a une ;
                                                      relâché à moins de 5 px : retour à la sélection
 0. bouton molette                                  → déplace la carte s'il y en a une, sinon rien
+0. accroche en attente (🔗, hooking)               → le symbole touché devient l'hôte (hookTo), ou refus
 1. une poignée de la sélection est sous le doigt   → drag (voir table ci-dessous)
    — sauf pendant le tracé d'une zone ; un objet ancré n'a pas de poignée
 2. outil zone                                      → ajoute un sommet / referme
@@ -317,6 +320,31 @@ n'est stocké** : `radarView()` recalcule l'image à chaque dessin avec `RADAR.r
 
 `snap()` recopie tous les champs : l'historique et la sauvegarde gardent l'ancrage sans
 code dédié.
+
+### Objets accrochés
+
+Sur une carte, la position d'un symbole est un point du terrain, sa taille est fixe à
+l'écran. Un objet posé *sur* un symbole doit donc vivre dans le repère du dessin de ce
+symbole, pas sur le terrain : sinon le zoom l'en écarte (lot 10). `hook` le range ainsi :
+
+- `u`, `v` : sa place en tailles de symbole de l'hôte (`SIZE × s`), axes tournés de
+  `a` (0 pour une forme `upright`) ; `da` : son cap moins celui de l'hôte ;
+- `settle()` place chaque objet accroché après son hôte, au zoom courant
+  (`hookPlace()`). Elle tourne au début de `drawFrame()` — donc aussi sur les copies
+  interpolées d'une transition —, dans `topmost()` (un zoom pas encore dessiné) et
+  autour du dessin de l'export kneeboard, qui a sa propre caméra ;
+- `placed` (WeakMap) retient la position laissée par le dernier placement. Un objet qui
+  n'y est plus (glissé, tourné, recalé par `snapAlt()`, `reprof()`, `convertPlan()`)
+  garde sa position : c'est son `hook` qui est recalculé (`hookFrom()`). Un objet
+  absent de `placed` — restauré par l'historique, relu d'un fichier — suit son `hook` ;
+- `hook` est **remplacé**, jamais modifié en place : `snap()` copie superficiellement
+  et les instantanés de l'historique partagent sinon le même objet ;
+- l'accroche se fait au doigt (`hooking`, puis `hookTo()` au `pointerdown` suivant) ;
+  l'hôte est le symbole le plus haut sous le doigt, l'objet lui-même exclu ; une boucle
+  est refusée. `hostOf()` ne rend qu'un hôte présent dans la planche : un hôte effacé
+  laisse l'objet libre, l'historique le rend ;
+- une copie `Ctrl+D` recalcule son `hook` depuis sa place décalée ; `handles()` trace
+  le pointillé vers l'hôte ou vers les objets accrochés.
 
 ### Modes de `drag`
 

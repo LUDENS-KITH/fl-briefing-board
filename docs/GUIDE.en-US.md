@@ -193,6 +193,16 @@ drag and drop your own background image.
   SAM area, bullseye, background image. Color, line and label stay editable; a
   duplicate is born unpinned. To unpin: selection tool, touch the object, then 📌 or
   `K`. On a map, dragging over a pinned object pans the map.
+- **Attach** (🔗 or `J`): a tanker placed on the leg of its racetrack, a track on its
+  radar display, stay there. Select the object, 🔗, then touch the symbol that carries
+  it — touching the object itself picks the symbol underneath. Once attached, it keeps
+  its place on that symbol **at every map zoom** (a symbol keeps its size on screen, so
+  what sits on it does too), and follows it when it is moved, rotated or resized,
+  heading included. You can still drag or rotate it: it stays attached at its new
+  place. 🔗 again detaches it, where it is. When selected, a dotted line joins it to the
+  center of its host. A symbol or a text attaches to a symbol; a text can attach to the
+  tanker attached to the orbit. A duplicate (`Ctrl+D`) stays attached to the same host;
+  deleting the host leaves the object where it is.
 - **Label:** double-click a shape, for example `UZI 1-1 · FL250 · 450 kt`. The label
   follows the shape; emptying it removes it.
 - **Curve an arrow:** draw it straight, then drag the middle handle.
@@ -240,7 +250,7 @@ drag and drop your own background image.
 **Shortcuts:** `V` select · `A` arrow · `L` line · `P` pencil · `C` circle ·
 `R` rectangle · `Z` zone · `M` ruler · `T` text · `E` eraser · `H` hand ·
 `Ctrl+Z` / `Ctrl+Y` / `Ctrl+D` · `Page Up` / `Page Down` boards · `+` / `-` map zoom ·
-`K` pin · `Esc` or right-click: back to selection · `Ctrl+S` save the briefing ·
+`K` pin · `J` attach · `Esc` or right-click: back to selection · `Ctrl+S` save the briefing ·
 `Ctrl+O` open one · `F5` present · drop a `.miz`: import the mission.
 
 ## What It Does Not Do
