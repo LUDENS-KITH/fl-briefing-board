@@ -29,8 +29,8 @@ demande de Vince du 2026-10-06, les lots 10 et 11 à celles du 2026-10-07.
 | 7 | Animation entre phases | proposition | M | — | v1.8 | engagé le 2026-09-30, livré |
 | 8 | Cadrage manuel du kneeboard | proposition | S | — | v1.9 | engagé le 2026-09-30, livré |
 | 9 | Route du tableau dans la DTC du F/A-18C, par un `.miz` complété | demande | M | lot 6 | v1.10 | en ligne le 2026-10-06 |
-| 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | engagé le 2026-10-07 |
-| 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | engagé le 2026-10-07 |
+| 10 | Accrocher un symbole à un autre : ravitailleur et hippodrome restent alignés à toute échelle | demande | M | lot 1 | v1.11 | en ligne le 2026-10-07 |
+| 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -493,7 +493,8 @@ la duplication, `handles()`, le clavier, la barre, `#hint`, la démo.
 ETAT §2, CHANGELOG v1.11, aide `#hint`, démo (une orbite et son ravitailleur sur les
 planches Ingress et Attaque).
 
-État au 2026-10-07 : livré sur la branche `lot-10-accroche`, fusion à valider. Banc
+État au 2026-10-07 : en ligne (v1.11, PR #13 fusionnée, démo publiée vérifiée : écart
+écran du ravitailleur identique aux zooms 7,6, 8,6, 10,1 et sur la page kneeboard). Banc
 60/60, les 8 scénarios rouges avant le code, mis en échec par deux mutations (zoom
 ignoré dans le repère de l'hôte, glissé non détecté). La transition entre phases et la
 page kneeboard sont vérifiées sur la démo dans Brave, pas au banc.
@@ -537,8 +538,8 @@ D'où la confirmation, et le rappel d'enregistrer d'abord.
 **Documentation** : GUIDE FR et EN-US, MODELE §7 (persistance), ETAT §2, CHANGELOG
 v1.11, README.
 
-État au 2026-10-07 : livré dans la même PR que le lot 10 (#13), fusion à valider. Banc
-64/64, les 3 scénarios rouges avant le code ; vrai clic dans la démo sous Brave.
+État au 2026-10-07 : en ligne (v1.11, PR #13 fusionnée ; vrai clic sur la démo publiée :
+confirmation, tableau vierge). Banc 64/64, les 3 scénarios rouges avant le code.
 
 ## 8. Hors plan
 
@@ -591,5 +592,6 @@ avis contraire :
 | 2026-10-06 | Fusion du lot 9 : v1.10 en ligne |
 | 2026-10-07 | Lot 10 : accrocher un symbole à un autre ; lancement |
 | 2026-10-07 | Lot 11 : nouveau briefing, dans la même PR que le lot 10 (v1.11) ; lancement |
+| 2026-10-07 | Fusion des lots 10 et 11 : v1.11 en ligne |
 
-**À trancher par Vince :** la fusion des lots 10 et 11 (PR #13).
+**À trancher par Vince :** rien. Les onze lots du plan sont en ligne.
