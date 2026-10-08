@@ -156,6 +156,7 @@ de la base mesurée, pas d'un chiffre inventé aujourd'hui.
 |---|---|
 | 2026-10-08 | Ouverture : constat, positionnement, ordre, décisions D1 à D4 proposées |
 | 2026-10-08 | « GO » de Vince : D1 à D4 retenues comme recommandées. Lots 14 et 15 livrés (v1.14), fusion à valider. D1 attend l'enregistrement DNS de Vince : le DNS de `flightledger.io` est chez Infomaniak |
+| 2026-10-08 | Vince pose le CNAME `briefing` → `ludens-kith.github.io.` et vérifie `flightledger.io` pour GitHub Pages (TXT `_github-pages-challenge-ludens-kith`, à garder). v1.14 en ligne, pages servies vérifiées (160/160) |
 
 Sources consultées pour la concurrence : fil
 [Current mission planning tools](https://forum.dcs.world/topic/374602-current-mission-planning-tools/),
