@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FL Briefing Board — le tableau de briefing des escadrons DCS World</title>
+<meta name="description" content="Tableau de briefing gratuit pour escadrons DCS World : symboles aéro, cartes des théâtres, coupe liée à la route, vue radar, kneeboard et DTC du F/A-18C.">
+<link rel="canonical" href="https://ludens-kith.github.io/fl-briefing-board/fr/">
+<link rel="alternate" hreflang="fr" href="https://ludens-kith.github.io/fl-briefing-board/fr/">
+<link rel="alternate" hreflang="en" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<link rel="alternate" hreflang="x-default" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FL Briefing Board">
+<meta property="og:title" content="FL Briefing Board — le tableau de briefing des escadrons DCS World">
+<meta property="og:description" content="Posez avions et menaces sur les cartes des théâtres, liez la coupe à la route, montrez l'écran radar, puis exportez le kneeboard ou la DTC. Gratuit, dans le navigateur.">
+<meta property="og:url" content="https://ludens-kith.github.io/fl-briefing-board/fr/">
+<meta property="og:image" content="https://ludens-kith.github.io/fl-briefing-board/assets/readme/apercu-social.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#070B10">
+<link rel="icon" type="image/svg+xml" href="../assets/fl-briefing-board-icon.svg">
+<link rel="stylesheet" href="../assets/site/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "FL Briefing Board",
+  "url": "https://ludens-kith.github.io/fl-briefing-board/",
+  "description": "Tableau de briefing pour escadrons DCS World : symboles aéro, cartes des théâtres, coupe liée à la route, vue radar du F/A-18C et du F-16C, import de mission, kneeboard et DTC du F/A-18C.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Navigateur web",
+  "inLanguage": "fr",
+  "isAccessibleForFree": true,
+  "license": "https://opensource.org/licenses/MIT",
+  "image": "https://ludens-kith.github.io/fl-briefing-board/assets/readme/apercu-social.png",
+  "screenshot": "https://ludens-kith.github.io/fl-briefing-board/assets/site/tableau.jpg",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "publisher": { "@type": "Organization", "name": "LK Studio", "url": "https://l-k-studio.com" }
+}
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="../assets/fl-briefing-board-patch.svg" alt="" width="36" height="36"><span><b>FL</b> Briefing Board</span></a>
+    <nav aria-label="Navigation">
+      <a href="../docs/GUIDE.html">Guide</a>
+      <a href="../?demo">Démo</a>
+      <a href="https://github.com/LUDENS-KITH/fl-briefing-board">GitHub</a>
+      <a href="../en/" hreflang="en" lang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1>Le tableau de briefing des escadrons DCS World</h1>
+    <p class="lead">Posez avions et menaces sur les cartes des théâtres, liez la coupe à la
+    route, montrez à la patrouille ce que verra son radar, puis emportez le tout au
+    kneeboard ou dans la DTC du F/A-18C.</p>
+    <div class="cta">
+      <a class="btn primary" href="../">Ouvrir le tableau</a>
+      <a class="btn ghost" href="../?demo">Voir la démo</a>
+    </div>
+    <p class="fine">Gratuit · dans le navigateur · rien à installer · code ouvert</p>
+    <figure class="shot">
+      <img src="../assets/site/tableau.jpg" width="1440" height="900" fetchpriority="high"
+           alt="Le tableau : route d'une frappe au Caucase sur carte topographique, ravitailleur sur son hippodrome, menace SA-11, et la coupe d'altitude de la route en dessous">
+    </figure>
+  </div>
+
+  <section aria-labelledby="fonctions">
+    <div class="wrap">
+      <h2 id="fonctions">Ce qu'il fait</h2>
+
+      <div class="feature">
+        <div class="text">
+          <span class="tag">Coupe</span>
+          <h3>L'altitude de la route, sous la carte</h3>
+          <p>La coupe suit les waypoints de la vue de dessus, dans l'ordre de leurs
+          numéros, avec le relief et le plafond des menaces sol-air. Déplacez un point sur
+          la carte, la coupe suit ; tirez-le dans la coupe, son altitude change.</p>
+        </div>
+        <figure><img src="../assets/site/coupe.jpg" width="1100" height="675" loading="lazy"
+             alt="Phase d'attaque : pop-up vers l'objectif sous le plafond d'un SA-11, vu sur la carte et dans la coupe"></figure>
+      </div>
+
+      <div class="feature flip">
+        <div class="text">
+          <span class="tag">Radar</span>
+          <h3>Ce que voit le radar de votre module</h3>
+          <p>Désignez un porteur : chaque appareil de la carte devient un contact sur
+          l'écran radar du F/A-18C ou du F-16C, avec distance, gisement, aspect et part
+          radiale. Tournez le porteur, déplacez une cible : l'écran suit.</p>
+        </div>
+        <figure><img src="../assets/site/radar-lie.jpg" width="1100" height="675" loading="lazy"
+             alt="Interception : trois bandits sur la carte et leur position sur l'écran radar du F/A-18C, calculée depuis la vue de dessus"></figure>
+      </div>
+
+      <div class="feature">
+        <div class="text">
+          <span class="tag">Kit radar</span>
+          <h3>La symbologie, prête à poser</h3>
+          <p>Gabarits d'écran et symboles du F/A-18C et du F-16C, dessinés d'après le manuel
+          de chaque module, pour enseigner la lecture de la page radar sur le même tableau
+          que la manœuvre.</p>
+        </div>
+        <figure><img src="../assets/site/kit-radar.jpg" width="620" height="300" loading="lazy"
+             alt="Écran RDR ATTK du F/A-18C et écran FCR du F-16C en TWS, avec leurs pistes"></figure>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Votre mission DCS, importée</h3>
+          <p>Glissez le <code>.miz</code> : route du vol, bullseye, défenses aériennes, navires,
+          ravitailleurs et AWACS avec leur orbite, leur TACAN et leur fréquence. Renvoyez
+          ensuite la route dans la DTC du F/A-18C.</p>
+        </div>
+        <div class="card">
+          <h3>Les cartes des théâtres</h3>
+          <p>Les 14 théâtres DCS en topographique, satellite ou plan routier, à l'échelle
+          automatique. Caps vrais ou magnétiques, déclinaison calculée ou celle de votre
+          mission.</p>
+        </div>
+        <div class="card">
+          <h3>28 symboles aéro</h3>
+          <p>Chasseurs, ravitailleurs, AWACS, menaces, waypoints, bullseye… orientables,
+          redimensionnables, recolorables. Accrochez un ravitailleur à son hippodrome : il
+          reste aligné à toute échelle.</p>
+        </div>
+        <div class="card">
+          <h3>Mener le briefing</h3>
+          <p>Plein écran en partage d'écran, phases animées d'une planche à l'autre,
+          pointeur laser. Puis kneeboard, image PNG ou fichier de briefing pour toute la
+          patrouille.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="planificateur">
+    <div class="wrap">
+      <h2 id="planificateur">Il complète votre planificateur</h2>
+      <p class="lead">Votre outil de planification calcule le carburant, les emports et les
+      cartes. FL Briefing Board sert à <strong>expliquer</strong> : qui va où, à quelle
+      altitude, d'où vient la menace, et ce que montrera le radar au moment de tirer.</p>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="questions">
+    <div class="wrap">
+      <h2 id="questions">Questions</h2>
+      <details>
+        <summary>C'est gratuit ?</summary>
+        <p>Oui. Le code est ouvert, sous licence MIT. Le projet est porté par LK Studio et
+        par les soutiens de la communauté.</p>
+      </details>
+      <details>
+        <summary>Faut-il installer quelque chose ?</summary>
+        <p>Non : un navigateur récent sur ordinateur suffit. Les fonds de carte demandent
+        une connexion Internet.</p>
+      </details>
+      <details>
+        <summary>Où vont mes données ?</summary>
+        <p>Nulle part : le tableau garde votre travail dans votre navigateur, et une
+        mission importée est lue sur votre poste. Seuls les fonds de carte sont chargés
+        depuis des serveurs publics (OpenTopoMap, OpenStreetMap, Esri).</p>
+      </details>
+      <details>
+        <summary>Comment partager un briefing avec la patrouille ?</summary>
+        <p>« ⇩ Briefing » enregistre un fichier, avec ses planches et ses images, que
+        chacun rouvre par « ⇧ Ouvrir ». Pour le cockpit : le kneeboard ou une image PNG.</p>
+      </details>
+      <details>
+        <summary>Quels appareils sont pris en charge ?</summary>
+        <p>Le tableau sert à tout appareil. La vue radar et son kit couvrent le F/A-18C
+        et le F-16C ; l'export de la route dans la DTC, le F/A-18C.</p>
+      </details>
+      <p><a href="../docs/GUIDE.html">Le guide détaille chaque geste et chaque raccourci.</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="../assets/lk-studio-logo.png" alt="LK Studio" width="112" height="105">
+    <div>
+      <p><strong>Conçu et développé par LK Studio</strong>, studio de création logicielle installé à Tours.</p>
+      <div class="links">
+        <a href="https://l-k-studio.com">l-k-studio.com</a>
+        <a href="../docs/SOUTENIR.html">Soutenir (Ko-Fi)</a>
+        <a href="https://discord.gg/cTepFwBPUy">Discord</a>
+        <a href="https://github.com/LUDENS-KITH/fl-briefing-board">GitHub</a>
+        <a href="https://flightledger.io">FlightLedger</a>
+      </div>
+      <p>FL Briefing Board est un projet indépendant, non affilié à Eagle Dynamics. DCS World
+      et les noms des modules et des cartes DCS sont des marques d'Eagle Dynamics SA.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

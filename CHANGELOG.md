@@ -3,6 +3,29 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.14 — 2026-10-08
+
+Lots 14 et 15 du [plan d'action](docs/PLAN.md), chantier Visibilité
+([VISIBILITE.md](docs/VISIBILITE.md)) : que les moteurs de recherche et les aperçus de
+partage sachent ce qu'est l'outil.
+
+### Ajouté
+- **Pages de présentation** en français (`fr/`) et en anglais (`en/`) : ce que fait
+  l'outil, en captures de la démo publique, boutons vers le tableau et la démo, questions
+  fréquentes, mention de non-affiliation. Liées entre elles pour les moteurs (`hreflang`).
+- **Référencement du tableau** : titre, description, adresse canonique, aperçu de partage
+  (Open Graph, carte Twitter avec l'image du dépôt), texte lisible sans script, liens vers
+  les présentations dans le panneau ⓘ.
+- **Guides rendus par GitHub Pages** : nom du site, description, image de partage ; les
+  documents de travail (PLAN, ETAT, MODELE, RADAR, DEVELOPPER, VISIBILITE) ne sont plus
+  proposés aux moteurs (`noindex`).
+- `sitemap.xml` et `robots.txt` ; ce dernier ne prendra effet qu'avec un domaine propre.
+
+### Vérifié en exécutant
+`node tools/test_seo.js` 149/149, 27 échecs avant le code ; deux mutations signalées ·
+pages rendues dans Brave à 1 440 et 375 px, sans image cassée ni défilement horizontal ·
+banc 71/71, `test_miz` 91/91, `test_radar` 26/26.
+
 ## v1.13 — 2026-10-08
 
 Lot 13 du [plan d'action](docs/PLAN.md), demandé par Vince : les numéros de waypoint.

@@ -14,7 +14,13 @@ FL Briefing Board/
 ├─ radar.js          vue radar liée : géométrie du B-scope, fonctions pures
 ├─ miz.js            lire une mission .miz : zip, table Lua, projection ; fonctions pures
 ├─ projections.js    projection de chaque théâtre DCS (généré, ne pas retoucher)
-├─ assets/           exports du logo (écusson, icône, .ico du raccourci) — ne pas retoucher
+├─ assets/           exports du logo (écusson, icône, .ico du raccourci) — ne pas retoucher ;
+│                    assets/site/ : feuille de style et captures des pages de présentation
+├─ fr/, en/          pages de présentation, statiques (lot 15) ; la base des adresses absolues
+│                    est vérifiée par tools/test_seo.js
+├─ _config.yml       réglages Jekyll de GitHub Pages pour les documents Markdown rendus
+├─ _includes/        head-custom.html : balise noindex des documents de travail, icône
+├─ sitemap.xml       plan du site soumis aux moteurs ; robots.txt, effectif sur un domaine propre
 ├─ tools/
 │  ├─ creer-raccourci.ps1  crée le raccourci bureau (mode application)
 │  ├─ build_theatres.py régénère theatres.js depuis les données de FlightLedger
@@ -22,6 +28,8 @@ FL Briefing Board/
 │  ├─ test_magnetic.js  vérifie la déclinaison contre les 100 valeurs de test du NOAA
 │  ├─ test_radar.js     vérifie la géométrie de la vue radar liée
 │  ├─ test_miz.js       vérifie la projection (contre pyproj), la table Lua et une .miz
+│  ├─ test_seo.js       vérifie ce que lit un moteur : balises, aperçu, hreflang, plan du site ;
+│  │                    avec une adresse en argument, les pages servies
 │  ├─ build_projections.py mesure la projection des théâtres sur les balises du jeu (pyproj, numpy)
 │  ├─ banc-saisie.html  banc de saisie : l'application pilotée par de vrais événements
 │  ├─ build_logo.py     régénère le logo : maîtres dans FlightLedger_BRAND, exports ici
@@ -35,6 +43,7 @@ FL Briefing Board/
    ├─ DEVELOPPER.md  ce fichier
    ├─ ETAT.md        où en est le projet : vérifié, non vérifié, hors périmètre
    ├─ PLAN.md        ce qui vient ensuite : lots, ordre, critères de fin
+   ├─ VISIBILITE.md  comment l'outil se fait trouver : constat, ordre, diffusion, mesure
    ├─ RADAR.md       kit radar : la source de chaque libellé et de chaque symbole
    ├─ MODELE.md      contrat interne : objets, interaction, persistance, ajout d'une forme
    └─ SOUTENIR.md    Ko-Fi, invitations Discord, crédits des soutiens

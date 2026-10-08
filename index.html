@@ -3,7 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<title>FL Briefing Board</title>
+<title>FL Briefing Board — tableau de briefing pour DCS World</title>
+<meta name="description" content="Tableau de briefing gratuit pour escadrons DCS World : symboles aéro, cartes des théâtres, coupe liée à la route, vue radar, kneeboard et DTC du F/A-18C.">
+<link rel="canonical" href="https://ludens-kith.github.io/fl-briefing-board/">
+<link rel="alternate" hreflang="fr" href="https://ludens-kith.github.io/fl-briefing-board/fr/">
+<link rel="alternate" hreflang="en" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FL Briefing Board">
+<meta property="og:title" content="FL Briefing Board — tableau de briefing pour DCS World">
+<meta property="og:description" content="Tableau de briefing gratuit pour escadrons DCS World : symboles aéro, cartes des théâtres, coupe liée à la route, vue radar, kneeboard et DTC du F/A-18C.">
+<meta property="og:url" content="https://ludens-kith.github.io/fl-briefing-board/">
+<meta property="og:image" content="https://ludens-kith.github.io/fl-briefing-board/assets/readme/apercu-social.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#070B10">
 <link rel="icon" type="image/svg+xml" href="assets/fl-briefing-board-icon.svg">
 <style>
   :root{
@@ -137,9 +152,23 @@
     background:rgba(7,11,16,.92);border:1px solid var(--fl-gold-2);color:#E6EDF5;font-size:12px;
     pointer-events:none;white-space:nowrap}
   @media (max-width:760px){ .brand{display:none} #pal{width:104px} .tile span{display:none} }
+  .noscript{max-width:640px;margin:48px auto;padding:0 16px;line-height:1.5}
+  .noscript a{color:var(--fl-blue-2)}
 </style>
 </head>
 <body>
+<noscript>
+  <div class="noscript">
+    <h1>FL Briefing Board</h1>
+    <p>Le tableau de briefing des escadrons DCS World : posez avions et menaces sur les
+    cartes des théâtres, liez la coupe à la route, montrez l'écran radar du F/A-18C ou du
+    F-16C, animez les phases, puis exportez le kneeboard ou la DTC du F/A-18C. Gratuit,
+    dans le navigateur, rien à installer.</p>
+    <p>The briefing whiteboard for DCS World squadrons. This app needs JavaScript.</p>
+    <p><a href="fr/">Présentation</a> · <a href="en/">Overview (English)</a> ·
+    <a href="docs/GUIDE.html">Guide</a> · <a href="docs/GUIDE.en-US.html">User guide</a></p>
+  </div>
+</noscript>
 
 <div id="bar">
   <span class="brand"><img src="assets/fl-briefing-board-icon.svg" alt="" width="22" height="22">FL <b>Briefing Board</b></span>
@@ -300,6 +329,8 @@
       <b>FlightLedger</b> — débriefez vos vrais vols : carnet de vol, analyse Tacview,
       escadrons. Le briefing prépare le vol ; FlightLedger raconte ce qui s'est passé. →</a>
     <p class="small">
+      <a href="fr/" target="_blank" rel="noopener">Présentation</a> ·
+      <a href="en/" target="_blank" rel="noopener">Overview</a> ·
       Guides :
       <a href="docs/GUIDE.html" target="_blank" rel="noopener">FR</a> ·
       <a href="docs/GUIDE.en-US.html" target="_blank" rel="noopener">EN-US</a> ·
@@ -321,7 +352,7 @@
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="miz.js?v=1.2"></script>
-<script src="board.js?v=1.13"></script>
+<script src="board.js?v=1.14"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

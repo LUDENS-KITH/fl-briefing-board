@@ -35,8 +35,8 @@ proposés, non engagés.
 | 11 | Nouveau briefing : repartir d'un tableau vierge, toutes planches et images effacées | demande | S | lot 4 | v1.11 | en ligne le 2026-10-07 |
 | 12 | Import `.miz` : ravitailleurs et AWACS, leur route et leur orbite | demande | M | lots 6 et 10 | v1.12 | en ligne le 2026-10-07 |
 | 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | en ligne le 2026-10-08 |
-| 14 | Visibilité : référencement technique (description, aperçu de partage, données structurées, texte lisible) | demande | S | D1 conseillée | v1.14 | proposé le 2026-10-08 |
-| 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.15 | proposé le 2026-10-08 |
+| 14 | Visibilité : référencement technique (description, aperçu de partage, données structurées, texte lisible) | demande | S | D1 conseillée | v1.14 | engagé le 2026-10-08 |
+| 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.14 | engagé le 2026-10-08 |
 | 16 | Interface en anglais | demande | M-L | — | v1.16 | proposé le 2026-10-08 |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 
@@ -691,6 +691,14 @@ non-affiliation à Eagle Dynamics, LK Studio, Ko-Fi, Discord.
 téléphone sans défilement horizontal (capture à 375 px de large) ; aucune image ne
 montre la couche des aérodromes.
 
+État des lots 14 et 15 au 2026-10-08 : engagés sur le « GO » de Vince, livrés ensemble
+(v1.14) sur la branche `chantier-visibilite`, fusion à valider. `test_seo.js` 149/149,
+27 échecs avant le code ; captures prises sur la démo publique (sans aérodromes) ; pages
+vérifiées dans Brave à 1 440 et 375 px. Adresses sur `ludens-kith.github.io` tant que D1
+n'est pas exécutée : la bascule changera la base dans un seul passage, que `test_seo.js`
+contrôle. Restent après la fusion : le validateur de données structurées de Google et
+l'aperçu collé dans Discord (critère 2 du lot 14).
+
 #### Lot 16 — Interface en anglais
 
 Toutes les chaînes affichées (boutons, info-bulles, aide, messages, boîtes de
@@ -776,7 +784,7 @@ avis contraire :
 | 2026-10-08 | Lot 13 : numéros de waypoint au plus petit libre ; lancement |
 | 2026-10-08 | Fusion du lot 13 : v1.13 en ligne |
 | 2026-10-08 | Chantier Visibilité ouvert : lots 14 à 17 proposés, [VISIBILITE.md](VISIBILITE.md) |
+| 2026-10-08 | « GO » de Vince : recommandations D1 à D4 retenues ; lots 14 et 15 engagés, livrés en v1.14 |
 
-**À trancher par Vince :** le chantier Visibilité — D1 (adresse), D2 (ordre de diffusion),
-D3 (mesure), D4 (publications), voir [VISIBILITE.md §4](VISIBILITE.md#4-décisions-à-prendre-par-vince) ;
-puis l'engagement des lots 14 à 17.
+**À trancher par Vince :** la fusion des lots 14 et 15. **À faire par Vince :** l'enregistrement
+DNS de D1 ([VISIBILITE.md §4](VISIBILITE.md#4-décisions-à-prendre-par-vince)).

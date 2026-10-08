@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="https://ludens-kith.github.io/fl-briefing-board/?demo"><b>▶ Essayer la démo</b></a> ·
+  <a href="https://ludens-kith.github.io/fl-briefing-board/fr/">Présentation</a> ·
   <a href="https://l-k-studio.com">LK Studio</a> ·
   <a href="https://flightledger.io">FlightLedger</a> ·
   <a href="docs/GUIDE.md">Guide FR</a> ·
@@ -127,7 +128,8 @@ Les contributions sont bienvenues — un symbole qui manque, un théâtre, une c
 28 ready-to-place aviation symbols, live maps of the 14 DCS theatres,
 an altitude profile linked to the route, true or magnetic headings (NOAA World Magnetic Model),
 multi-phase boards and DCS kneeboard export. No install, no account.
-[Try the demo](https://ludens-kith.github.io/fl-briefing-board/?demo), read the
+[Try the demo](https://ludens-kith.github.io/fl-briefing-board/?demo), see the
+[overview](https://ludens-kith.github.io/fl-briefing-board/en/), read the
 [EN-US guide](docs/GUIDE.en-US.md), or join the
 [FlightLedger Discord](https://discord.gg/cTepFwBPUy). Made in Tours, France, by
 [LK Studio](https://l-k-studio.com) — also the makers of [FlightLedger](https://flightledger.io).
