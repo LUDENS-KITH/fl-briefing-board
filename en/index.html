@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FL Briefing Board — the briefing whiteboard for DCS World squadrons</title>
+<meta name="description" content="Free briefing whiteboard for DCS World squadrons: aircraft symbols, theatre maps, altitude profile linked to the route, radar view, kneeboard and F/A-18C DTC.">
+<link rel="canonical" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<link rel="alternate" hreflang="fr" href="https://ludens-kith.github.io/fl-briefing-board/fr/">
+<link rel="alternate" hreflang="en" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<link rel="alternate" hreflang="x-default" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FL Briefing Board">
+<meta property="og:title" content="FL Briefing Board — the briefing whiteboard for DCS World squadrons">
+<meta property="og:description" content="Drop aircraft and threats on theatre maps, link the altitude profile to your route, show the radar page, then export a kneeboard or your DTC. Free, in your browser.">
+<meta property="og:url" content="https://ludens-kith.github.io/fl-briefing-board/en/">
+<meta property="og:image" content="https://ludens-kith.github.io/fl-briefing-board/assets/readme/apercu-social.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#070B10">
+<link rel="icon" type="image/svg+xml" href="../assets/fl-briefing-board-icon.svg">
+<link rel="stylesheet" href="../assets/site/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "FL Briefing Board",
+  "url": "https://ludens-kith.github.io/fl-briefing-board/",
+  "description": "Briefing whiteboard for DCS World squadrons: aircraft symbols, theatre maps, altitude profile linked to the route, F/A-18C and F-16C radar view, mission import, kneeboard and F/A-18C DTC.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web browser",
+  "inLanguage": "fr",
+  "isAccessibleForFree": true,
+  "license": "https://opensource.org/licenses/MIT",
+  "image": "https://ludens-kith.github.io/fl-briefing-board/assets/readme/apercu-social.png",
+  "screenshot": "https://ludens-kith.github.io/fl-briefing-board/assets/site/tableau.jpg",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "publisher": { "@type": "Organization", "name": "LK Studio", "url": "https://l-k-studio.com" }
+}
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="../assets/fl-briefing-board-patch.svg" alt="" width="36" height="36"><span><b>FL</b> Briefing Board</span></a>
+    <nav aria-label="Navigation">
+      <a href="../docs/GUIDE.en-US.html">User guide</a>
+      <a href="../?demo">Demo</a>
+      <a href="https://github.com/LUDENS-KITH/fl-briefing-board">GitHub</a>
+      <a href="../fr/" hreflang="fr" lang="fr">Français</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1>The briefing whiteboard for DCS World squadrons</h1>
+    <p class="lead">Drop aircraft and threats on real theatre maps, link the altitude
+    profile to your route, show your flight what their radar will see, then take it all
+    to the kneeboard or into your F/A-18C DTC.</p>
+    <div class="cta">
+      <a class="btn primary" href="../">Open the board</a>
+      <a class="btn ghost" href="../?demo">Try the demo</a>
+    </div>
+    <p class="fine">Free · in your browser · nothing to install · open source</p>
+    <figure class="shot">
+      <img src="../assets/site/tableau.jpg" width="1440" height="900" fetchpriority="high"
+           alt="The board: a strike route in the Caucasus on a topographic map, a tanker on its racetrack, an SA-11 threat, and the route's altitude profile below">
+    </figure>
+  </div>
+
+  <section aria-labelledby="features">
+    <div class="wrap">
+      <h2 id="features">What it does</h2>
+
+      <div class="feature">
+        <div class="text">
+          <span class="tag">Profile</span>
+          <h3>Your route's altitude, under the map</h3>
+          <p>The profile follows the waypoints of the top view in number order, with
+          terrain and surface-to-air threat ceilings. Move a point on the map and the
+          profile follows; drag it in the profile to change its altitude.</p>
+        </div>
+        <figure><img src="../assets/site/coupe.jpg" width="1100" height="675" loading="lazy"
+             alt="Attack phase: pop-up to the target under an SA-11 ceiling, seen on the map and in the profile"></figure>
+      </div>
+
+      <div class="feature flip">
+        <div class="text">
+          <span class="tag">Radar</span>
+          <h3>What your module's radar sees</h3>
+          <p>Pick a radar carrier: every aircraft on the map becomes a contact on the
+          F/A-18C or F-16C radar page, with range, bearing, aspect and closure share. Turn
+          the carrier or move a target and the display follows.</p>
+        </div>
+        <figure><img src="../assets/site/radar-lie.jpg" width="1100" height="675" loading="lazy"
+             alt="Intercept: three bandits on the map and where they sit on the F/A-18C radar page, computed from the top view"></figure>
+      </div>
+
+      <div class="feature">
+        <div class="text">
+          <span class="tag">Radar kit</span>
+          <h3>Radar symbology, ready to drop</h3>
+          <p>F/A-18C and F-16C display templates and symbols, drawn from each module's
+          manual, to teach how to read the radar page on the same board as the
+          manoeuvre.</p>
+        </div>
+        <figure><img src="../assets/site/kit-radar.jpg" width="620" height="300" loading="lazy"
+             alt="F/A-18C RDR ATTK page and F-16C FCR page in TWS, with their tracks"></figure>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Your DCS mission, imported</h3>
+          <p>Drop the <code>.miz</code>: your flight's route, bullseye, air defences, ships,
+          tankers and AWACS with their orbit, TACAN and frequency. Then send the route back
+          into the F/A-18C DTC.</p>
+        </div>
+        <div class="card">
+          <h3>Theatre maps</h3>
+          <p>All 14 DCS theatres in topographic, satellite or road map, with automatic
+          scale. True or magnetic headings, with computed declination or your mission's.</p>
+        </div>
+        <div class="card">
+          <h3>28 aviation symbols</h3>
+          <p>Fighters, tankers, AWACS, threats, waypoints, bullseye… rotate, resize,
+          recolour. Attach a tanker to its racetrack and it stays aligned at any zoom.</p>
+        </div>
+        <div class="card">
+          <h3>Run the briefing</h3>
+          <p>Full screen for screen sharing, animated transitions between phases, laser
+          pointer. Then a kneeboard, a PNG image or a briefing file for the whole flight.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="planner">
+    <div class="wrap">
+      <h2 id="planner">It complements your mission planner</h2>
+      <p class="lead">Your planning tool computes fuel, loadouts and cards. FL Briefing Board
+      is for <strong>explaining</strong>: who goes where, at what altitude, where the threat
+      comes from, and what the radar will show when it is time to shoot.</p>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="questions">
+    <div class="wrap">
+      <h2 id="questions">Questions</h2>
+      <details>
+        <summary>Is it free?</summary>
+        <p>Yes. The code is open source under the MIT licence. The project is backed by LK
+        Studio and by community supporters.</p>
+      </details>
+      <details>
+        <summary>Is the interface in English?</summary>
+        <p>The interface is in French for now; an English interface is being prepared. The
+        <a href="../docs/GUIDE.en-US.html">user guide</a> is fully in English, and the
+        board's symbols and maps speak for themselves.</p>
+      </details>
+      <details>
+        <summary>Do I need to install anything?</summary>
+        <p>No: a recent desktop browser is enough. Map backgrounds need an Internet
+        connection.</p>
+      </details>
+      <details>
+        <summary>Where does my data go?</summary>
+        <p>Nowhere: the board keeps your work in your browser, and an imported mission is
+        read on your machine. Only map tiles are loaded, from public servers (OpenTopoMap,
+        OpenStreetMap, Esri).</p>
+      </details>
+      <details>
+        <summary>How do I share a briefing with my flight?</summary>
+        <p>“⇩ Briefing” saves a file, with its phases and images, that anyone reopens with
+        “⇧ Ouvrir”. For the cockpit: the kneeboard or a PNG image.</p>
+      </details>
+      <details>
+        <summary>Which aircraft are supported?</summary>
+        <p>The board works for any aircraft. The radar view and its kit cover the F/A-18C
+        and F-16C; exporting the route to the DTC, the F/A-18C.</p>
+      </details>
+      <p><a href="../docs/GUIDE.en-US.html">The user guide covers every gesture and shortcut.</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="../assets/lk-studio-logo.png" alt="LK Studio" width="112" height="105">
+    <div>
+      <p><strong>Designed and built by LK Studio</strong>, a software studio based in Tours, France.</p>
+      <div class="links">
+        <a href="https://l-k-studio.com">l-k-studio.com</a>
+        <a href="../docs/SOUTENIR.html" hreflang="fr">Support us (Ko-Fi)</a>
+        <a href="https://discord.gg/cTepFwBPUy">Discord</a>
+        <a href="https://github.com/LUDENS-KITH/fl-briefing-board">GitHub</a>
+        <a href="https://flightledger.io">FlightLedger</a>
+      </div>
+      <p>FL Briefing Board is an independent project, not affiliated with Eagle Dynamics. DCS
+      World and the names of DCS modules and maps are trademarks of Eagle Dynamics SA.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

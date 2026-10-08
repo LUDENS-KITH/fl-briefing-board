@@ -155,6 +155,7 @@ de la base mesurée, pas d'un chiffre inventé aujourd'hui.
 | Date | Événement |
 |---|---|
 | 2026-10-08 | Ouverture : constat, positionnement, ordre, décisions D1 à D4 proposées |
+| 2026-10-08 | « GO » de Vince : D1 à D4 retenues comme recommandées. Lots 14 et 15 livrés (v1.14), fusion à valider. D1 attend l'enregistrement DNS de Vince : le DNS de `flightledger.io` est chez Infomaniak |
 
 Sources consultées pour la concurrence : fil
 [Current mission planning tools](https://forum.dcs.world/topic/374602-current-mission-planning-tools/),
