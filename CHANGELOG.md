@@ -3,6 +3,20 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.15 — 2026-10-08
+
+Lot 18 du [plan d'action](docs/PLAN.md) : le déménagement vers `briefing.flightledger.io`,
+le lundi 12 octobre 2026.
+
+### Ajouté
+- **Bandeau de déménagement**, sur l'ancienne adresse seulement, hors démo, et seulement si
+  un briefing est gardé dans le navigateur : FL Briefing Board déménage le 12 octobre, les
+  briefings gardés ici ne suivront pas ; « ⇩ Enregistrer maintenant » télécharge le fichier
+  de briefing, « Compris » ferme le bandeau pour de bon.
+
+### Vérifié en exécutant
+Banc 77/77, les 6 scénarios nouveaux rouges sur le moteur d'avant · rendu dans Brave.
+
 ## v1.14 — 2026-10-08
 
 Lots 14 et 15 du [plan d'action](docs/PLAN.md), chantier Visibilité

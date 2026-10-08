@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-10-08**, version **v1.14**.
+> Document vivant. Dernière mise à jour : **2026-10-08**, version **v1.15**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [ludens-kith.github.io/fl-briefing-board](https://ludens-kith.github.io/fl-briefing-board/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 71 scénarios) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 77 scénarios) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
@@ -111,6 +111,7 @@ par événements pointeur réels, pas en relisant le code.
 | Route dans la DTC | 4 scénarios au banc, rouges avant le code : planche carte et planche sans carte ramenées aux positions DCS d'origine à moins de 2 m, après enregistrement, réouverture et « + phase » ; refus expliqués (pas de route, pas de repère, autre théâtre, aucun F/A-18C) ; choix du vol parmi les seuls Hornet ; mis en échec par deux mutations ; 51/51 | conforme | 2026-10-06 |
 | Ravitailleurs et AWACS | `node tools/test_miz.js` 91/91, 8 contrôles nouveaux dont 6 rouges avant le code : tâche Refueling et AWACS lues, ravitailleur sans tâche écarté, route, orbite Race-Track (point suivant) et Anchored (dans une tâche contrôlée, branche chaude), altitude de l'orbite, TACAN, fréquence | conforme | 2026-10-07 |
 | Ravitailleurs et AWACS | 1 scénario au banc, rouge sur le moteur d'avant : ravitailleur et AWACS accrochés à leur orbite, routes tiretées, étiquettes (niveau, TACAN, fréquence), orbite Race-Track au milieu de sa branche et dans son axe, bilan ; 65/65. Mission réelle de Vince (« CAUCASUS - Entraînement Sol - FA-18C Multi 4 », 1,4 Mo) dans Brave : Texaco 11 (FL200, TCN 12Y TEX, 251.000) et Overlord 1 (FL250, 260.000) sur leurs orbites | conforme | 2026-10-07 |
+| Bandeau de déménagement | 6 scénarios au banc, rouges avant le code : présent sur l'ancienne adresse avec un briefing gardé (nom, date, nouvelle adresse, consigne) ; absent sur un tableau vierge, à une autre adresse, dans la démo ; « Compris » le ferme pour de bon ; « Enregistrer maintenant » télécharge le briefing et le ferme ; 77/77. Rendu vérifié dans Brave | conforme | 2026-10-08 |
 | Référencement et présentation | `node tools/test_seo.js` 149/149, rouge avant le code (27 échecs) : titre, description (50 à 160 caractères), canonique, Open Graph et carte Twitter, image de partage présente, texte sans script, liens vers les présentations ; pages `fr/` et `en/` : langue, `hreflang` croisés, données `SoftwareApplication`, boutons vers le tableau et la démo, non-affiliation, un seul `h1`, images avec `alt` et dimensions, aucun lien local cassé ; plan du site, `robots.txt`, réglages Jekyll et `noindex` des six documents de travail. Mutation : un lien d'image et un `hreflang` faussés sont signalés. Dans Brave à 1 440 et 375 px : aucune image cassée, aucun défilement horizontal. Banc 71/71 (non-régression) | conforme | 2026-10-08 |
 | Numéros de waypoint | 6 scénarios au banc, rouges avant le code : tout supprimé, le suivant repart de 1 ; le dernier supprimé rend son numéro ; un trou au milieu comblé puis la suite reprend (2, puis 5) ; la copie prend le plus petit libre ; un briefing ouvert au compteur d'avant (`wpN` 9) numérote au plus petit libre ; liens des guides du panneau ⓘ vers la page mise en forme ; 71/71. Dans Brave, vrais clics : 1-2-3-4 posés, 2 supprimé, le suivant porte 2 | conforme | 2026-10-08 |
 | Nouveau briefing | 3 scénarios au banc, rouges avant le code : tableau garni (2 planches, image, km) remis à une planche vide, sans carte ni historique, km gardé, vierge à la réouverture, IndexedDB vide ; refus de la confirmation sans effet ; tableau déjà vierge sans question ; Effacer inchangé (non-régression) ; 64/64. Démo dans Brave, vrai clic : boîte de confirmation (« Les 5 planches… »), tableau vierge, message | conforme | 2026-10-07 |

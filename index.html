@@ -151,6 +151,12 @@
   #toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:6px 12px;border-radius:6px;
     background:rgba(7,11,16,.92);border:1px solid var(--fl-gold-2);color:#E6EDF5;font-size:12px;
     pointer-events:none;white-space:nowrap}
+  #moving{position:absolute;left:50%;top:52px;transform:translateX(-50%);width:min(560px,calc(100% - 32px));
+    padding:12px 14px;border-radius:8px;background:rgba(7,11,16,.95);border:1px solid var(--fl-orange-2);
+    color:var(--fl-silver-0);font-size:13px;line-height:1.45;z-index:6;box-shadow:0 6px 24px rgba(0,0,0,.45)}
+  #moving p{margin:0 0 10px}
+  #moving div{display:flex;gap:8px;justify-content:flex-end}
+  body.present #moving{display:none}
   @media (max-width:760px){ .brand{display:none} #pal{width:104px} .tile span{display:none} }
   .noscript{max-width:640px;margin:48px auto;padding:0 16px;line-height:1.5}
   .noscript a{color:var(--fl-blue-2)}
@@ -290,6 +296,12 @@
     <div id="tabs"></div>
     <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · 🔗 ou J : accrocher à un symbole · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
     <div id="toast" hidden></div>
+    <div id="moving" hidden role="status">
+      <p><b>FL Briefing Board déménage le 12 octobre</b> sur <b>briefing.flightledger.io</b>.
+      Vos briefings gardés dans ce navigateur ne suivront pas : enregistrez-les avec
+      ⇩ Briefing, puis rouvrez-les à la nouvelle adresse avec ⇧ Ouvrir.</p>
+      <div><button id="movingsave">⇩ Enregistrer maintenant</button> <button id="movingok">Compris</button></div>
+    </div>
     <div id="pbadge" hidden></div>
   </div>
 </div>
@@ -352,7 +364,7 @@
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="miz.js?v=1.2"></script>
-<script src="board.js?v=1.14"></script>
+<script src="board.js?v=1.15"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')
