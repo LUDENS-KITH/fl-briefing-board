@@ -37,9 +37,9 @@ proposés, non engagés.
 | 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | en ligne le 2026-10-08 |
 | 14 | Visibilité : référencement technique (description, aperçu de partage, données structurées, texte lisible) | demande | S | D1 conseillée | v1.14 | en ligne le 2026-10-08 |
 | 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.14 | en ligne le 2026-10-08 |
-| 16 | Interface en anglais | demande | M-L | — | v1.16 | proposé le 2026-10-08 |
+| 16 | Interface en anglais | demande | M-L | — | v1.17 | proposé le 2026-10-08 |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
-| 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule le 2026-10-12 | demande | S | D1 | v1.15 | bandeau en ligne le 2026-10-08 ; bascule le 2026-10-12 |
+| 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -716,12 +716,16 @@ passe dans les deux langues ; les deux guides citent les libellés exacts de leu
 
 #### Lot 18 — Déménagement vers `briefing.flightledger.io`
 
-Date retenue par Vince le 2026-10-08 : **lundi 2026-10-12**.
+Date retenue par Vince le 2026-10-08 : lundi 2026-10-12, puis **avancée au jour même** (« GO » de
+Vince le 2026-10-08) : les briefings gardés à l'ancienne adresse se récupèrent par une page
+dédiée, au lieu d'un préavis de quatre jours.
 
 | | |
 |---|---|
 | Bandeau (v1.15) | sur l'ancienne adresse seulement (`ludens-kith.github.io`), hors démo, et seulement si un briefing est gardé dans le navigateur : « **FL Briefing Board déménage le 12 octobre** sur briefing.flightledger.io. Vos briefings gardés dans ce navigateur ne suivront pas : enregistrez-les avec ⇩ Briefing, puis rouvrez-les à la nouvelle adresse avec ⇧ Ouvrir. » Boutons « ⇩ Enregistrer maintenant » (télécharge le fichier de briefing) et « Compris » ; l'un ou l'autre le ferme pour de bon. Masqué en mode présentation |
-| Bascule (le 12) | fichier `CNAME`, domaine déclaré dans les réglages Pages, HTTPS forcé ; base des adresses absolues changée en un passage (`BASE` de `test_seo.js`), liens du README, des guides, de SOUTENIR et du dépôt ; bandeau retiré |
+| Page de récupération | dépôt public [`fl-briefing-board-recuperation`](https://github.com/LUDENS-KITH/fl-briefing-board-recuperation), servi par Pages sur l'**ancienne origine** (`ludens-kith.github.io`), que la redirection du domaine ne touche pas : le stockage du navigateur est lié à l'origine, pas au chemin, donc cette page relit en lecture seule ce que l'ancienne adresse gardait (planches, réglages, images de fond) et le rend en fichier de briefing, à rouvrir avec ⇧ Ouvrir. Hors index |
+| Bascule (v1.16) | fichier `CNAME`, domaine déclaré dans les réglages Pages, HTTPS forcé ; base des adresses absolues changée en un passage (`BASE` de `test_seo.js`, seule exception autorisée sur l'ancienne origine : la page de récupération), liens du README, de SOUTENIR et du dépôt ; lien de récupération dans le panneau ⓘ |
+| Bandeau (v1.16) | sur la nouvelle adresse seulement, hors démo, sur un tableau vierge, jusqu'au 2026-11-30 : « **FL Briefing Board a déménagé** sur briefing.flightledger.io. Vous l'utilisiez à l'ancienne adresse (ludens-kith.github.io) ? Vos briefings y sont restés : la page de récupération vous les rend en fichier, à rouvrir ici avec ⇧ Ouvrir. » Boutons « Récupérer mes briefings » (ouvre la page de récupération) et « Compris » ; l'un ou l'autre le ferme pour de bon |
 
 **Fait quand** — au banc, rouges avant le code (6 scénarios) : bandeau présent avec le nom, la
 date, la nouvelle adresse et la consigne ; absent sur un tableau vierge, à une autre adresse,
@@ -729,6 +733,13 @@ dans la démo ; « Compris » le ferme et il ne revient pas à la réouverture ;
 maintenant » télécharge un fichier de briefing qui contient le travail et le ferme. Le 12 :
 `node tools/test_seo.js https://briefing.flightledger.io/` sans échec, l'ancienne adresse
 redirige, HTTPS valide.
+
+**Fait quand (v1.16)** — au banc, rouges avant le code : bandeau présent sur un tableau vierge à
+la nouvelle adresse, avec le nom, l'ancienne adresse et la consigne, et « Récupérer » ouvre la
+page de récupération ; absent avec un briefing en cours, à une autre adresse, après novembre,
+dans la démo ; « Compris » le ferme pour de bon ; lien du panneau ⓘ. Page de récupération
+prouvée sur la vraie ancienne origine : un briefing garni (symbole et image de fond) relu,
+téléchargé, puis rouvert intact.
 
 #### Lot 17 — Mesure
 
@@ -810,4 +821,4 @@ avis contraire :
 | 2026-10-08 | Lot 18 : bascule fixée au 2026-10-12 par Vince ; bandeau d'avertissement livré (v1.15), fusion à valider |
 | 2026-10-08 | Fusion du bandeau : v1.15 en ligne (publication Pages relancée à la main, GitHub ne l'avait pas déclenchée) ; bandeau vu sur l'adresse publique après rechargement d'un briefing gardé |
 
-**À faire le 2026-10-12 :** la bascule vers `briefing.flightledger.io` (lot 18), au « bascule » de Vince.
+| 2026-10-08 | « GO » de Vince : bascule avancée au jour même ; page de récupération publiée et prouvée sur l'ancienne origine ; v1.16 |

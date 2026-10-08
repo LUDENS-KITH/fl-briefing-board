@@ -3,6 +3,27 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.16 — 2026-10-08
+
+Lot 18 du [plan d'action](docs/PLAN.md), avancé au jour même : FL Briefing Board passe sur
+**[briefing.flightledger.io](https://briefing.flightledger.io/)**. L'ancienne adresse redirige.
+
+### Ajouté
+- **Page de récupération** ([ludens-kith.github.io/fl-briefing-board-recuperation](https://ludens-kith.github.io/fl-briefing-board-recuperation/)) :
+  elle relit, dans le navigateur, les briefings gardés à l'ancienne adresse et les rend en
+  fichier de briefing, à rouvrir avec ⇧ Ouvrir. Rien n'est envoyé ni effacé.
+- **Bandeau à la nouvelle adresse**, sur un tableau vierge, hors démo, jusqu'à fin novembre :
+  « FL Briefing Board a déménagé », avec « Récupérer mes briefings » et « Compris ».
+- Lien de récupération dans le panneau ⓘ.
+
+### Modifié
+- Adresses publiques (canonique, partage, plan du site, README, Soutenir) sur le nouveau domaine.
+- L'avertissement d'avant la bascule (v1.15) est remplacé par ce bandeau.
+
+### Vérifié en exécutant
+Banc 77/77, scénarios nouveaux rouges sur le moteur d'avant · `test_seo` 133/133 ·
+`test_miz` 91/91 · `test_radar` 26/26 · page de récupération sur la vraie ancienne origine.
+
 ## v1.15 — 2026-10-08
 
 Lot 18 du [plan d'action](docs/PLAN.md) : le déménagement vers `briefing.flightledger.io`,

@@ -48,7 +48,7 @@ Votre soutien Ko-Fi finance le temps de développement, les tests avec des pilot
 les modèles de briefing et la documentation bilingue.
 
 Essayer l'outil :
-https://ludens-kith.github.io/fl-briefing-board
+https://briefing.flightledger.io/
 
 Code source :
 https://github.com/LUDENS-KITH/fl-briefing-board
@@ -85,7 +85,7 @@ Public links:
 
 ```text
 Try FL Briefing Board:
-https://ludens-kith.github.io/fl-briefing-board
+https://briefing.flightledger.io/
 
 Source code:
 https://github.com/LUDENS-KITH/fl-briefing-board

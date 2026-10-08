@@ -5,7 +5,8 @@
    changer BASE et relancer ce test. */
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
-const BASE = 'https://ludens-kith.github.io/fl-briefing-board/';
+const BASE = 'https://briefing.flightledger.io/';
+const RECUP = 'https://ludens-kith.github.io/fl-briefing-board-recuperation/';
 const PAGES = { app: 'index.html', fr: 'fr/index.html', en: 'en/index.html' };
 const INTERNES = ['docs/PLAN.md', 'docs/ETAT.md', 'docs/MODELE.md', 'docs/RADAR.md', 'docs/DEVELOPPER.md', 'docs/VISIBILITE.md'];
 
@@ -43,8 +44,9 @@ function common(file, html, { lang, url }){
   const img = meta(html, 'og:image') || '';
   ok(fromBase(img) !== null && exists(fromBase(img)), `${file} : image de partage ${img || 'absente'}`);
   ok(meta(html, 'twitter:card') === 'summary_large_image', `${file} : twitter:card ${meta(html, 'twitter:card')}`);
+  /* depuis la bascule (lot 18), l'ancienne origine ne sert plus que la page de récupération */
   for (const [, u] of html.matchAll(/(?:href|src|content)="(https?:\/\/[^"]*github\.io[^"]*)"/g))
-    ok(u.startsWith(BASE), `${file} : adresse hors de la base ${u}`);
+    ok(u === RECUP, `${file} : adresse de l'ancienne origine ${u}`);
   for (const [, h] of html.matchAll(/(?:href|src)="([^"#:]+)(?:#[^"]*)?"/g))
     if (!h.startsWith('//')) ok(linkOk(file, h), `${file} : lien local cassé ${h}`);
 }
