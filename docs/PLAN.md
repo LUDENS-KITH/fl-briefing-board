@@ -39,7 +39,7 @@ proposés, non engagés.
 | 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.14 | en ligne le 2026-10-08 |
 | 16 | Interface en anglais | demande | M-L | — | v1.16 | proposé le 2026-10-08 |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
-| 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule le 2026-10-12 | demande | S | D1 | v1.15 | engagé le 2026-10-08 |
+| 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule le 2026-10-12 | demande | S | D1 | v1.15 | bandeau en ligne le 2026-10-08 ; bascule le 2026-10-12 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -808,5 +808,6 @@ avis contraire :
 | 2026-10-08 | D1 : CNAME `briefing.flightledger.io` et domaine `flightledger.io` vérifié pour GitHub Pages (TXT), posés par Vince |
 | 2026-10-08 | Fusion des lots 14 et 15 : v1.14 en ligne ; publication Pages bloquée une fois côté GitHub, relancée |
 | 2026-10-08 | Lot 18 : bascule fixée au 2026-10-12 par Vince ; bandeau d'avertissement livré (v1.15), fusion à valider |
+| 2026-10-08 | Fusion du bandeau : v1.15 en ligne (publication Pages relancée à la main, GitHub ne l'avait pas déclenchée) ; bandeau vu sur l'adresse publique après rechargement d'un briefing gardé |
 
-**À trancher par Vince :** la fusion du bandeau (lot 18, v1.15), puis la bascule le 2026-10-12.
+**À faire le 2026-10-12 :** la bascule vers `briefing.flightledger.io` (lot 18), au « bascule » de Vince.
