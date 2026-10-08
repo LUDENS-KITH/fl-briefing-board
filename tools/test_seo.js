@@ -89,7 +89,7 @@ ok(read('robots.txt').includes('Sitemap: ' + BASE + 'sitemap.xml'), 'robots.txt 
 const cfg = read('_config.yml');
 ok(/^title:\s*FL Briefing Board\s*$/m.test(cfg), '_config.yml : titre');
 ok(/^lang:\s*fr\s*$/m.test(cfg), '_config.yml : langue');
-ok(/^image:\s*\/assets\/readme\/apercu-social\.png\s*$/m.test(cfg), '_config.yml : image de partage');
+ok(/path:\s*""\s*\}\s*values:\s*\{\s*image:\s*\/assets\/readme\/apercu-social\.png\s*\}/.test(cfg), '_config.yml : image de partage par défaut des pages');
 for (const f of INTERNES){
   ok(fs.existsSync(path.join(ROOT, f)), `${f} n'existe plus`);
   ok(new RegExp(`path:\\s*"${f.replace(/\./g, '\\.')}"[\\s\\S]{0,80}noindex:\\s*true`).test(cfg), `_config.yml : ${f} pas en noindex`);
