@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.15', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.16', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -2637,15 +2637,19 @@ function demoBoards(){
           flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
 
-/* Déménagement (lot 18) : le stockage du navigateur est lié à l'adresse. Quand GitHub Pages
-   redirigera vers le nouveau domaine, ce qui est gardé ici ne suivra pas. On le dit avant,
-   et seulement à ceux qui ont un briefing à perdre : pas à la démo, pas ailleurs. */
-const MOVE = { from: 'ludens-kith.github.io', to: 'briefing.flightledger.io', key: 'fl-briefing-board-moving-ok' };
-function movingNotice(host){
+/* Déménagement (lot 18) : le stockage du navigateur est lié à l'adresse. Depuis la bascule,
+   l'ancienne adresse redirige ici et ce qu'elle gardait y est resté. Un tableau vierge à la
+   nouvelle adresse est le cas de celui qui revient : on lui montre la page de récupération,
+   qui vit sur l'ancienne origine et rend son travail en fichier de briefing. Pas à la démo,
+   pas ailleurs, et plus après novembre. */
+const MOVE = { to: 'briefing.flightledger.io', until: new Date('2026-12-01'),
+               recup: 'https://ludens-kith.github.io/fl-briefing-board-recuperation/',
+               key: 'fl-briefing-board-moving-ok' };
+function movingNotice(host, now = new Date()){
   let seen = false;
   try { seen = !!localStorage.getItem(MOVE.key); } catch(_){}
   stash();
-  $('moving').hidden = DEMO || seen || host !== MOVE.from || !boards.some(b => b.objs && b.objs.length);
+  $('moving').hidden = DEMO || seen || host !== MOVE.to || now >= MOVE.until || boards.some(b => b.objs && b.objs.length);
 }
 function movingDone(){
   try { localStorage.setItem(MOVE.key, '1'); } catch(_){}
@@ -2653,9 +2657,8 @@ function movingDone(){
 }
 $('movingok').onclick = movingDone;
 $('movingsave').onclick = () => {
-  $('save').click();
+  window.open(MOVE.recup, '_blank', 'noopener');
   movingDone();
-  toast(`Briefing enregistré : rouvrez-le sur ${MOVE.to} avec ⇧ Ouvrir`, 6000);
 };
 
 (function boot(){

@@ -1257,32 +1257,39 @@ test('Guides du panneau ⓘ : la page mise en forme, pas le Markdown brut', asyn
 });
 
 /* ---------- lot 18 : déménagement vers briefing.flightledger.io ---------- */
-const OLD_HOST = 'ludens-kith.github.io';
+const NEW_HOST = 'briefing.flightledger.io';
+const RECUP = 'https://ludens-kith.github.io/fl-briefing-board-recuperation/';
 const moving = a => { const m = a.d.getElementById('moving'); return m && !m.hidden ? m.textContent.replace(/\s+/g, ' ') : ''; };
 function garnir(a){ a.tile('fighter'); a.click(400, 300); a.key('Escape'); }
 
-test('Déménagement : un briefing gardé sur l\'ancienne adresse fait paraître le bandeau', async (ok) => {
+test('Déménagement : à la nouvelle adresse, un tableau vierge montre où récupérer ses briefings', async (ok) => {
   const a = await open();
-  garnir(a);
-  a.s(`movingNotice('${OLD_HOST}')`);
+  a.s(`movingNotice('${NEW_HOST}', new Date('2026-10-20'))`);
   const t = moving(a);
-  ok(/FL Briefing Board déménage le 12 octobre/.test(t), `bandeau : « ${t} »`);
-  ok(/briefing\.flightledger\.io/.test(t) && /⇩ Briefing/.test(t) && /⇧ Ouvrir/.test(t), `consigne : « ${t} »`);
+  ok(/FL Briefing Board a déménagé/.test(t) && /ludens-kith\.github\.io/.test(t), `bandeau : « ${t} »`);
+  ok(/⇧ Ouvrir/.test(t), `consigne : « ${t} »`);
+  let opened = '';
+  a.w.open = u => { opened = u; return null; };
+  a.button('#movingsave');
+  ok(opened === RECUP, `page ouverte : ${opened}`);
+  ok(moving(a) === '', `bandeau après Récupérer : « ${moving(a)} »`);
 });
 
-test('Déménagement : rien de gardé, pas de bandeau', async (ok) => {
-  const a = await open();
-  a.s(`movingNotice('${OLD_HOST}')`);
-  ok(moving(a) === '', `bandeau sur un tableau vierge : « ${moving(a)} »`);
-});
-
-test('Déménagement : à une autre adresse, pas de bandeau', async (ok) => {
+test('Déménagement : un briefing déjà en cours ici, pas de bandeau', async (ok) => {
   const a = await open();
   garnir(a);
-  for (const h of ['briefing.flightledger.io', 'localhost', '']){
-    a.s(`movingNotice('${h}')`);
+  a.s(`movingNotice('${NEW_HOST}', new Date('2026-10-20'))`);
+  ok(moving(a) === '', `bandeau : « ${moving(a)} »`);
+});
+
+test('Déménagement : ailleurs qu\'à la nouvelle adresse, ou après novembre, pas de bandeau', async (ok) => {
+  const a = await open();
+  for (const h of ['ludens-kith.github.io', 'localhost', '']){
+    a.s(`movingNotice('${h}', new Date('2026-10-20'))`);
     ok(moving(a) === '', `bandeau à « ${h} » : « ${moving(a)} »`);
   }
+  a.s(`movingNotice('${NEW_HOST}', new Date('2026-12-01'))`);
+  ok(moving(a) === '', `bandeau en décembre : « ${moving(a)} »`);
 });
 
 test('Déménagement : la démo n\'affiche pas le bandeau', async (ok) => {
@@ -1294,33 +1301,23 @@ test('Déménagement : la démo n\'affiche pas le bandeau', async (ok) => {
   await new Promise(r => f.addEventListener('load', r, { once: true }));
   await pause(50);
   const a = app(f);
-  a.s(`movingNotice('${OLD_HOST}')`);
+  a.s(`movingNotice('${NEW_HOST}', new Date('2026-10-20'))`);
   ok(moving(a) === '', `bandeau dans la démo : « ${moving(a)} »`);
 });
 
 test('Déménagement : « Compris » ferme le bandeau, qui ne revient pas à la réouverture', async (ok) => {
   let a = await open();
-  garnir(a);
-  a.s(`movingNotice('${OLD_HOST}')`);
+  a.s(`movingNotice('${NEW_HOST}', new Date('2026-10-20'))`);
   a.button('#movingok');
   ok(moving(a) === '', `après Compris : « ${moving(a)} »`);
   a = await reload(); await pause(200);
-  a.s(`movingNotice('${OLD_HOST}')`);
+  a.s(`movingNotice('${NEW_HOST}', new Date('2026-10-20'))`);
   ok(moving(a) === '', `réouverture : « ${moving(a)} »`);
-  ok(a.s('objs.length') === 1, `le briefing gardé : ${a.s('objs.length')} objet`);
 });
 
-test('Déménagement : « Enregistrer maintenant » télécharge le briefing et ferme le bandeau', async (ok) => {
+test('Déménagement : le panneau ⓘ mène à la page de récupération', async (ok) => {
   const a = await open();
-  garnir(a);
-  a.s(`movingNotice('${OLD_HOST}')`);
-  const got = []; a.w.download = (url, name) => got.push({ url, name });
-  a.button('#movingsave'); await pause(400);
-  ok(got.length === 1, `téléchargements : ${got.length}`);
-  const text = got.length ? await (await a.w.fetch(got[0].url)).text() : '';
-  ok(/"format":\s*"fl-briefing-board"/.test(text) && /fighter/.test(text), `fichier : ${text.slice(0, 80)}`);
-  ok(moving(a) === '', `bandeau après l'enregistrement : « ${moving(a)} »`);
-  ok(/briefing\.flightledger\.io/.test(a.toast()), `message : « ${a.toast()} »`);
+  ok(!!a.d.querySelector(`#aboutbox a[href="${RECUP}"]`), 'lien absent du panneau ⓘ');
 });
 
 (async () => {

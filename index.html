@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>FL Briefing Board — tableau de briefing pour DCS World</title>
 <meta name="description" content="Tableau de briefing gratuit pour escadrons DCS World : symboles aéro, cartes des théâtres, coupe liée à la route, vue radar, kneeboard et DTC du F/A-18C.">
-<link rel="canonical" href="https://ludens-kith.github.io/fl-briefing-board/">
-<link rel="alternate" hreflang="fr" href="https://ludens-kith.github.io/fl-briefing-board/fr/">
-<link rel="alternate" hreflang="en" href="https://ludens-kith.github.io/fl-briefing-board/en/">
+<link rel="canonical" href="https://briefing.flightledger.io/">
+<link rel="alternate" hreflang="fr" href="https://briefing.flightledger.io/fr/">
+<link rel="alternate" hreflang="en" href="https://briefing.flightledger.io/en/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FL Briefing Board">
 <meta property="og:title" content="FL Briefing Board — tableau de briefing pour DCS World">
 <meta property="og:description" content="Tableau de briefing gratuit pour escadrons DCS World : symboles aéro, cartes des théâtres, coupe liée à la route, vue radar, kneeboard et DTC du F/A-18C.">
-<meta property="og:url" content="https://ludens-kith.github.io/fl-briefing-board/">
-<meta property="og:image" content="https://ludens-kith.github.io/fl-briefing-board/assets/readme/apercu-social.png">
+<meta property="og:url" content="https://briefing.flightledger.io/">
+<meta property="og:image" content="https://briefing.flightledger.io/assets/readme/apercu-social.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta property="og:locale" content="fr_FR">
@@ -297,10 +297,10 @@
     <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · 🔗 ou J : accrocher à un symbole · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
     <div id="toast" hidden></div>
     <div id="moving" hidden role="status">
-      <p><b>FL Briefing Board déménage le 12 octobre</b> sur <b>briefing.flightledger.io</b>.
-      Vos briefings gardés dans ce navigateur ne suivront pas : enregistrez-les avec
-      ⇩ Briefing, puis rouvrez-les à la nouvelle adresse avec ⇧ Ouvrir.</p>
-      <div><button id="movingsave">⇩ Enregistrer maintenant</button> <button id="movingok">Compris</button></div>
+      <p><b>FL Briefing Board a déménagé</b> sur <b>briefing.flightledger.io</b>.
+      Vous l'utilisiez à l'ancienne adresse (ludens-kith.github.io) ? Vos briefings y sont
+      restés : la page de récupération vous les rend en fichier, à rouvrir ici avec ⇧ Ouvrir.</p>
+      <div><button id="movingsave">Récupérer mes briefings</button> <button id="movingok">Compris</button></div>
     </div>
     <div id="pbadge" hidden></div>
   </div>
@@ -347,7 +347,8 @@
       <a href="docs/GUIDE.html" target="_blank" rel="noopener">FR</a> ·
       <a href="docs/GUIDE.en-US.html" target="_blank" rel="noopener">EN-US</a> ·
       <a href="docs/SOUTENIR.html" target="_blank" rel="noopener">Soutenir / Ko-Fi</a> ·
-      <a href="https://discord.gg/cTepFwBPUy" target="_blank" rel="noopener">Discord</a>
+      <a href="https://discord.gg/cTepFwBPUy" target="_blank" rel="noopener">Discord</a> ·
+      <a href="https://ludens-kith.github.io/fl-briefing-board-recuperation/" target="_blank" rel="noopener">Récupérer les briefings de l'ancienne adresse</a>
     </p>
     <p class="small">
       <a id="aboutcode" href="#" target="_blank" rel="noopener" hidden>Code source</a>
@@ -364,7 +365,7 @@
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="miz.js?v=1.2"></script>
-<script src="board.js?v=1.15"></script>
+<script src="board.js?v=1.16"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

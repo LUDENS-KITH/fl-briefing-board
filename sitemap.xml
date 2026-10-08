@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://ludens-kith.github.io/fl-briefing-board/</loc></url>
-  <url><loc>https://ludens-kith.github.io/fl-briefing-board/fr/</loc></url>
-  <url><loc>https://ludens-kith.github.io/fl-briefing-board/en/</loc></url>
-  <url><loc>https://ludens-kith.github.io/fl-briefing-board/docs/GUIDE.html</loc></url>
-  <url><loc>https://ludens-kith.github.io/fl-briefing-board/docs/GUIDE.en-US.html</loc></url>
+  <url><loc>https://briefing.flightledger.io/</loc></url>
+  <url><loc>https://briefing.flightledger.io/fr/</loc></url>
+  <url><loc>https://briefing.flightledger.io/en/</loc></url>
+  <url><loc>https://briefing.flightledger.io/docs/GUIDE.html</loc></url>
+  <url><loc>https://briefing.flightledger.io/docs/GUIDE.en-US.html</loc></url>
 </urlset>

@@ -3,4 +3,4 @@ Allow: /
 
 # Lu seulement à la racine de l'hôte : sans effet tant que le tableau vit dans un
 # sous-dossier de github.io, effectif dès qu'il a son propre domaine.
-Sitemap: https://ludens-kith.github.io/fl-briefing-board/sitemap.xml
+Sitemap: https://briefing.flightledger.io/sitemap.xml

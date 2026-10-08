@@ -20,6 +20,7 @@ FL Briefing Board/
 │                    est vérifiée par tools/test_seo.js
 ├─ _config.yml       réglages Jekyll de GitHub Pages pour les documents Markdown rendus
 ├─ _includes/        head-custom.html : balise noindex des documents de travail, icône
+├─ CNAME             domaine de GitHub Pages : briefing.flightledger.io (lot 18)
 ├─ sitemap.xml       plan du site soumis aux moteurs ; robots.txt, effectif sur un domaine propre
 ├─ tools/
 │  ├─ creer-raccourci.ps1  crée le raccourci bureau (mode application)
