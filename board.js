@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.14', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.15', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 
@@ -2637,6 +2637,27 @@ function demoBoards(){
           flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
 
+/* Déménagement (lot 18) : le stockage du navigateur est lié à l'adresse. Quand GitHub Pages
+   redirigera vers le nouveau domaine, ce qui est gardé ici ne suivra pas. On le dit avant,
+   et seulement à ceux qui ont un briefing à perdre : pas à la démo, pas ailleurs. */
+const MOVE = { from: 'ludens-kith.github.io', to: 'briefing.flightledger.io', key: 'fl-briefing-board-moving-ok' };
+function movingNotice(host){
+  let seen = false;
+  try { seen = !!localStorage.getItem(MOVE.key); } catch(_){}
+  stash();
+  $('moving').hidden = DEMO || seen || host !== MOVE.from || !boards.some(b => b.objs && b.objs.length);
+}
+function movingDone(){
+  try { localStorage.setItem(MOVE.key, '1'); } catch(_){}
+  $('moving').hidden = true;
+}
+$('movingok').onclick = movingDone;
+$('movingsave').onclick = () => {
+  $('save').click();
+  movingDone();
+  toast(`Briefing enregistré : rouvrez-le sur ${MOVE.to} avec ⇧ Ouvrir`, 6000);
+};
+
 (function boot(){
   let data = null;
   try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(_){}
@@ -2666,4 +2687,5 @@ function demoBoards(){
   setTool(tool);                           // l'outil d'ouverture, allumé dans la barre
   commit();
   restoreImages();
+  movingNotice(location.hostname);
 })();

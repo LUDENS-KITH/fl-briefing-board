@@ -39,6 +39,7 @@ proposés, non engagés.
 | 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.14 | en ligne le 2026-10-08 |
 | 16 | Interface en anglais | demande | M-L | — | v1.16 | proposé le 2026-10-08 |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
+| 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule le 2026-10-12 | demande | S | D1 | v1.15 | engagé le 2026-10-08 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -713,6 +714,22 @@ suit. Les identifiants DCS (types, noms de missions) ne se traduisent pas.
 chaîne de l'autre langue à l'écran (texte visible, `title`, messages) ; le banc de saisie
 passe dans les deux langues ; les deux guides citent les libellés exacts de leur langue.
 
+#### Lot 18 — Déménagement vers `briefing.flightledger.io`
+
+Date retenue par Vince le 2026-10-08 : **lundi 2026-10-12**.
+
+| | |
+|---|---|
+| Bandeau (v1.15) | sur l'ancienne adresse seulement (`ludens-kith.github.io`), hors démo, et seulement si un briefing est gardé dans le navigateur : « **FL Briefing Board déménage le 12 octobre** sur briefing.flightledger.io. Vos briefings gardés dans ce navigateur ne suivront pas : enregistrez-les avec ⇩ Briefing, puis rouvrez-les à la nouvelle adresse avec ⇧ Ouvrir. » Boutons « ⇩ Enregistrer maintenant » (télécharge le fichier de briefing) et « Compris » ; l'un ou l'autre le ferme pour de bon. Masqué en mode présentation |
+| Bascule (le 12) | fichier `CNAME`, domaine déclaré dans les réglages Pages, HTTPS forcé ; base des adresses absolues changée en un passage (`BASE` de `test_seo.js`), liens du README, des guides, de SOUTENIR et du dépôt ; bandeau retiré |
+
+**Fait quand** — au banc, rouges avant le code (6 scénarios) : bandeau présent avec le nom, la
+date, la nouvelle adresse et la consigne ; absent sur un tableau vierge, à une autre adresse,
+dans la démo ; « Compris » le ferme et il ne revient pas à la réouverture ; « Enregistrer
+maintenant » télécharge un fichier de briefing qui contient le travail et le ferme. Le 12 :
+`node tools/test_seo.js https://briefing.flightledger.io/` sans échec, l'ancienne adresse
+redirige, HTTPS valide.
+
 #### Lot 17 — Mesure
 
 Un relevé hebdomadaire, dans un fichier du poste, des chiffres de Search Console
@@ -790,6 +807,6 @@ avis contraire :
 | 2026-10-08 | « GO » de Vince : recommandations D1 à D4 retenues ; lots 14 et 15 engagés, livrés en v1.14 |
 | 2026-10-08 | D1 : CNAME `briefing.flightledger.io` et domaine `flightledger.io` vérifié pour GitHub Pages (TXT), posés par Vince |
 | 2026-10-08 | Fusion des lots 14 et 15 : v1.14 en ligne ; publication Pages bloquée une fois côté GitHub, relancée |
+| 2026-10-08 | Lot 18 : bascule fixée au 2026-10-12 par Vince ; bandeau d'avertissement livré (v1.15), fusion à valider |
 
-**À trancher par Vince :** la date de bascule vers `briefing.flightledger.io`, annoncée par un
-bandeau dans le tableau quelques jours avant.
+**À trancher par Vince :** la fusion du bandeau (lot 18, v1.15), puis la bascule le 2026-10-12.
