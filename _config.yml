@@ -7,13 +7,16 @@ description: >-
   Tableau de briefing gratuit pour escadrons DCS World : symboles aéro, cartes des
   théâtres, coupe liée à la route, vue radar, kneeboard et DTC du F/A-18C.
 lang: fr
-image: /assets/readme/apercu-social.png
 twitter:
   card: summary_large_image
 
 # Documents de travail : publiés avec le dépôt, mais pas proposés aux moteurs de recherche
 # (_includes/head-custom.html écrit la balise robots).
 defaults:
+  # jekyll-seo-tag ne lit l'image de partage que dans les valeurs de la page : la clé
+  # `image` du site seule ne produit aucune balise og:image.
+  - scope: { path: "" }
+    values: { image: /assets/readme/apercu-social.png }
   - scope: { path: "docs/GUIDE.en-US.md" }
     values: { lang: en-US }
   - scope: { path: "docs/PLAN.md" }
