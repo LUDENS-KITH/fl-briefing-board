@@ -30,7 +30,8 @@ FL Briefing Board/
 │  ├─ test_magnetic.js  vérifie la déclinaison contre les 100 valeurs de test du NOAA
 │  ├─ test_radar.js     vérifie la géométrie de la vue radar liée
 │  ├─ test_miz.js       vérifie la projection (contre pyproj), la table Lua et une .miz
-│  ├─ test_i18n.js      vérifie que chaque texte affiché a sa traduction anglaise
+│  ├─ test_i18n.js      vérifie que chaque texte affiché a sa traduction anglaise, et que
+│  │                    les guides citent les boutons de leur langue
 │  ├─ test_seo.js       vérifie ce que lit un moteur : balises, aperçu, hreflang, plan du site ;
 │  │                    avec une adresse en argument, les pages servies
 │  ├─ build_projections.py mesure la projection des théâtres sur les balises du jeu (pyproj, numpy)
@@ -82,7 +83,9 @@ sur une installation de DCS World (option `--dcs` pour son dossier).
 Le quatrième, `test_i18n.js`, garde l'interface anglaise : tout texte affiché passe par
 `tr()` (code) ou par la page, et sa clé est le **texte français exact** dans `EN` de
 `i18n.js`. Ajouter un texte, c'est ajouter sa ligne dans `EN` ; le changer en français,
-c'est changer sa clé. Les noms DCS ne se traduisent pas.
+c'est changer sa clé. Les noms DCS ne se traduisent pas. Un bouton cité dans un guide
+avec son pictogramme (« ⇧ Ouvrir », « ⇧ Open ») doit exister tel quel dans la langue de
+ce guide.
 
 ```bash
 python -m http.server 8765

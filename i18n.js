@@ -200,6 +200,8 @@ const EN = {
   'Point IP': 'IP',
   'Écran RWS': 'RWS display',
   'Écran TWS': 'TWS display',
+  'Écran FCR RWS': 'FCR RWS display',
+  'Écran FCR TWS': 'FCR TWS display',
   'Écran STT': 'STT display',
   'Brique': 'Brick',
   'L&S': 'L&S',

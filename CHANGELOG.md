@@ -3,6 +3,30 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.18 — 2026-10-09
+
+Lot 16 du [plan d'action](docs/PLAN.md), livraison 2 : **les guides et les exports suivent la langue**.
+
+### Corrigé
+- Palette anglaise : « Écran FCR RWS » et « Écran FCR TWS » (radar F-16C) restaient en
+  français ; ils deviennent « FCR RWS display » et « FCR TWS display ».
+
+### Modifié
+- Guide anglais : il cite les libellés anglais de l'écran (« ▶ Present », « ⇧ Open »,
+  « ✚ New », « ⬚ Frame », « ◎ Ownship », « Clear », « AGL »…), et non plus les français.
+- Guide français : les boutons de la coupe cités tels qu'à l'écran (« ⛰ Relief »,
+  « ◠ Menace SA », « ▤ Bloc d'alt. »).
+- Les deux guides et le README disent comment choisir la langue.
+
+### Vérifié en exécutant
+`test_i18n` 1 914/1 914 : il contrôle désormais les boutons cités par chaque guide, et
+il était rouge sur les 11 libellés français du guide anglais et sur les deux écrans FCR.
+Banc 83/83 en français et 83/83 en anglais ; le nouveau scénario des exports
+(kneeboard et PNG en anglais, date américaine) est rouge sur la v1.16.
+**Correction** de la v1.17 : son « 82/82 en anglais » avait en fait tourné en français,
+car le lanceur du banc perdait `&lang=en`. Le lanceur est corrigé, et le vrai passage
+anglais n'a trouvé que trois vérifications du banc écrites en français seulement.
+
 ## v1.17 — 2026-10-09
 
 Lot 16 du [plan d'action](docs/PLAN.md), livraison 1 : **l'interface en anglais (US)**.

@@ -127,7 +127,8 @@ Les contributions sont bienvenues — un symbole qui manque, un théâtre, une c
 **FL Briefing Board** is a free, browser-based briefing whiteboard for DCS World squadrons:
 28 ready-to-place aviation symbols, live maps of the 14 DCS theatres,
 an altitude profile linked to the route, true or magnetic headings (NOAA World Magnetic Model),
-multi-phase boards and DCS kneeboard export. No install, no account.
+multi-phase boards and DCS kneeboard export. Interface in English (US) or French, following
+your browser. No install, no account.
 [Try the demo](https://briefing.flightledger.io/?demo), see the
 [overview](https://briefing.flightledger.io/en/), read the
 [EN-US guide](docs/GUIDE.en-US.md), or join the

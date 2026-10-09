@@ -37,7 +37,7 @@ proposés, non engagés.
 | 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | en ligne le 2026-10-08 |
 | 14 | Visibilité : référencement technique (description, aperçu de partage, données structurées, texte lisible) | demande | S | D1 conseillée | v1.14 | en ligne le 2026-10-08 |
 | 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.14 | en ligne le 2026-10-08 |
-| 16 | Interface en anglais | demande | M-L | — | v1.17 | livraison 1 (l'écran) le 2026-10-09 ; livraison 2 (guides, exports) à venir |
+| 16 | Interface en anglais | demande | M-L | — | v1.17, v1.18 | fait le 2026-10-09 (livraisons 1 et 2) |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
 
@@ -730,10 +730,29 @@ anglais ne dessine aucun mot français (planches, coupe, écrans radar) ; messag
 en anglais ; le bouton bascule, garde le choix et le travail. Tout le banc passe dans les deux
 langues (`banc-saisie.html?lang=en`).
 
-État au 2026-10-09 : livraison 1 faite, PR à fusionner. `test_i18n` 1 624/1 624, et en échec
-sur une traduction retirée ou un texte affiché sans `tr()` ; banc 82/82 en français et 82/82 en
-anglais ; les 5 scénarios rouges sur la v1.16 (sur la v1.16, la démo dessinait « 29° G · froide ·
-radiale 88 % »), et en échec sur deux traductions retirées.
+État au 2026-10-09 : livraison 1 fusionnée (#25), v1.17 en ligne. `test_i18n` 1 624/1 624, et en
+échec sur une traduction retirée ou un texte affiché sans `tr()` ; les 5 scénarios rouges sur la
+v1.16 (sur la v1.16, la démo dessinait « 29° G · froide · radiale 88 % »), et en échec sur deux
+traductions retirées. **Correction** : le « 82/82 en anglais » annoncé avec la v1.17 ne l'était
+pas — le lanceur du banc perdait `&lang=en` de l'adresse, et ce passage a tourné en français
+(les 5 scénarios de langue, qui choisissent leur langue eux-mêmes, valaient bien). Lanceur
+corrigé, il affiche désormais la langue jouée.
+
+**Fait quand (livraison 2)** — `test_i18n` : chaque bouton cité avec son pictogramme dans un guide
+existe tel quel à l'écran dans la langue du guide ; aucun libellé de l'autre langue en gras ou
+entre guillemets ; les noms des formes lus en **exécutant** `symbols.js` (deux étaient fabriqués
+par une fonction et échappaient à la lecture du texte). Au banc : le kneeboard et le PNG
+exportés en anglais (en-tête « Board n / m », date au format américain, aucun mot français).
+
+État au 2026-10-09 : livraison 2 faite (v1.18), PR à fusionner. Le vrai passage anglais du banc a
+trouvé 3 vérifications écrites en français seulement (pas de défaut de l'outil) ; le relevé des
+libellés à l'écran a trouvé un vrai oubli, « Écran FCR RWS » et « Écran FCR TWS » restés en
+français dans la palette anglaise, que ni `test_i18n` (lecture du texte) ni le banc (majuscule
+accentuée non reconnue) ne voyaient : les deux filets sont corrigés, rouges sur l'oubli, puis
+verts. Le guide anglais citait 11 libellés français (« ▶ Présenter », « ⇧ Ouvrir », « ✚ Nouveau »,
+« ⬚ Cadre », « ◎ Porteur », « Effacer », « alt. sol »…) : rouge, puis aligné. `test_i18n`
+1 914/1 914 ; banc 83/83 en français et 83/83 en anglais, langue jouée affichée ; le scénario des
+exports rouge sur la v1.16 (en-tête « Planche… »).
 
 #### Lot 18 — Déménagement vers `briefing.flightledger.io`
 
@@ -845,3 +864,4 @@ avis contraire :
 | 2026-10-08 | « GO » de Vince : bascule avancée au jour même ; page de récupération publiée et prouvée sur l'ancienne origine ; v1.16 |
 | 2026-10-09 | Déménagement annoncé sur Discord (édition 014) |
 | 2026-10-09 | « GO » de Vince : lot 16 en deux livraisons ; livraison 1 (l'écran en anglais, v1.17) faite, fusion à valider |
+| 2026-10-09 | Fusion de la livraison 1 (#25) : v1.17 en ligne, vérifiée sur l'adresse publique ; livraison 2 (guides, exports, v1.18) faite |

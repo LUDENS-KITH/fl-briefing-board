@@ -1,6 +1,11 @@
 # Guide d'utilisation — FL Briefing Board
 
 Tout ce que l'outil sait faire, geste par geste. Pour démarrer : [README](../README.md).
+Le guide en anglais : [GUIDE.en-US.md](GUIDE.en-US.md).
+
+**Langue** : l'interface suit celle du navigateur, en français ou en anglais (US). Le
+bouton **EN** / **FR** de la barre la change à tout moment, sans perdre le travail ; le
+choix est gardé. Les noms DCS (appareils, armes, cartes, missions) ne se traduisent pas.
 
 ## La palette — 28 formes
 
@@ -144,11 +149,11 @@ phase affichée (« 2 / 4 · Attaque »).
 Le panneau du bas montre, au choix, la coupe ou **l'écran radar d'un appareil**,
 calculé depuis la vue de dessus : ce que la manœuvre dessinée donne sur le B-scope.
 
-1. Ouvrez la coupe (⊟), puis choisissez **RADAR F/A-18C** ou **RADAR F-16C** dans la
-   liste du bandeau.
+1. Ouvrez la coupe (**⊟ Coupe**), puis choisissez **RADAR F/A-18C** ou **RADAR F-16C**
+   dans la liste qui affiche **COUPE**.
 2. Sélectionnez un appareil dans la vue de dessus, puis **◎ Porteur**. Un seul porteur
    par planche ; son cône balayé se dessine en pointillés sur la vue de dessus.
-3. Réglez l'**échelle** et le **balayage** dans le bandeau.
+3. Réglez l'**Échelle** et le **Balayage** dans le bandeau.
 
 Chaque autre aéronef de la vue de dessus devient un contact, placé selon son gisement
 et sa distance : déplacez une cible, tournez le porteur (`←` `→`), l'écran suit. Au
@@ -224,15 +229,15 @@ d'une image reste possible.
   double-cliquer. Double-clic dedans pour la nommer (« CAP NORD », « SAM MEZ »).
 - **Règle** (`M`) : distance et cap. Mesurer une distance connue, puis **Échelle** pour
   passer en NM ou en km.
-- **Cotes** (📐) : distance et cap affichés sur les traits et les flèches. Sur une
+- **Cotes** (**📐 Cotes**) : distance et cap affichés sur les traits et les flèches. Sur une
   flèche courbe, la distance suit le chemin tracé. Bouton **NM / km** pour l'unité.
 - **Planches** : un onglet par phase (ingress, attaque, egress…). « + phase » copie la
   planche affichée ; double-clic pour renommer ; `PgPréc` / `PgSuiv`.
-- **Coupe** (⊟) : l'écran se partage, vue de dessus en haut, **vue de profil** en bas.
+- **Coupe** (**⊟ Coupe**) : l'écran se partage, vue de dessus en haut, **vue de profil** en bas.
   Altitudes en pieds, niveaux de vol au-dessus de 18 000 ft, calées sur 500 ft. Les
   appareils y prennent leur silhouette de profil et affichent leur altitude. Le
-  bandeau de la coupe offre **relief**, **menace sol-air** (dôme) et **bloc
-  d'altitude**, et règle le plafond et la largeur.
+  bandeau de la coupe offre **⛰ Relief**, **◠ Menace SA** (son dôme) et
+  **▤ Bloc d'alt.**, et règle le **Plafond** et la **Largeur**.
 - **Route liée** (case du bandeau de coupe) : la coupe suit les waypoints de la vue de
   dessus, dans l'ordre de leurs numéros, en distance cumulée. Tirez un waypoint de la
   coupe verticalement pour son altitude, double-cliquez pour la taper. La vue de

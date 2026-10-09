@@ -3,6 +3,11 @@
 Everything the board can do, step by step. To start from the project overview, read the
 [README](../README.md). The French guide is [GUIDE.md](GUIDE.md).
 
+**Language:** the interface follows your browser's language, English (US) or French. The
+**FR** / **EN** button in the toolbar switches it at any time without losing your work,
+and your choice is remembered. DCS names (aircraft, weapons, maps, missions) are not
+translated.
+
 ## Palette — 28 Shapes
 
 | Group | Shapes |
@@ -73,7 +78,7 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
   (SAM, AAA, early-warning radars) and the **ships** of both sides, in their side's color
   and under their group name.
 - The profile opens with the linked route: the flight profile reads at once. A ground
-  altitude (AGL in the editor) is flagged "alt. sol".
+  altitude (AGL in the editor) is flagged "AGL".
 - On theatres whose projection is measured — Caucasus, Syria, Persian Gulf, Sinai,
   Afghanistan, Marianas, Kola —, everything lands **on the map**, to the metre. Elsewhere,
   on a **board without a map** at exact scale, DCS grid north up; its headings then carry
@@ -115,9 +120,9 @@ loaded, with no third-party tool.
 
 ## Presentation Mode
 
-To lead the briefing over a screen share: **▶ Présenter** (or `F5`). The board goes full
+To lead the briefing over a screen share: **▶ Present** (or `F5`). The board goes full
 screen, without toolbar or palette; a discreet tag in the top-right corner shows the
-current phase ("2 / 4 · Attaque").
+current phase ("2 / 4 · Attack").
 
 - `→`, `Space` or `Page Down`: next phase; `←` or `Page Up`: previous; `Home` and
   `End`: first and last.
@@ -139,20 +144,21 @@ current phase ("2 / 4 · Attaque").
 The bottom panel shows either the profile or **an aircraft's radar display**, computed
 from the top-down board: what the drawn maneuver looks like on the B-scope.
 
-1. Open the profile view (⊟), then pick **RADAR F/A-18C** or **RADAR F-16C** in the
-   toolbar list.
-2. Select an aircraft on the top-down board, then **◎ Porteur** (radar carrier). One
-   carrier per board; its scan cone is drawn dashed on the top-down board.
-3. Set the **range** and **azimuth scan** in the toolbar.
+1. Open the profile view (**⊟ Profile**), then pick **RADAR F/A-18C** or **RADAR F-16C**
+   in the list that reads **PROFILE**.
+2. Select an aircraft on the top-down board, then **◎ Ownship** (the aircraft whose
+   radar you read). One ownship per board; its scan cone is drawn dashed on the top-down
+   board.
+3. Set the **Range** and the azimuth **Scan** in the toolbar.
 
 Every other aircraft on the top-down board becomes a contact, placed by its bearing and
-range: move a target or turn the carrier (`←` `→`) and the display follows. On the
+range: move a target or turn the ownship (`←` `→`) and the display follows. On the
 F/A-18C a contact is a HAFU whose identification follows its color (red hostile, blue
 friendly, anything else unknown); on the F-16C, a TWS track. Its stem or nose line
 shows its heading relative to yours.
 
 On the right, each contact is read out: range, bearing, **aspect** in F-16C format (tens
-of degrees, L or R side: "9D" beam, "18" nose-on), **hot** or **cold**, and **radial** —
+of degrees, L or R side: "9R" beam, "18" nose-on), **hot** or **cold**, and **radial** —
 the share of its speed along the line of sight. Near 0 %, the target is beaming: that is
 where a Doppler radar may reject it when looking down. Contacts outside the scan or
 beyond the range scale are counted.
@@ -174,7 +180,7 @@ The map is live: mouse wheel or pinch to zoom; right-click drag, middle-click dr
 space + drag, or the hand tool (`H`) to pan. Objects stay attached to the terrain, and
 scale is automatic: no manual calibration is needed.
 
-**True or magnetic headings:** use the **True / Mag. heading** button. Magnetic
+**True or magnetic headings:** the **True hdg** / **Mag. hdg** button switches them. Magnetic
 declination is computed on the map through NOAA's WMM2025 model. Use the **Decl.**
 button to enter the DCS mission declination manually; that value then wins, so displayed
 headings match the cockpit. Each heading states its reference: `049°T`, `042°M`.
@@ -223,14 +229,14 @@ drag and drop your own background image.
   Double-click inside to name it, for example `CAP NORTH` or `SAM MEZ`.
 - **Ruler** (`M`): shows distance and heading. Measure a known distance, then use
   **Scale** to switch to NM or km.
-- **Measurements** (📐): distance and heading displayed on lines and arrows. Curved
+- **Measurements** (**📐 Measure**): distance and heading displayed on lines and arrows. Curved
   arrows measure the path, not just the chord. The **NM / km** button changes units.
 - **Boards / phases:** one tab per phase: ingress, attack, egress. **+ phase** copies
   the current board; double-click a tab to rename it; `Page Up` / `Page Down` navigate.
-- **Profile view** (⊟): split screen with the top-down board above and an altitude
+- **Profile view** (**⊟ Profile**): split screen with the top-down board above and an altitude
   profile below. Altitudes are in feet, flight levels above 18,000 ft, snapped to
-  500 ft. The profile toolbar provides **terrain**, **SAM threat dome**, **altitude
-  block**, ceiling and range controls.
+  500 ft. The profile toolbar provides **⛰ Terrain**, **◠ SAM threat** (its dome),
+  **▤ Alt. block**, **Ceiling** and **Range**.
 - **Linked route:** when enabled, the profile follows top-down waypoints in numerical
   order, using cumulative distance. Drag a waypoint vertically in the profile to set
   altitude; double-click it to type the altitude. The top-down board must have a map
@@ -243,25 +249,25 @@ drag and drop your own background image.
   launches**. The eraser never removes the background image: select it and press
   `Delete`.
 - **Save the briefing** (⇩ Briefing, `Ctrl+S`): every board, its settings and its
-  images, in a `.json` file. **Open it** (⇧ Ouvrir, `Ctrl+O`, or drop the file on the
+  images, in a `.json` file. **Open it** (⇧ Open, `Ctrl+O`, or drop the file on the
   page) on another computer, or hand it to the next flight lead: it replaces the board
   on screen, after confirmation. A file that is not a briefing is refused, and the board
   stays as it is.
-- **New briefing** (✚ Nouveau): the board saves itself in the browser and comes back
-  every time you open it. To start from a blank page, ✚ Nouveau erases every board and
+- **New briefing** (✚ New): the board saves itself in the browser and comes back
+  every time you open it. To start from a blank page, ✚ New erases every board and
   its images, after confirmation, and cannot be undone: save first (⇩ Briefing) what you
   want to keep. Unit, true or magnetic heading, background and profile view stay as
-  set. **Effacer** (clear) only empties the board on screen.
+  set. **Clear** only empties the board on screen.
 - Undo / redo, timestamped PNG export, dark or light background, hideable palette.
 - **DCS kneeboard** (⇩ Kneeboard): portrait PNG, 768 × 1157, to copy into
   `Saved Games\DCS\Kneeboard\`. These are the proportions of the in-game kneeboard,
   which stretches any image to its own size: a page with other proportions would come
   out distorted. Without a frame, the page shows the whole board.
-- **Frame the kneeboard** (⬚ Cadre): a dotted gold frame, with the page's proportions,
+- **Frame the kneeboard** (⬚ Frame): a dotted gold frame, with the page's proportions,
   is placed in the middle of the map. Move it by its edge or its title, enlarge it with
   its handle; inside it, you keep working on the map. The export then takes only what
   it contains, across the whole page. One frame per board, copied by "+ phase"; it never
-  appears in the PNG or while presenting. A second click on ⬚ Cadre removes it. The page
+  appears in the PNG or while presenting. A second click on ⬚ Frame removes it. The page
   has not been seen in the cockpit yet.
 
 **Shortcuts:** `V` select · `A` arrow · `L` line · `P` pencil · `C` circle ·

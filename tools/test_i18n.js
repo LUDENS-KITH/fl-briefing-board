@@ -79,11 +79,15 @@ for (const k of trKeys) ok(own(k), `board.js : tr() sans traduction : « ${k} »
 for (const k of ['côté:G', 'côté:D', 'cap:V', 'déclinaison:O']) ok(own(k), `clé à contexte absente : ${k}`);
 
 /* ---------- formes, groupes, théâtres ---------- */
+/* exécuté, pas lu : certains noms sont fabriqués par une fonction (f16Page('Écran FCR RWS', …)) */
 const symbols = read('symbols.js');
-const labels = [...symbols.matchAll(/\blabel:\s*('(?:\\.|[^'\\])*')/g)].map(m => lit(m[1]));
+const sandbox = { console };
+require('vm').createContext(sandbox);
+require('vm').runInContext(symbols + ';this.__S = SHAPES; this.__G = GROUPS;', sandbox);
+const labels = Object.values(sandbox.__S).map(s => s.label);
 ok(labels.length >= 40, `seulement ${labels.length} noms de formes lus`);
 for (const s of labels) ok(own(s), `forme sans traduction : « ${s} »`);
-const groups = [...symbols.matchAll(/\[\s*'[a-z0-9]+'\s*,\s*('(?:\\.|[^'\\])*')\s*\]/g)].map(m => lit(m[1]));
+const groups = sandbox.__G.map(g => g[1]);
 ok(groups.length >= 6, `seulement ${groups.length} groupes lus`);
 for (const s of groups) ok(own(s), `groupe sans traduction : « ${s} »`);
 const theatres = JSON.parse(/const THEATRES = (\[[\s\S]*?\]);/.exec(read('theatres.js'))[1]);
@@ -93,6 +97,35 @@ for (const t of theatres) ok(own(t.name), `théâtre sans traduction : « ${t.na
 const mizErrors = [...read('miz.js').matchAll(/(?:throw new Error|fail)\(\s*('(?:\\.|[^'\\])*')\s*\)/g)].map(m => lit(m[1]));
 ok(mizErrors.length >= 4, `seulement ${mizErrors.length} erreurs lues dans miz.js`);
 for (const s of mizErrors) ok(own(s), `miz.js : erreur sans traduction : « ${s} »`);
+
+/* ---------- les guides citent les libellés de leur langue ----------
+   Un bouton cité avec son pictogramme (« ⇧ Ouvrir ») doit exister tel quel à l'écran dans
+   la langue du guide ; un libellé en gras ou entre guillemets ne doit pas être celui de
+   l'autre langue. */
+const trEN = s => (own(s) ? EN[s] : s);
+const shortFR = [...pageStrings.map(p => p[0]).filter(s => s.length <= 40), ...labels, ...groups, ...trKeys.filter(s => s.length <= 40)];
+const GLYPH = '▶✚⇩⇧⬚◎⊟📐⛰◠▤';
+const bare = s => s.replace(new RegExp(`^[${GLYPH}]\\s*`, 'u'), '');
+const screen = {
+  fr: new Set(shortFR),
+  en: new Set(shortFR.map(trEN)),
+};
+for (const [file, lang, other] of [['docs/GUIDE.md', 'fr', 'en'], ['docs/GUIDE.en-US.md', 'en', 'fr']]){
+  const g = read(file);
+  const mine = [...screen[lang]].filter(s => GLYPH.includes([...s][0]));
+  let cited = 0;
+  for (const m of g.matchAll(new RegExp(`[${GLYPH}] [A-Za-zÀ-ÿ]`, 'gu'))){
+    cited++;
+    ok(mine.some(L => g.startsWith(L, m.index)), `${file} : bouton cité absent de l'écran ${lang} : « ${g.slice(m.index, m.index + 24).split('\n')[0]}… »`);
+  }
+  ok(cited >= 8, `${file} : seulement ${cited} boutons cités avec leur pictogramme`);
+  /* le libellé de l'autre langue, en gras ou entre guillemets */
+  const theirs = new Set([...screen[other]].map(bare).filter(s => !new Set([...screen[lang]].map(bare)).has(s) && /[A-Za-zÀ-ÿ]{2}/.test(s)));
+  for (const m of g.matchAll(/\*\*([^*\n]+)\*\*|"([^"\n]+)"|« ([^»\n]+) »/g)){
+    const s = bare(m[1] || m[2] || m[3]);
+    ok(!theirs.has(s), `${file} : libellé de l'autre langue : « ${s} »`);
+  }
+}
 
 /* ---------- rien d'écrit en dur là où ça s'affiche ---------- */
 const NEUTRE = new Set(['+ phase', 'KNEEBOARD', 'BRIEFING BOARD', 'FL', 'km', 'NM', '×']);
