@@ -499,7 +499,7 @@ test('Vue radar : sans porteur, un message ; le porteur se désigne depuis la s�
   const a = await open();
   await radarBoard(a);
   ok(a.s('prof.pane') === 'fa18', `vue du panneau : ${a.s('prof.pane')}`);
-  ok(/porteur/i.test(a.s('radarView().msg || ""')), `message sans porteur : « ${a.s('radarView().msg')} »`);
+  ok(/porteur|ownship/i.test(a.s('radarView().msg || ""')), `message sans porteur : « ${a.s('radarView().msg')} »`);
   a.key('v'); a.click(500, 340); a.button('#own');
   ok(a.s('!!objs[0].own && !objs[1].own'), 'porteur non désigné');
   a.choose('#rrng', '160');
@@ -524,7 +524,7 @@ test('Vue radar : sans carte ni échelle, un message et rien d\'inventé', async
   const a = await open();
   await radarBoard(a, false);
   a.key('v'); a.click(500, 340); a.button('#own');
-  ok(/échelle|carte/i.test(a.s('radarView().msg || ""')), `message : « ${a.s('radarView().msg')} »`);
+  ok(/échelle|carte|scale|map/i.test(a.s('radarView().msg || ""')), `message : « ${a.s('radarView().msg')} »`);
   ok(!a.s('radarView().shown'), 'des contacts affichés sans échelle');
 });
 
@@ -681,7 +681,7 @@ test('Mission .miz déposée : choix du vol, puis route, altitudes, bullseye et 
   ok(a.s('boards[cur].name') === 'Rioni Gate', `nom de la planche : ${a.s('boards[cur].name')}`);
   ok(a.s('mapCfg && mapCfg.theatre') === 'Caucasus' && a.s('!!cam'), `carte : ${a.s('JSON.stringify(mapCfg)')}`);
   const wps = JSON.parse(a.s('JSON.stringify(objs.filter(o => o.k === "wp").map(o => [o.n, o.alt, o.lbl || ""]))'));
-  ok(JSON.stringify(wps) === JSON.stringify([[1, 40, 'COLT 2'], [2, 25000, 'IP'], [3, 490, 'CIBLE · alt. sol']]), `waypoints : ${JSON.stringify(wps)}`);
+  ok(JSON.stringify(wps) === JSON.stringify([[1, 40, 'COLT 2'], [2, 25000, 'IP'], [3, 490, LANG === 'en' ? 'CIBLE · AGL' : 'CIBLE · alt. sol']]), `waypoints : ${JSON.stringify(wps)}`);
   ok(a.s('objs.some(o => o.k === "bullseye")') && a.s('objs.some(o => o.k === "sam" && o.lbl === "SA-11 Kutaïssi")'), 'bullseye ou SAM absent');
   ok(a.s('split && prof.linked'), 'route liée non ouverte');
   ok(a.s('route.pts.length') === 3, `route liée : ${a.s('route.pts.length')} points`);
@@ -1355,7 +1355,7 @@ function screenTexts(a){
   out.add(d.title);
   return [...out];
 }
-const FR_MARK = /[àâçéèêëîïôûùüœ]|\b(le|la|les|des|du|une|et|pour|avec|sur|dans|sans|puis|ou|pas)\b/;
+const FR_MARK = /[àâçéèêëîïôûùüœÀÂÇÉÈÊËÎÏÔÛÙÜŒ]|\b(le|la|les|des|du|une|et|pour|avec|sur|dans|sans|puis|ou|pas)\b/;
 function frenchIn(a, list){
   const EN = a.s('EN'), own = k => Object.prototype.hasOwnProperty.call(EN, k);
   return [...new Set(list)].filter(s => (own(s) && EN[s] !== s) || FR_MARK.test(s));
@@ -1398,6 +1398,29 @@ test('Langue : la démo en anglais ne dessine aucun mot français (planches, vue
   ok(!left.length, `${left.length} textes dessinés en français : ${cite(left)}`);
   const tabs = frenchIn(a, screenTexts(a));
   ok(!tabs.length, `${tabs.length} textes de la démo en français : ${cite(tabs)}`);
+});
+
+test('Langue : en anglais, le kneeboard et le PNG exportés n\'écrivent aucun mot français', async (ok) => {
+  const a = await openIn('en', 'demo');
+  const files = [];
+  a.w.download = (url, name) => files.push(name);
+  const drawn = [], P = a.w.CanvasRenderingContext2D.prototype, f0 = P.fillText;
+  P.fillText = function(t, ...r){ drawn.push(String(t)); return f0.call(this, t, ...r); };
+  /* une planche sans carte (pas de tuiles à attendre), avec l'écran radar de son porteur */
+  const tabs = () => a.d.querySelectorAll('.tab:not(.x):not(.add)');
+  const own = a.s('boards.findIndex(b => b.objs.some(o => o.own))');
+  tabs()[own].click(); a.choose('#pane', 'fa18'); await pause(100);
+  drawn.length = 0;
+  a.button('#png'); await pause(300);
+  a.button('#knee');
+  for (let i = 0; i < 40 && files.length < 2; i++) await pause(250);
+  P.fillText = f0;
+  ok(files.length === 2, `fichiers rendus : ${files.join(', ') || 'aucun'}`);
+  ok(drawn.some(t => /^Board \d+ \/ \d+$/.test(t)), `en-tête du kneeboard : ${cite(drawn.filter(t => /\//.test(t)))}`);
+  const date = new Date().toLocaleDateString('en-US');
+  ok(drawn.includes(date), `date au format américain (${date}) absente : ${cite(drawn.filter(t => /\d/.test(t)).slice(-6))}`);
+  const left = frenchIn(a, drawn.map(s => s.trim()).filter(Boolean));
+  ok(!left.length, `${left.length} textes exportés en français : ${cite(left)}`);
 });
 
 test('Langue : en anglais, les messages et les questions sont en anglais', async (ok) => {

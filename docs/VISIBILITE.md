@@ -16,7 +16,7 @@ Mesuré, pas supposé :
 | Dépôt GitHub | 0 étoile, 0 release ; 21 vues, 11 visiteurs uniques sur 14 jours, un seul référent (github.com). GitHub **ne compte pas** les visites de la démo, seulement celles du dépôt, et les efface après 14 jours |
 | Page de l'application | un titre seul : ni description, ni aperçu de partage (Open Graph), ni données structurées. Le contenu est un canevas : rien à lire pour un robot. Le texte du panneau ⓘ existe dans le HTML, mais masqué |
 | Adresse | `ludens-kith.github.io/fl-briefing-board/`, un sous-chemin de GitHub. Un `robots.txt` n'est lu qu'à la racine de l'hôte (`ludens-kith.github.io/robots.txt`, qui répond 404) : celui d'un site projet est ignoré. Search Console n'y accepte qu'une propriété « préfixe d'URL » |
-| Langue | interface **en français seulement** (`<html lang="fr">`, aucun mécanisme de langue). Le guide existe en français et en anglais US |
+| Langue | interface **en français seulement** (`<html lang="fr">`, aucun mécanisme de langue). Le guide existe en français et en anglais US. *Levé par le lot 16 : interface en français et en anglais US depuis la v1.17 (2026-10-09)* |
 | Atouts déjà en place | les guides sont rendus en vraies pages HTML par GitHub Pages (`docs/GUIDE.html`, `docs/GUIDE.en-US.html`) ; aperçu social du dépôt posé (1280 × 640) ; sujets GitHub posés (`dcs-world`, `briefing`, `kneeboard`, `mission-planning`, `whiteboard`…) ; issues ouvertes ; lien Ko-Fi et Discord dans le panneau ⓘ |
 
 Conclusion : l'outil n'est pas mal référencé, il **n'est pas référencé**. Le travail
@@ -66,7 +66,7 @@ tool*, *DCS kneeboard*, *DCS tactical board* ; *tableau de briefing DCS*.
 2. **Le référencement technique** (lot 14) : rendre chaque page lisible et partageable.
 3. **Les pages de présentation** (lot 15) : ce qu'on partage et ce qui se classe.
 4. **La diffusion francophone** : l'interface est déjà en français.
-5. **L'interface anglaise** (lot 16), **puis** la diffusion internationale : envoyer
+5. **L'interface anglaise** (lot 16, en ligne depuis la v1.17), **puis** la diffusion internationale : envoyer
    le forum ED ou Reddit sur une interface en français gâcherait la première impression,
    qui ne se rejoue pas.
 6. **La mesure** (lot 17) en parallèle, dès que D3 est tranchée.
