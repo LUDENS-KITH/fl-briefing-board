@@ -744,7 +744,7 @@ entre guillemets ; les noms des formes lus en **exécutant** `symbols.js` (deux 
 par une fonction et échappaient à la lecture du texte). Au banc : le kneeboard et le PNG
 exportés en anglais (en-tête « Board n / m », date au format américain, aucun mot français).
 
-État au 2026-10-09 : livraison 2 faite (v1.18), PR à fusionner. Le vrai passage anglais du banc a
+État au 2026-10-09 : livraison 2 fusionnée (#26), v1.18 en ligne ; lot 16 clos. Le vrai passage anglais du banc a
 trouvé 3 vérifications écrites en français seulement (pas de défaut de l'outil) ; le relevé des
 libellés à l'écran a trouvé un vrai oubli, « Écran FCR RWS » et « Écran FCR TWS » restés en
 français dans la palette anglaise, que ni `test_i18n` (lecture du texte) ni le banc (majuscule
@@ -865,3 +865,4 @@ avis contraire :
 | 2026-10-09 | Déménagement annoncé sur Discord (édition 014) |
 | 2026-10-09 | « GO » de Vince : lot 16 en deux livraisons ; livraison 1 (l'écran en anglais, v1.17) faite, fusion à valider |
 | 2026-10-09 | Fusion de la livraison 1 (#25) : v1.17 en ligne, vérifiée sur l'adresse publique ; livraison 2 (guides, exports, v1.18) faite |
+| 2026-10-10 | Fusion de la livraison 2 (#26) : v1.18 en ligne, palette FCR et guide anglais vérifiés sur l'adresse publique ; lot 16 clos |
