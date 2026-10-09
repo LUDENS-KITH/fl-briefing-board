@@ -8,6 +8,7 @@ Zéro dépendance, zéro build : on modifie, on recharge la page. Le contrat du 
 FL Briefing Board/
 ├─ index.html        coquille : barre d'outils, palette, styles          (329 l.)
 ├─ symbols.js        les 28 formes, vues de profil, kit radar           (724 l.)
+├─ i18n.js           langue de l'interface : dictionnaire FR → EN-US, tr(), traduction de la page
 ├─ board.js          le moteur : planches, carte, coupe, route, exports (2 467 l.)
 ├─ theatres.js       14 théâtres DCS et 791 aérodromes (généré, ne pas retoucher)
 ├─ magnetic.js       modèle magnétique WMM2025 (généré, ne pas retoucher)
@@ -29,10 +30,12 @@ FL Briefing Board/
 │  ├─ test_magnetic.js  vérifie la déclinaison contre les 100 valeurs de test du NOAA
 │  ├─ test_radar.js     vérifie la géométrie de la vue radar liée
 │  ├─ test_miz.js       vérifie la projection (contre pyproj), la table Lua et une .miz
+│  ├─ test_i18n.js      vérifie que chaque texte affiché a sa traduction anglaise
 │  ├─ test_seo.js       vérifie ce que lit un moteur : balises, aperçu, hreflang, plan du site ;
 │  │                    avec une adresse en argument, les pages servies
 │  ├─ build_projections.py mesure la projection des théâtres sur les balises du jeu (pyproj, numpy)
-│  ├─ banc-saisie.html  banc de saisie : l'application pilotée par de vrais événements
+│  ├─ banc-saisie.html  banc de saisie : l'application pilotée par de vrais événements ;
+│  │                    ?lang=en le rejoue sur l'interface anglaise
 │  ├─ build_logo.py     régénère le logo : maîtres dans FlightLedger_BRAND, exports ici
 │  ├─ build_social_preview.py image d'aperçu du dépôt (assets/readme/)
 │  └─ logo-preview.html planche de contrôle du logo
@@ -67,6 +70,7 @@ modifier : `python tools/build_logo.py`, jamais le SVG à la main.
 node tools/test_magnetic.js
 node tools/test_radar.js
 node tools/test_miz.js
+node tools/test_i18n.js
 ```
 
 Le premier vérifie la déclinaison magnétique contre les 100 valeurs de test officielles
@@ -74,6 +78,11 @@ du NOAA ; le deuxième, la géométrie de la vue radar liée sur des cas calcul�
 le troisième, la projection des théâtres contre pyproj, la table Lua et une vraie
 archive `.miz`. `projections.js` se régénère par `python tools/build_projections.py`,
 sur une installation de DCS World (option `--dcs` pour son dossier).
+
+Le quatrième, `test_i18n.js`, garde l'interface anglaise : tout texte affiché passe par
+`tr()` (code) ou par la page, et sa clé est le **texte français exact** dans `EN` de
+`i18n.js`. Ajouter un texte, c'est ajouter sa ligne dans `EN` ; le changer en français,
+c'est changer sa clé. Les noms DCS ne se traduisent pas.
 
 ```bash
 python -m http.server 8765
@@ -84,7 +93,8 @@ Chaque scénario ouvre l'application neuve dans un cadre et la pilote par de vra
 `PointerEvent` et `KeyboardEvent`, jamais en appelant le moteur ; le verdict (`OK n/n`,
 ou la liste des échecs) s'affiche en haut et dans le titre de l'onglet. Un scénario
 nouveau doit échouer avant le changement qu'il couvre ; ceux marqués « non-régression »
-passaient déjà et doivent continuer.
+passaient déjà et doivent continuer. `banc-saisie.html?lang=en` rejoue tout le banc sur l'interface anglaise :
+une livraison passe dans les deux langues.
 
 Quand un script change, **monter son paramètre de version** dans `index.html`
 (`board.js?v=…`) : sans cela, les navigateurs gardent l'ancienne version en cache.

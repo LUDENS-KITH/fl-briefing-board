@@ -37,7 +37,7 @@ proposés, non engagés.
 | 13 | Numéros de waypoint : le plus petit libre, pas un compteur | demande | S | — | v1.13 | en ligne le 2026-10-08 |
 | 14 | Visibilité : référencement technique (description, aperçu de partage, données structurées, texte lisible) | demande | S | D1 conseillée | v1.14 | en ligne le 2026-10-08 |
 | 15 | Visibilité : pages de présentation FR et EN | demande | M | lot 14 | v1.14 | en ligne le 2026-10-08 |
-| 16 | Interface en anglais | demande | M-L | — | v1.17 | proposé le 2026-10-08 |
+| 16 | Interface en anglais | demande | M-L | — | v1.17 | livraison 1 (l'écran) le 2026-10-09 ; livraison 2 (guides, exports) à venir |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
 
@@ -714,6 +714,27 @@ suit. Les identifiants DCS (types, noms de missions) ne se traduisent pas.
 chaîne de l'autre langue à l'écran (texte visible, `title`, messages) ; le banc de saisie
 passe dans les deux langues ; les deux guides citent les libellés exacts de leur langue.
 
+Découpé en deux livraisons (« GO » de Vince le 2026-10-09) :
+
+| | |
+|---|---|
+| Livraison 1 (v1.17) — l'écran | `i18n.js` : dictionnaire FR → EN-US, la clé est le texte français exact, avec ses valeurs insérées `{0}`. `tr()` traduit le code ; `localize()` traduit la page (textes, `title`, `placeholder`, `alt`, `aria-label`, blocs `data-i18n`), le titre de l'onglet et `<html lang>`. Langue : `?lang=` de l'adresse, sinon le choix gardé, sinon le navigateur (français s'il commence par `fr`, anglais sinon). Bouton EN / FR dans la barre : bascule en gardant le travail. Nombres et dates au format de la langue ; caps « T » (true), côtés « L/R », déclinaison « W ». Noms DCS inchangés. Pages de présentation : leurs boutons ouvrent l'outil dans leur langue |
+| Livraison 2 — guides et exports | les deux guides citent les libellés exacts de leur langue (le guide anglais cite encore « ▶ Présenter », « ⇧ Ouvrir »…) ; étiquettes d'export (kneeboard, PNG) relues dans chaque langue |
+
+**Fait quand (livraison 1)** — `node tools/test_i18n.js` : chaque texte de la page, chaque
+`tr()` du moteur, chaque forme, groupe, théâtre et erreur de `miz.js` a sa traduction ; aucun
+texte écrit en dur là où il s'affiche ; mêmes valeurs insérées dans les deux langues ; pas de
+clé morte. Au banc, rouges avant le code (5 scénarios) : en anglais, aucun texte français à
+l'écran, info-bulles et panneaux fermés compris ; en français, aucun texte anglais ; la démo en
+anglais ne dessine aucun mot français (planches, coupe, écrans radar) ; messages et questions
+en anglais ; le bouton bascule, garde le choix et le travail. Tout le banc passe dans les deux
+langues (`banc-saisie.html?lang=en`).
+
+État au 2026-10-09 : livraison 1 faite, PR à fusionner. `test_i18n` 1 624/1 624, et en échec
+sur une traduction retirée ou un texte affiché sans `tr()` ; banc 82/82 en français et 82/82 en
+anglais ; les 5 scénarios rouges sur la v1.16 (sur la v1.16, la démo dessinait « 29° G · froide ·
+radiale 88 % »), et en échec sur deux traductions retirées.
+
 #### Lot 18 — Déménagement vers `briefing.flightledger.io`
 
 Date retenue par Vince le 2026-10-08 : lundi 2026-10-12, puis **avancée au jour même** (« GO » de
@@ -822,3 +843,5 @@ avis contraire :
 | 2026-10-08 | Fusion du bandeau : v1.15 en ligne (publication Pages relancée à la main, GitHub ne l'avait pas déclenchée) ; bandeau vu sur l'adresse publique après rechargement d'un briefing gardé |
 
 | 2026-10-08 | « GO » de Vince : bascule avancée au jour même ; page de récupération publiée et prouvée sur l'ancienne origine ; v1.16 |
+| 2026-10-09 | Déménagement annoncé sur Discord (édition 014) |
+| 2026-10-09 | « GO » de Vince : lot 16 en deux livraisons ; livraison 1 (l'écran en anglais, v1.17) faite, fusion à valider |
