@@ -3,6 +3,27 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.17 — 2026-10-09
+
+Lot 16 du [plan d'action](docs/PLAN.md), livraison 1 : **l'interface en anglais (US)**.
+
+### Ajouté
+- **Interface en anglais** : boutons, info-bulles, palette, panneaux, messages, questions,
+  textes dessinés sur les planches et les écrans radar. La langue suit le navigateur ; le
+  bouton **EN / FR** de la barre la change à tout moment, sans perdre le travail, et le choix
+  est gardé. `?lang=en` ou `?lang=fr` dans l'adresse la force.
+- En anglais : nombres et dates au format US, caps « T » (vrai), côtés « L / R »,
+  déclinaison « W ». Les noms DCS (appareils, armes, cartes, missions) ne changent pas.
+
+### Modifié
+- Les pages de présentation ouvrent l'outil et sa démo dans leur langue ; la question
+  « Is the interface in English? » répond oui.
+
+### Vérifié en exécutant
+`test_i18n` 1 624/1 624, en échec sur une traduction retirée ou un texte affiché sans
+traduction · banc 82/82 en français et 82/82 en anglais, les 5 scénarios nouveaux rouges sur
+la v1.16 · `test_seo` 134/134 · `test_miz` 91/91 · `test_radar` 26/26.
+
 ## v1.16 — 2026-10-08
 
 Lot 18 du [plan d'action](docs/PLAN.md), avancé au jour même : FL Briefing Board passe sur

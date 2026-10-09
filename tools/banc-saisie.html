@@ -31,19 +31,24 @@
    Le verdict s'affiche en haut de la page et dans le titre de l'onglet. */
 
 const KEY = 'fl-briefing-board-v3';
+/* la langue de l'application jugée : ?lang=en rejoue tout le banc en anglais */
+const LANG = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'fr';
+const LANG_KEY = 'fl-briefing-board-lang';
+const appUrl = (q = '') => '../index.html?' + (q ? q + '&' : '') + 'lang=' + LANG;
 const host = document.getElementById('host');
 const BITS = [1, 4, 2];                    // boutons gauche, molette, droit → masque `buttons`
 
 const IDB_NAME = 'fl-briefing-board';      // octets des images de fond
 async function open(){                     // application neuve, tableau vide, aucune image gardée
   localStorage.removeItem(KEY);
+  localStorage.removeItem(LANG_KEY);
   await new Promise(r => { const q = indexedDB.deleteDatabase(IDB_NAME); q.onsuccess = q.onerror = q.onblocked = () => r(); });
   return reload();
 }
 async function reload(){                   // relit le stockage, comme une réouverture
   host.innerHTML = '';
   const f = document.createElement('iframe');
-  f.src = '../index.html';
+  f.src = appUrl();
   host.appendChild(f);
   await new Promise(r => f.addEventListener('load', r, { once: true }));
   await pause(50);                         // pas requestAnimationFrame : suspendu dans un onglet masqué
@@ -256,7 +261,7 @@ test('Forme ancrée : ni déplacée, ni tournée, ni gommée, ni supprimée ; li
   ok(geo() === g0, 'tournée au clavier');
   a.key('Delete');
   ok(a.s('objs.length') === 1, 'supprimée par Suppr');
-  ok(/ancr/i.test(a.toast()), `refus muet (message : « ${a.toast()} »)`);
+  ok(/ancr|pin/i.test(a.toast()), `refus muet (message : « ${a.toast()} »)`);
   a.key('e'); a.click(400, 300);
   ok(a.s('objs.length') === 1, 'effacée à la gomme');
   a.key('v'); a.click(400, 300); a.key('k');
@@ -870,7 +875,7 @@ test('DTC : refus expliqués — pas de route, pas de repère, autre théâtre, 
   const a = await open();
   ok(!(await dtc(a)) && /waypoint/i.test(a.toast()), `planche vide : « ${a.toast()} »`);
   a.tile('wp'); a.click(400, 300); a.key('Escape');
-  ok(!(await dtc(a)) && /repère/i.test(a.toast()), `planche sans repère : « ${a.toast()} »`);
+  ok(!(await dtc(a)) && /repère|reference/i.test(a.toast()), `planche sans repère : « ${a.toast()} »`);
   a.drop(a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]])); await pause(400);
   a.d.querySelectorAll('#mizlist button')[0].click(); await pause(200);
   ok(!(await dtc(a, a.miz('Overlord.miz', [['mission', MISSION('Normandy')]]))) && /Normandie|Normandy/.test(a.toast()),
@@ -931,7 +936,7 @@ test('Accroche, carte : accroché, le ravitailleur reste sur la branche à tout 
   await orbitTanker(a, { map: true });
   hookTanker(a);
   ok(hooked(a), `ravitailleur non accroché (message : « ${a.toast()} »)`);
-  ok(/accroch/i.test(a.toast()), `accroche muette (message : « ${a.toast()} »)`);
+  ok(/accroch|attach/i.test(a.toast()), `accroche muette (message : « ${a.toast()} »)`);
   const g0 = gap(a);
   await zoomSteps(a, '+', 3);
   ok(same(gap(a), g0), `zoom avant : ${fmt(g0)} → ${fmt(gap(a))}`);
@@ -981,7 +986,7 @@ test('Accroche : 🔗 décroche, Ctrl+Z raccroche, Ctrl+Y décroche ; réouvertu
   hookTanker(a);
   a.key('v'); a.click(...BRANCH); a.button('#hook');
   ok(!hooked(a), '🔗 ne décroche pas');
-  ok(/décroch/i.test(a.toast()), `décroche muette (message : « ${a.toast()} »)`);
+  ok(/décroch|detach/i.test(a.toast()), `décroche muette (message : « ${a.toast()} »)`);
   a.key('z', { ctrlKey: true });
   ok(hooked(a), 'Ctrl+Z ne raccroche pas');
   a.key('y', { ctrlKey: true });
@@ -1003,12 +1008,12 @@ test('Accroche : refus expliqués ; toucher l\'objet lui-même désigne l\'hôte
   await orbitTanker(a);
   a.key('Escape');
   a.key('j');
-  ok(/sélection/i.test(a.toast()), `sans sélection : « ${a.toast()} »`);
+  ok(/sélection|select/i.test(a.toast()), `sans sélection : « ${a.toast()} »`);
   a.key('z'); a.click(100, 100); a.click(200, 100); a.click(200, 200); a.key('Enter');
   a.key('v'); a.click(150, 130); a.key('j');
-  ok(/symbole|texte/i.test(a.toast()) && a.s('!objs.some(o => o.t === "zone" && o.hook)'), `zone : « ${a.toast()} »`);
+  ok(/symbole|texte|symbol|text/i.test(a.toast()) && a.s('!objs.some(o => o.t === "zone" && o.hook)'), `zone : « ${a.toast()} »`);
   a.key('v'); a.click(...BRANCH); a.key('j'); a.click(900, 150);
-  ok(!hooked(a) && /rien|symbole/i.test(a.toast()), `le vide : « ${a.toast()} »`);
+  ok(!hooked(a) && /rien|symbole|nothing|symbol/i.test(a.toast()), `le vide : « ${a.toast()} »`);
   a.key('v'); a.click(...BRANCH); a.key('j'); a.key('Escape');
   ok(a.s('sel') === null && a.s('tool') === 'select', 'Échap : la sélection reste');
   a.click(ORB[0] - 60, ORB[1]);
@@ -1017,7 +1022,7 @@ test('Accroche : refus expliqués ; toucher l\'objet lui-même désigne l\'hôte
   ok(hooked(a), `le ravitailleur touché : l'orbite dessous n'est pas prise (« ${a.toast()} »)`);
   const n = a.s('past.length');
   a.key('v'); a.click(ORB[0] - 60, ORB[1]); a.key('j'); a.click(...BRANCH);
-  ok(!hooked(a, 'orbit') && /boucle/i.test(a.toast()), `boucle : « ${a.toast()} »`);
+  ok(!hooked(a, 'orbit') && /boucle|loop/i.test(a.toast()), `boucle : « ${a.toast()} »`);
   ok(a.s('past.length') === n, 'un refus laisse une entrée d\'historique');
 });
 
@@ -1096,7 +1101,7 @@ test('Nouveau briefing confirmé : tableau vierge, gardé vierge à la réouvert
   let asked = '';
   a.w.confirm = m => (asked = m, true);
   a.button('#new'); await pause(300);
-  ok(/2 planches/.test(asked) && /Briefing/.test(asked), `question posée : « ${asked} »`);
+  ok(/2 (planches|boards)/.test(asked) && /Briefing/.test(asked), `question posée : « ${asked} »`);
   ok(a.s('boards.length') === 1 && a.s('boards[0].name') === 'Phase 1', `planches : ${a.s('boards.map(b => b.name).join()')}`);
   ok(a.s('objs.length') === 0 && a.s('cam') === null && a.s('past.length') === 0, `objets ${a.s('objs.length')}, historique ${a.s('past.length')}`);
   ok(a.s('tool') === 'select', `outil : ${a.s('tool')}`);
@@ -1122,7 +1127,7 @@ test('Nouveau briefing sur un tableau vierge : pas de question, un message', asy
   a.w.confirm = () => (asked++, true);
   a.button('#new');
   ok(asked === 0, 'une question a été posée');
-  ok(/vierge/i.test(a.toast()), `message : « ${a.toast()} »`);
+  ok(/vierge|blank/i.test(a.toast()), `message : « ${a.toast()} »`);
 });
 
 test('Effacer ne vide que la planche affichée', async (ok) => {
@@ -1192,7 +1197,7 @@ test('Import : ravitailleur et AWACS posés, accrochés à leur orbite, route ti
   const mid = [(leg[0][0] + leg[1][0]) / 2, (leg[0][1] + leg[1][1]) / 2], ax = Math.atan2(leg[1][1] - leg[0][1], leg[1][0] - leg[0][0]);
   ok(Math.hypot(host.x - mid[0], host.y - mid[1]) < .5, `orbite à ${Math.hypot(host.x - mid[0], host.y - mid[1]).toFixed(1)} du milieu de la branche`);
   ok(Math.abs(Math.sin(host.a - ax)) < .01, `orbite hors de l'axe : ${host.a.toFixed(3)} contre ${ax.toFixed(3)}`);
-  ok(/ravitailleur/i.test(a.toast()) && /AWACS/.test(a.toast()), `bilan : « ${a.toast()} »`);
+  ok(/ravitailleur|tanker/i.test(a.toast()) && /AWACS/.test(a.toast()), `bilan : « ${a.toast()} »`);
   ok(a.s('objs.some(o => o.t === "sym" && o.k === "wp")'), 'la route du vol joueur a disparu');
 });
 
@@ -1266,8 +1271,8 @@ test('Déménagement : à la nouvelle adresse, un tableau vierge montre où réc
   const a = await open();
   a.s(`movingNotice('${NEW_HOST}', new Date('2026-10-20'))`);
   const t = moving(a);
-  ok(/FL Briefing Board a déménagé/.test(t) && /ludens-kith\.github\.io/.test(t), `bandeau : « ${t} »`);
-  ok(/⇧ Ouvrir/.test(t), `consigne : « ${t} »`);
+  ok(/FL Briefing Board (a déménagé|has moved)/.test(t) && /ludens-kith\.github\.io/.test(t), `bandeau : « ${t} »`);
+  ok(/⇧ (Ouvrir|Open)/.test(t), `consigne : « ${t} »`);
   let opened = '';
   a.w.open = u => { opened = u; return null; };
   a.button('#movingsave');
@@ -1296,7 +1301,7 @@ test('Déménagement : la démo n\'affiche pas le bandeau', async (ok) => {
   await open();
   host.innerHTML = '';
   const f = document.createElement('iframe');
-  f.src = '../index.html?demo';
+  f.src = appUrl('demo');
   host.appendChild(f);
   await new Promise(r => f.addEventListener('load', r, { once: true }));
   await pause(50);
@@ -1318,6 +1323,122 @@ test('Déménagement : « Compris » ferme le bandeau, qui ne revient pas à la 
 test('Déménagement : le panneau ⓘ mène à la page de récupération', async (ok) => {
   const a = await open();
   ok(!!a.d.querySelector(`#aboutbox a[href="${RECUP}"]`), 'lien absent du panneau ⓘ');
+});
+
+/* ---------- lot 16 : langue de l'interface ----------
+   Ces scénarios choisissent eux-mêmes la langue de l'application, quel que soit ?lang
+   du banc. Un texte resté en français se reconnaît à ses accents, à ses petits mots, ou
+   parce qu'il est une clé du dictionnaire qui avait une traduction. */
+async function openIn(lang, q = ''){
+  await open();
+  host.innerHTML = '';
+  const f = document.createElement('iframe');
+  f.src = '../index.html?' + (q ? q + '&' : '') + 'lang=' + lang;
+  host.appendChild(f);
+  await new Promise(r => f.addEventListener('load', r, { once: true }));
+  await pause(50);
+  return app(f);
+}
+/* tout ce que le pilote peut lire : textes (panneaux fermés compris), info-bulles, titre */
+function screenTexts(a){
+  const d = a.d, out = new Set(), walk = d.createTreeWalker(d.body, 4);
+  for (let n; (n = walk.nextNode());){
+    if (n.parentElement.closest('script, style, noscript')) continue;
+    const t = n.textContent.replace(/\s+/g, ' ').trim();
+    if (t) out.add(t);
+  }
+  for (const e of d.body.querySelectorAll('[title], [placeholder], [alt], [aria-label]'))
+    for (const at of ['title', 'placeholder', 'alt', 'aria-label']){
+      const v = (e.getAttribute(at) || '').replace(/\s+/g, ' ').trim();
+      if (v) out.add(v);
+    }
+  out.add(d.title);
+  return [...out];
+}
+const FR_MARK = /[àâçéèêëîïôûùüœ]|\b(le|la|les|des|du|une|et|pour|avec|sur|dans|sans|puis|ou|pas)\b/;
+function frenchIn(a, list){
+  const EN = a.s('EN'), own = k => Object.prototype.hasOwnProperty.call(EN, k);
+  return [...new Set(list)].filter(s => (own(s) && EN[s] !== s) || FR_MARK.test(s));
+}
+const cite = list => list.slice(0, 8).map(s => '« ' + s.slice(0, 70) + ' »').join(' · ');
+
+test('Langue : en anglais, aucun texte français à l\'écran, info-bulles et panneaux fermés compris', async (ok) => {
+  const a = await openIn('en');
+  ok(a.d.documentElement.lang === 'en', `<html lang> : ${a.d.documentElement.lang}`);
+  const all = screenTexts(a), left = frenchIn(a, all);
+  ok(all.length > 150, `textes lus : ${all.length}`);
+  ok(!left.length, `${left.length} textes en français : ${cite(left)}`);
+});
+
+test('Langue : en français, aucun texte anglais à l\'écran', async (ok) => {
+  const a = await openIn('fr');
+  ok(a.d.documentElement.lang === 'fr', `<html lang> : ${a.d.documentElement.lang}`);
+  const EN = a.s('EN');
+  const en = new Set(Object.entries(EN).filter(([k, v]) => k !== v && !/^[a-zàâçéèêîôû]+:/.test(k)).map(([, v]) => v));
+  const left = screenTexts(a).filter(s => en.has(s));
+  ok(!left.length, `${left.length} textes en anglais : ${cite(left)}`);
+});
+
+test('Langue : la démo en anglais ne dessine aucun mot français (planches, vue de dessus, coupe, radar)', async (ok) => {
+  const a = await openIn('en', 'demo');
+  const drawn = [], P = a.w.CanvasRenderingContext2D.prototype, f0 = P.fillText;
+  P.fillText = function(t, ...r){ drawn.push(String(t)); return f0.call(this, t, ...r); };
+  const n = a.d.querySelectorAll('.tab:not(.x):not(.add)').length;
+  ok(n >= 2, `planches de la démo : ${n}`);
+  for (let i = n - 1; i >= 0; i--){ a.d.querySelectorAll('.tab:not(.x):not(.add)')[i].click(); await pause(150); }
+  /* l'écran radar d'un porteur de la démo : la lecture des contacts, côté gauche/droite */
+  const own = a.s('boards.findIndex(b => b.objs.some(o => o.own))');
+  ok(own >= 0, 'aucun porteur dans la démo');
+  a.d.querySelectorAll('.tab:not(.x):not(.add)')[own].click(); await pause(100);
+  for (const p of ['fa18', 'f16']){ a.choose('#pane', p); await pause(150); }
+  P.fillText = f0;
+  ok(drawn.some(t => /aspect .* radial \d+%/.test(t)), `lecture radar absente : ${cite(drawn.filter(t => /aspect/.test(t)))}`);
+  ok(drawn.length > 20, `textes dessinés : ${drawn.length}`);
+  const left = frenchIn(a, drawn.map(s => s.trim()).filter(Boolean));
+  ok(!left.length, `${left.length} textes dessinés en français : ${cite(left)}`);
+  const tabs = frenchIn(a, screenTexts(a));
+  ok(!tabs.length, `${tabs.length} textes de la démo en français : ${cite(tabs)}`);
+});
+
+test('Langue : en anglais, les messages et les questions sont en anglais', async (ok) => {
+  const a = await openIn('en');
+  const said = [], heard = () => { const t = a.toast(); if (t) said.push(t); };
+  a.w.confirm = q => (said.push(q), false);
+  a.w.alert = q => { said.push(q); };
+  a.w.prompt = q => (said.push(q), null);
+  a.button('#new'); heard();                                 // tableau déjà vierge
+  a.key('k'); heard();                                       // ancrer sans sélection
+  a.key('j'); heard();                                       // accrocher sans sélection
+  garnir(a);
+  a.button('#new'); heard();                                 // la question avant d'effacer
+  a.drop(new a.w.File(['pas une archive'], 'faux.miz')); await pause(300); heard();
+  a.drop(a.json({ nimporte: 'quoi' })); await pause(300); heard();
+  ok(said.length >= 5, `messages entendus : ${said.length} — ${cite(said)}`);
+  const left = frenchIn(a, said);
+  ok(!left.length, `${left.length} messages en français : ${cite(left)}`);
+});
+
+test('Langue : le bouton de langue bascule l\'interface, garde le choix et le travail en cours', async (ok) => {
+  let a = await openIn('fr');
+  garnir(a);
+  const f = host.querySelector('iframe');
+  ok(a.d.getElementById('lang').textContent.trim() === 'EN', `bouton en français : « ${a.d.getElementById('lang').textContent} »`);
+  let loaded = new Promise(r => f.addEventListener('load', r, { once: true }));
+  a.button('#lang'); await loaded; await pause(50);
+  a = app(f);
+  ok(a.d.documentElement.lang === 'en', `après bascule, <html lang> : ${a.d.documentElement.lang}`);
+  ok(a.s('objs.length') === 1, `objets après bascule : ${a.s('objs.length')}`);
+  ok(localStorage.getItem(LANG_KEY) === 'en', `choix gardé : ${localStorage.getItem(LANG_KEY)}`);
+  ok(a.d.getElementById('lang').textContent.trim() === 'FR', `bouton en anglais : « ${a.d.getElementById('lang').textContent} »`);
+  /* rouverte sans ?lang, l'application reprend la langue choisie */
+  host.innerHTML = '';
+  const g = document.createElement('iframe'); g.src = '../index.html'; host.appendChild(g);
+  await new Promise(r => g.addEventListener('load', r, { once: true })); await pause(50);
+  a = app(g);
+  ok(a.d.documentElement.lang === 'en', `réouverte sans ?lang : ${a.d.documentElement.lang}`);
+  loaded = new Promise(r => g.addEventListener('load', r, { once: true }));
+  a.button('#lang'); await loaded; await pause(50);
+  ok(app(g).d.documentElement.lang === 'fr' && localStorage.getItem(LANG_KEY) === 'fr', 'le retour au français ne prend pas');
 });
 
 (async () => {

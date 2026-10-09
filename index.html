@@ -241,6 +241,7 @@
   <button id="kframe" title="Cadrer le kneeboard : un cadre aux proportions de la page, à déplacer par son bord et agrandir par sa poignée ; l'export kneeboard prend ce qu'il contient. Un second clic l'ôte.">⬚ Cadre</button>
   <button id="knee"  title="Exporter la planche au format kneeboard DCS (portrait 768 × 1157, aux proportions de la planchette du jeu) : le cadre s'il y en a un, sinon la planche ; à copier dans Saved Games\DCS\Kneeboard">⇩ Kneeboard</button>
   <button id="clear" title="Effacer la planche affichée">Effacer</button>
+  <button id="lang" title="Langue de l'interface : passer en anglais" data-i18n="lang">EN</button>
   <button id="about" title="À propos — LK Studio">ⓘ</button>
 </div>
 
@@ -284,7 +285,7 @@
       </span>
       <span id="pradar">
         <button id="own" title="Porteur du radar : sélectionnez un appareil dans la vue de dessus, puis ce bouton">◎ Porteur</button>
-        <label>Échelle
+        <label><span data-i18n="rrange">Échelle</span>
           <select id="rrng">
             <option value="5">5 NM</option><option value="10">10 NM</option><option value="20">20 NM</option>
             <option value="40">40 NM</option><option value="80">80 NM</option><option value="160">160 NM</option>
@@ -297,7 +298,7 @@
     <div id="hint">Choisissez une forme, touchez le vide pour la poser, gardez appuyé pour l'orienter · clic droit ou Échap : retour à la sélection · 📌 ou K : ancrer · 🔗 ou J : accrocher à un symbole · double-clic : étiquette · carte : molette pour zoomer, clic droit glissé pour se déplacer</div>
     <div id="toast" hidden></div>
     <div id="moving" hidden role="status">
-      <p><b>FL Briefing Board a déménagé</b> sur <b>briefing.flightledger.io</b>.
+      <p data-i18n="moving"><b>FL Briefing Board a déménagé</b> sur <b>briefing.flightledger.io</b>.
       Vous l'utilisiez à l'ancienne adresse (ludens-kith.github.io) ? Vos briefings y sont
       restés : la page de récupération vous les rend en fichier, à rouvrir ici avec ⇧ Ouvrir.</p>
       <div><button id="movingsave">Récupérer mes briefings</button> <button id="movingok">Compris</button></div>
@@ -324,7 +325,7 @@
       <img src="assets/fl-briefing-board-patch.svg" alt="Écusson FL Briefing Board" width="96" height="96">
       <div>
         <h1>FL Briefing Board <span id="aboutver"></span></h1>
-        <p>Le tableau de briefing et de debriefing des escadrons DCS World : formes aéro
+        <p data-i18n="about-desc">Le tableau de briefing et de debriefing des escadrons DCS World : formes aéro
         prêtes à poser, cartes des théâtres, coupe liée à la route, caps magnétiques,
         export kneeboard.</p>
       </div>
@@ -332,12 +333,12 @@
     <div class="studio">
       <img src="assets/lk-studio-logo.png" alt="LK Studio" width="112" height="105">
       <div>
-        <p><b>Conçu et développé par LK Studio</b>, studio de création logicielle installé
+        <p data-i18n="about-studio"><b>Conçu et développé par LK Studio</b>, studio de création logicielle installé
         à Tours.</p>
         <p><a href="https://l-k-studio.com" target="_blank" rel="noopener">l-k-studio.com</a></p>
       </div>
     </div>
-    <a class="fl" href="https://flightledger.io" target="_blank" rel="noopener">
+    <a class="fl" href="https://flightledger.io" target="_blank" rel="noopener" data-i18n="about-fl">
       <b>FlightLedger</b> — débriefez vos vrais vols : carnet de vol, analyse Tacview,
       escadrons. Le briefing prépare le vol ; FlightLedger raconte ce qui s'est passé. →</a>
     <p class="small">
@@ -359,13 +360,14 @@
   </div>
 </div>
 
+<script src="i18n.js?v=1.0"></script>
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
 <script src="symbols.js?v=0.11"></script>
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="miz.js?v=1.2"></script>
-<script src="board.js?v=1.16"></script>
+<script src="board.js?v=1.17"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

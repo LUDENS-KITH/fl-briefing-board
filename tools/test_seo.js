@@ -72,7 +72,9 @@ for (const [lang, file, html_lang] of [['fr', PAGES.fr, 'fr'], ['en', PAGES.en, 
   ok(ld && ld['@type'] === 'SoftwareApplication' && ld.name === 'FL Briefing Board' && ld.url === BASE
      && ld.offers && String(ld.offers.price) === '0' && ld.applicationCategory && ld.operatingSystem
      && ld.publisher && ld.publisher.name === 'LK Studio', `${file} : données structurées ${JSON.stringify(ld)}`);
-  ok(/href="\.\.\/"/.test(html) && /href="\.\.\/\?demo"/.test(html), `${file} : boutons vers le tableau et la démo`);
+  /* les boutons ouvrent l'application et sa démo dans la langue de la page */
+  ok(html.includes(`href="../?lang=${lang}"`) && html.includes(`href="../?demo&amp;lang=${lang}"`)
+     && !/href="\.\.\/(\?demo)?"/.test(html), `${file} : boutons vers le tableau et la démo, en ${lang}`);
   ok(/Eagle Dynamics/.test(html), `${file} : mention de non-affiliation absente`);
   ok(/<h1[\s>]/.test(html) && (html.match(/<h1[\s>]/g) || []).length === 1, `${file} : un seul titre h1`);
   for (const [, a] of html.matchAll(/<img\b([^>]*)>/g))

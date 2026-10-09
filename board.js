@@ -14,9 +14,14 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.16', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.17', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
+/* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
+   traduisent une fois, à l'ouverture ; tout autre texte passe par tr() quand il s'affiche */
+for (const k in SHAPES) SHAPES[k].label = tr(SHAPES[k].label);
+for (const g of GROUPS) g[1] = tr(g[1]);
+for (const t of THEATRES) t.name = tr(t.name);
 
 let objs = [], draft = null, sel = null, drag = null, textTarget = null;
 let tool = 'select', symKey = 'fighter', color = '#2F8CFF', width = 4, ls = 'solid', dark = true;
@@ -52,7 +57,7 @@ function declAt(x, y){
     return wmmDeclination(y2lat(y), x2lon(x), Math.min(decimalYear(), WMM.until));
   return null;
 }
-const fmtDecl = d => Math.abs(d).toFixed(1).replace('.', ',') + '° ' + (d >= 0 ? 'E' : 'O');
+const fmtDecl = d => Math.abs(d).toFixed(1).replace('.', LANG === 'en' ? '.' : ',') + '° ' + (d >= 0 ? 'E' : tr('déclinaison:O'));
 /* « 6 », « 6,5 », « 6E », « 2W », « 2 O », « -2 » ; vide = automatique ; undefined = illisible */
 function parseDecl(v){
   const s = String(v).trim().toUpperCase().replace(',', '.').replace('°', '');
@@ -122,11 +127,11 @@ function fitCam(b){
 /* fonds de carte : trois fournisseurs vérifiés depuis un fichier local le 2026-09-18
    (CARTO écarté : il renvoie une image « API KEY REQUIRED » qui se charge très bien) */
 const STYLES = {
-  topo: { max: 17, attr: '© contributeurs OpenStreetMap · SRTM · style © OpenTopoMap (CC-BY-SA)',
+  topo: { max: 17, attr: tr('© contributeurs OpenStreetMap · SRTM · style © OpenTopoMap (CC-BY-SA)'),
           url: (z, x, y) => `https://${'abc'[(x + y) % 3]}.tile.opentopomap.org/${z}/${x}/${y}.png` },
-  sat:  { max: 18, attr: 'Imagerie © Esri, Maxar, Earthstar Geographics',
+  sat:  { max: 18, attr: tr('Imagerie © Esri, Maxar, Earthstar Geographics'),
           url: (z, x, y) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}` },
-  osm:  { max: 19, attr: '© contributeurs OpenStreetMap',
+  osm:  { max: 19, attr: tr('© contributeurs OpenStreetMap'),
           url: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png` },
 };
 const tileCache = new Map();
@@ -260,7 +265,7 @@ const snapAlt  = y  => yAt(Math.max(0, Math.round(altAt(y) / 500) * 500));
    cartes DCS américaines), pieds en dessous */
 function altText(ft){
   ft = Math.max(0, Math.round(ft / 100) * 100);
-  return ft >= 18000 ? 'FL' + String(ft / 100).padStart(3, '0') : ft.toLocaleString('fr-FR') + ' ft';
+  return ft >= 18000 ? 'FL' + String(ft / 100).padStart(3, '0') : ft.toLocaleString(LOCALE) + ' ft';
 }
 
 /* ---------- identité des objets ----------
@@ -384,11 +389,11 @@ function addBoard(){
   load(cur + 1); renderTabs(); commit();
 }
 function removeBoard(i){
-  if (boards.length < 2 || !confirm(`Supprimer la planche « ${boards[i].name} » ?`)) return;
+  if (boards.length < 2 || !confirm(tr('Supprimer la planche « {0} » ?', boards[i].name))) return;
   stash(); boards.splice(i, 1); load(Math.min(i, boards.length - 1)); renderTabs(); commit();
 }
 function renameBoard(i){
-  const v = prompt('Nom de la planche', boards[i].name);
+  const v = prompt(tr('Nom de la planche'), boards[i].name);
   if (v && v.trim()){ boards[i].name = v.trim(); renderTabs(); commit(); }
 }
 function renderTabs(){
@@ -397,20 +402,20 @@ function renderTabs(){
     const t = document.createElement('button');
     t.className = 'tab' + (i === cur ? ' on' : '');
     t.textContent = b.name;
-    t.title = 'Clic : afficher · double-clic : renommer · PgPréc / PgSuiv';
+    t.title = tr('Clic : afficher · double-clic : renommer · PgPréc / PgSuiv');
     t.onclick = () => switchBoard(i);
     t.ondblclick = () => renameBoard(i);
     tabs.appendChild(t);
     if (i === cur && boards.length > 1){
       const x = document.createElement('button');
-      x.className = 'tab x'; x.textContent = '×'; x.title = 'Supprimer cette planche';
+      x.className = 'tab x'; x.textContent = '×'; x.title = tr('Supprimer cette planche');
       x.onclick = () => removeBoard(i);
       tabs.appendChild(x);
     }
   });
   const p = document.createElement('button');
   p.className = 'tab add'; p.textContent = '+ phase';
-  p.title = 'Nouvelle planche : copie de celle affichée, à faire évoluer';
+  p.title = tr('Nouvelle planche : copie de celle affichée, à faire évoluer');
   p.onclick = addBoard;
   tabs.appendChild(p);
   presentBadge();
@@ -512,8 +517,8 @@ function drawProfAxes(w){
     ctx.strokeStyle = dark ? 'rgba(255,255,255,.07)' : 'rgba(10,20,35,.09)';
     ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(PROF_L, y + .5); ctx.lineTo(w, y + .5); ctx.stroke();
     ctx.fillStyle = dark ? '#7F8C98' : '#4A5661';
-    ctx.fillText(ft === 0 ? 'SOL' : ft >= 18000 ? 'FL' + String(ft / 100).padStart(3, '0')
-                                                : ft.toLocaleString('fr-FR'), PROF_L - 6, y);
+    ctx.fillText(ft === 0 ? tr('SOL') : ft >= 18000 ? 'FL' + String(ft / 100).padStart(3, '0')
+                                                    : ft.toLocaleString(LOCALE), PROF_L - 6, y);
   }
   ctx.strokeStyle = dark ? '#7F8C98' : '#4A5661'; ctx.lineWidth = 2;   // le sol
   ctx.beginPath(); ctx.moveTo(PROF_L, groundY()); ctx.lineTo(w, groundY()); ctx.stroke();
@@ -731,8 +736,8 @@ function computeRoute(){
                   .sort((a, b) => a.n - b.n);
   let prev = null;
   for (const w of wps){ const alt = w.alt ?? prev ?? 10000; routeAlt.set(w, alt); prev = alt; }
-  if (wps.length < 2) return { pts: [], err: 'Posez au moins deux waypoints dans la vue de dessus : la route va de 1 à 2, 3…' };
-  if (!cam && !nmPx) return { pts: [], err: 'Étalonnez la vue de dessus (règle, puis Échelle), ou choisissez une carte : sans échelle, pas de distance le long de la route.' };
+  if (wps.length < 2) return { pts: [], err: tr('Posez au moins deux waypoints dans la vue de dessus : la route va de 1 à 2, 3…') };
+  if (!cam && !nmPx) return { pts: [], err: tr('Étalonnez la vue de dessus (règle, puis Échelle), ou choisissez une carte : sans échelle, pas de distance le long de la route.') };
   let d = 0;
   return { err: '', pts: wps.map((w, i) => {
     if (i) d += Math.hypot(w.x - wps[i - 1].x, w.y - wps[i - 1].y) / nmAt((w.y + wps[i - 1].y) / 2);
@@ -801,9 +806,9 @@ const hafuFor = c => c === '#FF4D4D' ? 'fa18_hafu_h' : c === '#2F8CFF' ? 'fa18_h
 
 function radarView(){
   const own = objs.find(o => o.own && (o.v || 'm') === 'm');
-  if (!own) return { msg: 'Sélectionnez un appareil dans la vue de dessus, puis « Porteur ».' };
+  if (!own) return { msg: tr('Sélectionnez un appareil dans la vue de dessus, puis « Porteur ».') };
   const pxPerNm = cam ? nmAt(own.y) : nmPx;             // rien d'inventé sans échelle
-  if (!pxPerNm) return { own, msg: 'Il faut une carte, ou une planche étalonnée (bouton Échelle), pour mesurer les distances.' };
+  if (!pxPerNm) return { own, msg: tr('Il faut une carte, ou une planche étalonnée (bouton Échelle), pour mesurer les distances.') };
   const sc = radarScope();
   const tgts = objs.filter(o => o !== own && o.t === 'sym' && (o.v || 'm') === 'm' && (SHAPES[o.k] || {}).g === 'air');
   return { own, pxPerNm, ...RADAR.radarPicture(own, tgts,
@@ -842,21 +847,23 @@ function drawRadarPane(w){
   line((prof.pane === 'f16' ? 'F-16C · FCR' : 'F/A-18C · RDR ATTK') + ' · TWS', ink, 13, 700);
   if (v.msg){ line(v.msg, dim); ctx.restore(); return; }
   const azv = prof.raz ?? sc.az;
-  line(`Porteur : ${v.own.lbl || SHAPES[v.own.k].label} · échelle ${prof.rrng ?? sc.rng} NM · balayage `
-       + (prof.pane === 'f16' ? 'A' + azv : azv + '°'), dim);
+  line(tr('Porteur : {0} · échelle {1} NM · balayage {2}', v.own.lbl || SHAPES[v.own.k].label, prof.rrng ?? sc.rng,
+          prof.pane === 'f16' ? 'A' + azv : azv + '°'), dim);
   list.slice(0, 8).forEach((c, i) => {
     /* à 0 % affiché, la cible n'est ni chaude ni froide : elle est au travers */
     const o = c.src, az = Math.round(c.az), rad = Math.round(c.radial * 100);
-    line(`${i + 1}. ${o.lbl || SHAPES[o.k].label} — ${fmtNm(c.nm)}, ${Math.abs(az)}°${az ? (az < 0 ? ' G' : ' D') : ''}`
-         + ` · aspect ${RADAR.aspectText(c)} · ${rad ? (c.hot ? 'chaude' : 'froide') : 'au travers'} · radiale ${rad} %`);
+    line(tr('{0}. {1} — {2}, {3} · aspect {4} · {5} · radiale {6} %', i + 1, o.lbl || SHAPES[o.k].label, fmtNm(c.nm),
+            Math.abs(az) + '°' + (az ? ' ' + tr(az < 0 ? 'côté:G' : 'côté:D') : ''),
+            RADAR.aspectText(c).replace(/[GD]$/, s => tr('côté:' + s)),
+            tr(rad ? (c.hot ? 'chaude' : 'froide') : 'au travers'), rad));
   });
-  if (list.length > 8) line(`… et ${list.length - 8} autres`, dim);
-  if (!list.length) line('Aucun contact dans le balayage et l\'échelle.', dim);
-  const miss = [v.outCone && `${v.outCone} hors balayage`, v.beyond && `${v.beyond} au-delà de l'échelle`].filter(Boolean);
+  if (list.length > 8) line(tr('… et {0} autres', list.length - 8), dim);
+  if (!list.length) line(tr('Aucun contact dans le balayage et l\'échelle.'), dim);
+  const miss = [v.outCone && tr('{0} hors balayage', v.outCone), v.beyond && tr('{0} au-delà de l\'échelle', v.beyond)].filter(Boolean);
   if (miss.length) line(miss.join(' · '), dim);
   ty = PROF_H - 34;
-  line('Radiale : part de sa vitesse le long de la ligne de visée. Proche de 0 % (au travers),', dim, 11, 500);
-  line('le filtre Doppler peut rejeter la cible en regard vers le bas (manuel F-16C, p. 391).', dim, 11, 500);
+  line(tr('Radiale : part de sa vitesse le long de la ligne de visée. Proche de 0 % (au travers),'), dim, 11, 500);
+  line(tr('le filtre Doppler peut rejeter la cible en regard vers le bas (manuel F-16C, p. 391).'), dim, 11, 500);
   ctx.restore();
 }
 
@@ -902,7 +909,7 @@ function distText(px, per = nmPx){
    haut de l'écran d'une planche sans carte */
 function bearing(x1, y1, x2, y2){
   /* V : vrai, sur une carte ; G : grille DCS, sur une mission importée sans carte */
-  let b = Math.atan2(x2 - x1, -(y2 - y1)) * 180 / Math.PI, suf = cam ? 'V' : prof.grid ? 'G' : '';
+  let b = Math.atan2(x2 - x1, -(y2 - y1)) * 180 / Math.PI, suf = cam ? tr('cap:V') : prof.grid ? 'G' : '';
   if (headRef === 'mag'){
     const d = declAt((x1 + x2) / 2, (y1 + y2) / 2);
     if (d !== null){ b -= d; suf = 'M'; }                // cap magnétique = cap vrai − déclinaison Est
@@ -914,7 +921,7 @@ function bearing(x1, y1, x2, y2){
 function profText(o){
   const dz = altAt(o.y2) - altAt(o.y1), r = Math.round(Math.abs(dz) / 100) * 100;
   return distText(Math.abs(o.x2 - o.x1), profNmPx()) + ' · ' + (dz >= 0 ? '+' : '−') +
-         r.toLocaleString('fr-FR') + ' ft';
+         r.toLocaleString(LOCALE) + ' ft';
 }
 function rulerText(o){
   if (o.v === 'p') return profText(o);
@@ -1261,7 +1268,7 @@ function markTrack(x, y, mk){
   let t = topmost(x, y, o => kind(o).track && mine(o)), raw = null;
   if (!t){
     const foreign = topmost(x, y, o => other(o) && (kind(o).track || kind(o).raw));
-    if (foreign){ toast(`${sh.label} est une marque du ${name(sh.g)} : pas sur une piste du ${name(kind(foreign).g)}`); return; }
+    if (foreign){ toast(tr('{0} est une marque du {1} : pas sur une piste du {2}', sh.label, name(sh.g), name(kind(foreign).g))); return; }
     raw = topmost(x, y, o => kind(o).raw && mine(o) && !o.locked);
   }
   /* à portée de doigt d'une piste : c'est elle — le bout d'une tige compte */
@@ -1276,12 +1283,12 @@ function markTrack(x, y, mk){
   }
   if (!t){
     const scope = topmost(x, y, o => other(o) && kind(o).scope);
-    if (scope){ toast(`${sh.label} est une marque du ${name(sh.g)} : pas sur l'écran du ${name(kind(scope).g)}`); return; }
+    if (scope){ toast(tr('{0} est une marque du {1} : pas sur l\'écran du {2}', sh.label, name(sh.g), name(kind(scope).g))); return; }
   }
   const prev = t && t.mark && t.mark !== mk ? t.mark : null;
   const holder = prev && objs.find(o => o !== t && o.mark === mk && (o.v || 'm') === (t.v || 'm'));
   const kept = prev && Object.values(SHAPES).find(k => k.mark === prev && k.keep);
-  if (kept && !holder){ toast(`Cette piste porte la ${kept.label} : ${sh.label} se pose sur une autre piste`); return; }
+  if (kept && !holder){ toast(tr('Cette piste porte la {0} : {1} se pose sur une autre piste', kept.label, sh.label)); return; }
   snapshot();
   if (!t){                                             // un écho désigné : sa piste porte la marque
     const nk = SHAPES[sh.newTrack];
@@ -1554,8 +1561,7 @@ function openText(x, y, target = null, value = ''){
   ti.style.display = 'block';
   const [px, py] = view === 'm' ? w2s(x, y) : [x, y];
   ti.style.left = (r.left + px) + 'px'; ti.style.top = (r.top + oy + py - 16) + 'px';
-  ti.placeholder = target && target.t !== 'text' ? 'étiquette : indicatif, altitude… puis Entrée'
-                                                  : 'texte puis Entrée';
+  ti.placeholder = tr(target && target.t !== 'text' ? 'étiquette : indicatif, altitude… puis Entrée' : 'texte puis Entrée');
   ti.value = value; ti.dataset.x = x; ti.dataset.y = y;
   setTimeout(() => { ti.focus(); ti.select(); }, 0);
 }
@@ -1670,7 +1676,7 @@ async function restoreImages(){
     for (const o of b.objs) if (o.t === 'img') o.el = imageOf(o.id);
   }
   objs = boards[cur].objs;
-  if (lost) toast(lost > 1 ? `${lost} images de fond n'ont pas pu être relues` : 'Une image de fond n\'a pas pu être relue');
+  if (lost) toast(lost > 1 ? tr('{0} images de fond n\'ont pas pu être relues', lost) : tr('Une image de fond n\'a pas pu être relue'));
   if (!DEMO) idbKeep(new Set(boards.flatMap(b => b.objs.filter(o => o.t === 'img').map(o => o.id)))).catch(() => {});
   commit();
 }
@@ -1787,7 +1793,7 @@ $('dup').onclick = () => {
 /* ancrer : la sélection ne se déplace plus, ne tourne plus, ne s'efface plus ; on pose
    par-dessus. Couleur, trait et étiquette restent libres. */
 $('lock').onclick = () => {
-  if (!sel){ toast('Sélectionnez d\'abord l\'objet à ancrer (outil Sélection, V)'); return; }
+  if (!sel){ toast(tr('Sélectionnez d\'abord l\'objet à ancrer (outil Sélection, V)')); return; }
   snapshot();
   if (sel.locked) delete sel.locked; else sel.locked = true;
   commit();
@@ -1795,35 +1801,35 @@ $('lock').onclick = () => {
 /* accrocher (lot 10) : la sélection libre attend qu'on touche son hôte ; accrochée, elle
    se décroche sur place */
 $('hook').onclick = () => {
-  if (!sel){ toast('Sélectionnez d\'abord l\'objet à accrocher (outil Sélection, V)'); return; }
-  if (sel.t !== 'sym' && sel.t !== 'text'){ toast('Seuls un symbole ou un texte s\'accrochent'); return; }
-  if (hostOf(sel)){ snapshot(); delete sel.hook; commit(); toast('Décroché : il reste à sa place'); return; }
+  if (!sel){ toast(tr('Sélectionnez d\'abord l\'objet à accrocher (outil Sélection, V)')); return; }
+  if (sel.t !== 'sym' && sel.t !== 'text'){ toast(tr('Seuls un symbole ou un texte s\'accrochent')); return; }
+  if (hostOf(sel)){ snapshot(); delete sel.hook; commit(); toast(tr('Décroché : il reste à sa place')); return; }
   leaveGesture();
   hooking = sel;
-  toast('Touchez le symbole auquel l\'accrocher — Échap pour annuler', 8000);
+  toast(tr('Touchez le symbole auquel l\'accrocher — Échap pour annuler'), 8000);
   draw();
 };
-const shapeName = o => o.lbl || (SHAPES[o.k] || {}).label || 'symbole';
+const shapeName = o => o.lbl || (SHAPES[o.k] || {}).label || tr('symbole');
 /* l'objet lui-même ne compte pas : toucher le ravitailleur posé sur l'orbite désigne l'orbite */
 function hookTo(x, y){
   const o = hooking;
   hooking = null;
   if (!objs.includes(o)){ draw(); return; }
   const h = topmost(x, y, c => c !== o && c.t === 'sym');
-  if (!h){ toast('Rien d\'accroché : touchez un symbole'); draw(); return; }
-  if ((h.v || 'm') !== (o.v || 'm')){ toast('Rien d\'accroché : l\'hôte doit être dans la même vue'); draw(); return; }
+  if (!h){ toast(tr('Rien d\'accroché : touchez un symbole')); draw(); return; }
+  if ((h.v || 'm') !== (o.v || 'm')){ toast(tr('Rien d\'accroché : l\'hôte doit être dans la même vue')); draw(); return; }
   for (let p = h, n = 0; p && n < 64; p = hostOf(p), n++)
-    if (p === o){ toast(`Boucle refusée : ${shapeName(h)} est déjà accroché à cet objet`); draw(); return; }
+    if (p === o){ toast(tr('Boucle refusée : {0} est déjà accroché à cet objet', shapeName(h))); draw(); return; }
   snapshot();
   withUids([h]);
   o.hook = hookFrom(o, h);
   placed.set(o, { x: o.x, y: o.y, a: o.a });
   sel = o;
   commit();
-  toast(`Accroché à ${shapeName(h)} : il le suit au zoom, au déplacement, en rotation`);
+  toast(tr('Accroché à {0} : il le suit au zoom, au déplacement, en rotation', shapeName(h)));
 }
 /* un refus n'est jamais muet : message bref en haut du tableau */
-const LOCKED = 'Objet ancré — 📌 ou K pour le libérer';
+const LOCKED = tr('Objet ancré — 📌 ou K pour le libérer');
 let toastT = 0;
 function toast(msg, ms = 2200){
   const t = $('toast');
@@ -1831,7 +1837,7 @@ function toast(msg, ms = 2200){
   clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms);
 }
 $('clear').onclick = () => {
-  if (objs.length && confirm(`Effacer la planche « ${boards[cur].name} » ?`)){
+  if (objs.length && confirm(tr('Effacer la planche « {0} » ?', boards[cur].name))){
     snapshot(); objs = []; sel = null; commit();
   }
 };
@@ -1840,39 +1846,38 @@ $('clear').onclick = () => {
    Comme ⇧ Ouvrir, il remplace tout et ne s'annule pas : on le dit avant. */
 $('new').onclick = () => {
   stash();
-  if (boards.length === 1 && !boards[0].objs.length && !boards[0].map){ toast('Le tableau est déjà vierge'); return; }
+  if (boards.length === 1 && !boards[0].objs.length && !boards[0].map){ toast(tr('Le tableau est déjà vierge')); return; }
   const n = boards.length;
-  if (!confirm(`Commencer un nouveau briefing ?\n\n${n > 1 ? `Les ${n} planches` : 'La planche'} et leurs images seront `
-             + 'effacées de ce navigateur, sans retour par Annuler. Pour les garder, annulez puis enregistrez le '
-             + 'briefing (⇩ Briefing).')) return;
+  if (!confirm(n > 1
+      ? tr('Commencer un nouveau briefing ?\n\nLes {0} planches et leurs images seront effacées de ce navigateur, sans retour par Annuler. Pour les garder, annulez puis enregistrez le briefing (⇩ Briefing).', n)
+      : tr('Commencer un nouveau briefing ?\n\nLa planche et leurs images seront effacées de ce navigateur, sans retour par Annuler. Pour les garder, annulez puis enregistrez le briefing (⇩ Briefing).'))) return;
   cancelGesture(); leaveGesture(); anim = null;
   boards = [{ name:'Phase 1', objs:[], nmPx:0, past:[], future:[] }];
   for (const el of imgEls.values()) URL.revokeObjectURL(el.src);
   imgBlobs.clear(); imgEls.clear();
   load(0); renderTabs(); setTool('select'); commit();
   if (!DEMO) idbKeep(new Set()).catch(() => {});
-  toast('Nouveau briefing : tableau vierge');
+  toast(tr('Nouveau briefing : tableau vierge'));
 };
 $('scale').onclick = () => {
-  if (cam){ alert('Sur une carte, l\'échelle est automatique : distances et caps viennent de la carte.'); return; }
+  if (cam){ alert(tr('Sur une carte, l\'échelle est automatique : distances et caps viennent de la carte.')); return; }
   const r = (sel && sel.t === 'ruler') ? sel : [...objs].reverse().find(o => o.t === 'ruler');
   if (!r){
-    alert('Mesurez d\'abord avec la règle (M) une distance que vous connaissez sur la carte, ' +
-          'par exemple entre deux waypoints, puis revenez ici.');
+    alert(tr('Mesurez d\'abord avec la règle (M) une distance que vous connaissez sur la carte, par exemple entre deux waypoints, puis revenez ici.'));
     return;
   }
   const len = Math.hypot(r.x2 - r.x1, r.y2 - r.y1), k = unit === 'km' ? KM_PER_NM : 1;
-  const v = prompt(unit === 'km' ? 'Distance réelle de cette mesure, en kilomètres (km) :'
-                                 : 'Distance réelle de cette mesure, en milles nautiques (NM) :',
+  const v = prompt(tr(unit === 'km' ? 'Distance réelle de cette mesure, en kilomètres (km) :'
+                                    : 'Distance réelle de cette mesure, en milles nautiques (NM) :'),
                    nmPx ? (len / nmPx * k).toFixed(1) : '');
   if (v === null) return;
   const d = parseFloat(String(v).replace(',', '.'));
-  if (!(d > 0)){ alert('Distance invalide.'); return; }
+  if (!(d > 0)){ alert(tr('Distance invalide.')); return; }
   snapshot(); nmPx = len / (d / k); commit();
 };
 
 const slug = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-                   .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'planche';
+                   .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || tr('planche');
 function stamp(){
   const d = new Date(), p = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
@@ -1969,8 +1974,8 @@ async function kneeboardCanvas(){
     ctx.fillStyle = '#E6EDF5'; ctx.fillText(boards[cur].name, 18, 52);
     ctx.font = '600 12px ui-sans-serif, system-ui, sans-serif';
     ctx.textAlign = 'right'; ctx.fillStyle = '#B7C3CF';
-    ctx.fillText(`Planche ${cur + 1} / ${boards.length}`, W - 18, 24);
-    ctx.fillText(new Date().toLocaleDateString('fr-FR'), W - 18, 52);
+    ctx.fillText(tr('Planche {0} / {1}', cur + 1, boards.length), W - 18, 24);
+    ctx.fillText(new Date().toLocaleDateString(LOCALE), W - 18, 52);
     ctx.textAlign = 'left';
 
     ctx.save();
@@ -2007,8 +2012,8 @@ async function kneeboardCanvas(){
     ctx.fillStyle = dark ? '#4A5661' : '#7F8C98';
     const dk = cam ? declAt(cam.x, cam.y) : declAt(0, 0);
     ctx.fillText(SIGNATURE + (headRef === 'mag' && dk !== null
-      ? ` · caps magnétiques, déclinaison ${fmtDecl(dk)}${magDec !== null ? ' (saisie)' : ' (WMM2025)'}`
-      : cam ? ' · caps vrais' : ''), 18, H - 12);
+      ? tr(' · caps magnétiques, déclinaison {0}{1}', fmtDecl(dk), magDec !== null ? tr(' (saisie)') : ' (WMM2025)')
+      : cam ? tr(' · caps vrais') : ''), 18, H - 12);
   } finally {
     ctx = screen; sel = keepSel; tb = 1; bare = false;
   }
@@ -2042,7 +2047,7 @@ $('kframe').onclick = () => {
 $('knee').onclick = async () => {
   leaveGesture();
   const off = await kneeboardCanvas();
-  if (!off){ alert('Planche vide : rien à exporter.'); return; }
+  if (!off){ alert(tr('Planche vide : rien à exporter.')); return; }
   download(off.toDataURL('image/png'), `fl-kneeboard-${slug(boards[cur].name)}-${stamp()}.png`);
 };
 
@@ -2065,13 +2070,11 @@ addEventListener('keyup', e => { if (e.key === ' ') spaceHeld = false; });
 
 $('hdg').onclick = () => { headRef = headRef === 'mag' ? 'true' : 'mag'; commit(); };
 $('decl').onclick = () => {
-  const v = prompt('Déclinaison magnétique de cette planche, en degrés : Est positif (6 ou 6E), ' +
-                   'Ouest négatif (-2 ou 2W).\nRecopiez celle de votre mission DCS pour des caps identiques ' +
-                   'au cockpit. Laissez vide pour le calcul automatique sur carte (WMM2025).',
-                   magDec === null ? '' : String(magDec).replace('.', ','));
+  const v = prompt(tr('Déclinaison magnétique de cette planche, en degrés : Est positif (6 ou 6E), Ouest négatif (-2 ou 2W).\nRecopiez celle de votre mission DCS pour des caps identiques au cockpit. Laissez vide pour le calcul automatique sur carte (WMM2025).'),
+                   magDec === null ? '' : String(magDec).replace('.', LANG === 'en' ? '.' : ','));
   if (v === null) return;
   const d = parseDecl(v);
-  if (d === undefined){ alert('Déclinaison illisible : par exemple 6, 6,5, 6E, 2W ou -2 (entre -30 et 30).'); return; }
+  if (d === undefined){ alert(tr('Déclinaison illisible : par exemple 6, 6,5, 6E, 2W ou -2 (entre -30 et 30).')); return; }
   if (d === magDec) return;
   snapshot(); magDec = d; commit();
 };
@@ -2117,10 +2120,10 @@ async function openBriefing(file){
   let j = null;
   try { j = JSON.parse(await file.text()); } catch(_){}
   if (!j || j.format !== FILE_FORMAT || j.version !== FILE_VERSION || !Array.isArray(j.boards) || !j.boards.length){
-    toast('Ce fichier n\'est pas un briefing FL Briefing Board'); return;
+    toast(tr('Ce fichier n\'est pas un briefing FL Briefing Board')); return;
   }
   stash();
-  if (boards.some(b => b.objs.length) && !confirm('Ouvrir ce briefing remplace tout le tableau affiché. Continuer ?')) return;
+  if (boards.some(b => b.objs.length) && !confirm(tr('Ouvrir ce briefing remplace tout le tableau affiché. Continuer ?'))) return;
   const blobs = new Map();
   for (const [id, url] of Object.entries(j.images || {}))
     if (typeof url === 'string' && IMG_DATA.test(url)) blobs.set(id, dataBlob(url));
@@ -2141,7 +2144,7 @@ async function openBriefing(file){
   split = !!j.split; headRef = j.headRef === 'mag' ? 'mag' : 'true';
   load(Math.max(0, Math.min(+j.cur || 0, boards.length - 1)));
   sel = null; renderTabs(); fit(); commit();
-  toast(`Briefing ouvert : ${boards.length} planche${boards.length > 1 ? 's' : ''}`);
+  toast(boards.length > 1 ? tr('Briefing ouvert : {0} planches', boards.length) : tr('Briefing ouvert : 1 planche'));
 }
 $('open').onclick = () => $('openfile').click();
 $('openfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openBriefing(f); };
@@ -2155,7 +2158,7 @@ $('openfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''
 async function openMission(file){
   let m;
   try { m = await MIZ.readMiz(new Uint8Array(await file.arrayBuffer())); }
-  catch (e){ toast('Mission illisible : ' + e.message); return; }
+  catch (e){ toast(tr('Mission illisible : {0}', trMsg(e.message))); return; }
   const base = file.name.replace(/\.miz$/i, '').slice(0, 40) || 'Mission';
   if (m.flights.length > 1) return chooseFlight(m, base);
   importMission(m, m.flights[0] || null, base);
@@ -2167,14 +2170,15 @@ function pickFlight(title, info, flights, then){
   $('mizlist').textContent = '';
   for (const f of flights){
     const b = document.createElement('button');
-    b.textContent = `${f.name || 'Vol sans nom'} · ${f.type} ×${f.units} · ${f.points.length} point${f.points.length > 1 ? 's' : ''}`;
+    b.textContent = f.points.length > 1 ? tr('{0} · {1} ×{2} · {3} points', f.name || tr('Vol sans nom'), f.type, f.units, f.points.length)
+                                        : tr('{0} · {1} ×{2} · 1 point', f.name || tr('Vol sans nom'), f.type, f.units);
     b.onclick = () => { $('mizbox').hidden = true; then(f); };
     $('mizlist').appendChild(b);
   }
   $('mizbox').hidden = false;
 }
-const chooseFlight = (m, base) => pickFlight('Quel vol importer ?',
-  `${base} · ${theatreName(m.theatre)} · ${m.flights.length} vols pilotables`, m.flights, f => importMission(m, f, base));
+const chooseFlight = (m, base) => pickFlight(tr('Quel vol importer ?'),
+  tr('{0} · {1} · {2} vols pilotables', base, theatreName(m.theatre), m.flights.length), m.flights, f => importMission(m, f, base));
 $('mizbox').onclick = e => { if (e.target.id === 'mizbox' || e.target.id === 'mizclose') $('mizbox').hidden = true; };
 
 const SIDE_COL = { blue: '#2F8CFF', red: '#FF4D4D', neutrals: '#D1A94A' };
@@ -2183,7 +2187,7 @@ function importMission(m, f, base){
   const proj = PROJECTIONS[m.theatre], onMap = !!(proj && THEATRES.some(t => t.id === m.theatre));
   const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [], sup = m.support || [];
   const all = [...wps, ...m.threats, ...(be ? [be] : []), ...sup.flatMap(a => a.points)];
-  if (!all.length){ toast('Rien à importer : ni vol pilotable, ni menace, ni bullseye'); return; }
+  if (!all.length){ toast(tr('Rien à importer : ni vol pilotable, ni menace, ni bullseye')); return; }
   cancelGesture(); leaveGesture();
   split = true; fit();                                   // la route liée se lit dans la coupe
   let pos, camM = null, nmPxM = 0, grid = null;
@@ -2207,7 +2211,7 @@ function importMission(m, f, base){
   if (be) out.push(sym('bullseye', be, '#D1A94A'));
   /* le premier point porte le nom du vol : l'étiquette de l'appareil, posé au même endroit, le cacherait */
   wps.forEach((q, i) => {
-    const lbl = [i ? '' : f.name, q.name, q.agl ? 'alt. sol' : ''].filter(Boolean).join(' · ');
+    const lbl = [i ? '' : f.name, q.name, q.agl ? tr('alt. sol') : ''].filter(Boolean).join(' · ');
     out.push(sym('wp', q, '#D1A94A', { n: i + 1, alt: Math.round(q.alt * 3.28084 / 10) * 10,   // mètres DCS → pieds
                                         ...(lbl && { lbl }) }));
   });
@@ -2254,11 +2258,14 @@ function importMission(m, f, base){
   stash();
   boards.splice(cur + 1, 0, b);
   switchBoard(cur + 1);
-  toast(`Mission importée : ${wps.length} point${wps.length > 1 ? 's' : ''} de route, ${m.threats.length} menace`
-        + `${m.threats.length > 1 ? 's' : ''}${be ? ', bullseye' : ''}`
-        + [['tanker', 'ravitailleur', 'ravitailleurs'], ['awacs', 'AWACS', 'AWACS']]
-            .map(([r, one, many]) => { const n = sup.filter(a => a.role === r).length; return n ? `, ${n} ${n > 1 ? many : one}` : ''; }).join('')
-        + (onMap ? '' : ' — théâtre sans projection mesurée : planche sans carte, nord de la grille en haut'));
+  const nT = sup.filter(a => a.role === 'tanker').length, nA = sup.filter(a => a.role === 'awacs').length;
+  toast(tr('Mission importée : {0}', [
+          wps.length > 1 ? tr('{0} points de route', wps.length) : tr('1 point de route'),
+          tr(m.threats.length > 1 ? '{0} menaces' : '{0} menace', m.threats.length),
+          be && tr('bullseye'),
+          nT && (nT > 1 ? tr('{0} ravitailleurs', nT) : tr('1 ravitailleur')),
+          nA && tr('{0} AWACS', nA)].filter(Boolean).join(', '))
+        + (onMap ? '' : tr(' — théâtre sans projection mesurée : planche sans carte, nord de la grille en haut')));
 }
 $('miz').onclick = () => $('mizfile').click();
 $('mizfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) openMission(f); };
@@ -2271,10 +2278,10 @@ $('mizfile').onchange = e => { const f = e.target.files[0]; e.target.value = '';
    une planche sans carte, par le repère gardé à l'import (grid). */
 function dtcRoute(){
   const wps = objs.filter(o => o.t === 'sym' && o.k === 'wp' && (o.v || 'm') === 'm').sort((a, b) => a.n - b.n);
-  if (!wps.length) return { err: 'Aucun waypoint sur cette planche : posez la route avant de l\'écrire dans la DTC' };
+  if (!wps.length) return { err: tr('Aucun waypoint sur cette planche : posez la route avant de l\'écrire dans la DTC') };
   const g = !mapCfg && boards[cur].grid, proj = mapCfg && PROJECTIONS[mapCfg.theatre];
-  if (mapCfg && !proj) return { err: 'Théâtre sans projection mesurée : la route ne peut pas être placée dans la mission' };
-  if (!mapCfg && !g) return { err: 'Planche sans repère DCS : importez la mission (⇧ Mission) ou choisissez une carte' };
+  if (mapCfg && !proj) return { err: tr('Théâtre sans projection mesurée : la route ne peut pas être placée dans la mission') };
+  if (!mapCfg && !g) return { err: tr('Planche sans repère DCS : importez la mission (⇧ Mission) ou choisissez une carte') };
   let prev = null;                                          // altitude : la règle de la route liée
   const pts = wps.map(w => {
     const ft = w.alt ?? prev ?? 10000; prev = ft;
@@ -2288,24 +2295,25 @@ async function writeDtc(file){
   if (r.err){ toast(r.err); return; }
   let bytes, m;
   try { bytes = new Uint8Array(await file.arrayBuffer()); m = await MIZ.readMiz(bytes); }
-  catch (e){ toast('Mission illisible : ' + e.message); return; }
+  catch (e){ toast(tr('Mission illisible : {0}', trMsg(e.message))); return; }
   if (m.theatre !== r.theatre){
-    toast(`Mission en ${theatreName(m.theatre)}, planche en ${theatreName(r.theatre)} : choisissez une mission du même théâtre`); return;
+    toast(tr('Mission en {0}, planche en {1} : choisissez une mission du même théâtre', theatreName(m.theatre), theatreName(r.theatre))); return;
   }
   const hornets = m.flights.filter(f => f.type === 'FA-18C_hornet');
-  if (!hornets.length){ toast('Aucun vol F/A-18C pilotable dans cette mission : la DTC n\'est écrite que pour le F/A-18C'); return; }
+  if (!hornets.length){ toast(tr('Aucun vol F/A-18C pilotable dans cette mission : la DTC n\'est écrite que pour le F/A-18C')); return; }
   const base = file.name.replace(/\.miz$/i, '').replace(/ - FL Briefing$/, '') || 'Mission';
   const write = async f => {
     let out;
     try { out = await MIZ.withDtc(bytes, f.ref, r.pts); }
-    catch (e){ toast('DTC non écrite : ' + e.message); return; }
+    catch (e){ toast(tr('DTC non écrite : {0}', trMsg(e.message))); return; }
     const url = URL.createObjectURL(new Blob([out.bytes], { type: 'application/zip' }));
     download(url, `${base} - FL Briefing.miz`);
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    toast(`DTC de ${f.name} (${out.units} F/A-18C) : ${r.pts.length} waypoint${r.pts.length > 1 ? 's' : ''} — cartouche « ${out.cartridge} »`);
+    toast(r.pts.length > 1 ? tr('DTC de {0} ({1} F/A-18C) : {2} waypoints — cartouche « {3} »', f.name, out.units, r.pts.length, out.cartridge)
+                           : tr('DTC de {0} ({1} F/A-18C) : 1 waypoint — cartouche « {2} »', f.name, out.units, out.cartridge));
   };
   if (hornets.length === 1) return write(hornets[0]);
-  pickFlight('Dans la DTC de quel vol ?', `${base} · ${hornets.length} vols F/A-18C — la route de la planche y sera chargée`, hornets, write);
+  pickFlight(tr('Dans la DTC de quel vol ?'), tr('{0} · {1} vols F/A-18C — la route de la planche y sera chargée', base, hornets.length), hornets, write);
 }
 $('dtc').onclick = () => { const r = dtcRoute(); if (r.err) toast(r.err); else $('dtcfile').click(); };
 $('dtcfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) writeDtc(f); };
@@ -2315,6 +2323,8 @@ $('about').onclick = () => {
   $('aboutcode').hidden = !APP.code; $('aboutcode').href = APP.code || '#';
   $('aboutbox').hidden = false;
 };
+/* langue de l'interface (lot 16) : le travail est déjà gardé, la page se recharge */
+$('lang').onclick = () => { leaveGesture(); commit(); setLang(LANG === 'en' ? 'fr' : 'en'); };
 $('aboutbox').onclick = e => { if (e.target.id === 'aboutbox' || e.target.id === 'aboutclose') $('aboutbox').hidden = true; };
 
 $('split').onclick = () => {
@@ -2336,7 +2346,7 @@ $('raz').onchange  = e => { snapshot(); prof = { ...prof, raz: +e.target.value }
 /* le porteur : l'appareil sélectionné dans la vue de dessus, un seul par planche */
 $('own').onclick = () => {
   if (!sel || sel.t !== 'sym' || (SHAPES[sel.k] || {}).g !== 'air' || (sel.v || 'm') !== 'm'){
-    toast('Sélectionnez d\'abord un appareil de la vue de dessus (outil Sélection, V)'); return;
+    toast(tr('Sélectionnez d\'abord un appareil de la vue de dessus (outil Sélection, V)')); return;
   }
   snapshot();
   for (const o of objs) delete o.own;
@@ -2357,7 +2367,7 @@ function present(on){
   document.body.classList.toggle('present', on);
   if (on){
     if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-    toast('→ ou Espace : phase suivante · ← : précédente · Échap : sortir');
+    toast(tr('→ ou Espace : phase suivante · ← : précédente · Échap : sortir'));
   } else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   presentBadge();
   fit();
@@ -2514,18 +2524,18 @@ addEventListener('keydown', e => {
 function commit(){
   withUids(objs);
   draw();
-  $('scale').title = cam ? 'Échelle automatique : distances et caps viennent de la carte'
-                  : nmPx ? `Échelle de la planche : 1 NM = ${nmPx.toFixed(1)} px — cliquer pour réétalonner`
-                          : 'Échelle non étalonnée : mesurez une distance connue avec la règle, puis cliquez';
+  $('scale').title = cam ? tr('Échelle automatique : distances et caps viennent de la carte')
+                  : nmPx ? tr('Échelle de la planche : 1 NM = {0} px — cliquer pour réétalonner', nmPx.toFixed(1))
+                          : tr('Échelle non étalonnée : mesurez une distance connue avec la règle, puis cliquez');
   $('scale').classList.toggle('on', !!(cam || nmPx));
-  $('scale').textContent = cam ? 'Échelle auto' : 'Échelle';
-  $('hdg').textContent = headRef === 'mag' ? 'Cap mag.' : 'Cap vrai';
+  $('scale').textContent = tr(cam ? 'Échelle auto' : 'Échelle');
+  $('hdg').textContent = tr(headRef === 'mag' ? 'Cap mag.' : 'Cap vrai');
   $('hdg').classList.toggle('on', headRef === 'mag');
   const dc = cam ? declAt(cam.x, cam.y) : declAt(0, 0);
-  $('decl').textContent = dc === null ? 'Décl. ?' : 'Décl. ' + fmtDecl(dc);
-  $('decl').title = magDec !== null ? 'Déclinaison saisie pour cette planche — cliquer pour la changer ou revenir au calcul automatique'
+  $('decl').textContent = dc === null ? tr('Décl. ?') : tr('Décl. {0}', fmtDecl(dc));
+  $('decl').title = tr(magDec !== null ? 'Déclinaison saisie pour cette planche — cliquer pour la changer ou revenir au calcul automatique'
     : cam ? 'Déclinaison calculée au centre de la vue par le modèle WMM2025 — cliquer pour saisir celle de votre mission'
-    : 'Déclinaison inconnue sans carte — cliquer pour la saisir (celle de votre mission DCS)';
+    : 'Déclinaison inconnue sans carte — cliquer pour la saisir (celle de votre mission DCS)');
   $('decl').classList.toggle('warn', headRef === 'mag' && dc === null);
   $('ceil').value = prof.ceil; $('range').value = prof.range; $('linked').checked = !!prof.linked;
   syncPane();
@@ -2581,7 +2591,7 @@ function demoBoards(){
     sym('fighter', kx - d(110), ky + d(20), 1.4, O, 1, { lbl:'UZI 1-1', uid:'uzi11' }),
     { t:'arrow', x1:kx - d(95), y1:ky + d(25), x2:kx + d(60), y2:ky - d(20), cx:kx, cy:ky + d(40),
       bent:true, c:O, w:5, ls:'solid', meas:true },
-    sym('target', kx + d(70), ky - d(25), 0, O, 1.1, { lbl:'DÉPÔT' }),
+    sym('target', kx + d(70), ky - d(25), 0, O, 1.1, { lbl:tr('DÉPÔT') }),
     sym('fighter', gx(66), yA(8000), -.6, O, .9, { v:'p', lbl:'Pop-up', uid:'uzi11p' }),
     sym('bomb', gx(69), yA(5500), .8, O, .8, { v:'p' }),
     sym('blast', gx(71), groundY() - 10, 0, O, .7, { v:'p' }),
@@ -2600,10 +2610,10 @@ function demoBoards(){
     sym('fa18_hafu_u', 344, 140, 3.5, G, .9, { ...ink, mark:'dt2' }),
     sym('fa18_hafu_f', 334, 236, .2, GR, .9, ink),
     sym('fa18_tdc', 428, 138, 0, G, .9, ink),                 // le curseur sur un contact brut
-    { t:'text', s:'F/A-18C · RDR ATTK en TWS', x:640, y:110, c:Wh, w:4 },
-    { t:'text', s:'étoile : L&S, piste prioritaire', x:640, y:140, c:R, w:2 },
-    { t:'text', s:'losange : DT2, deuxième piste', x:640, y:164, c:G, w:2 },
-    { t:'text', s:'briques : contacts bruts (HITS)', x:640, y:188, c:GR, w:2 },
+    { t:'text', s:tr('F/A-18C · RDR ATTK en TWS'), x:640, y:110, c:Wh, w:4 },
+    { t:'text', s:tr('étoile : L&S, piste prioritaire'), x:640, y:140, c:R, w:2 },
+    { t:'text', s:tr('losange : DT2, deuxième piste'), x:640, y:164, c:G, w:2 },
+    { t:'text', s:tr('briques : contacts bruts (HITS)'), x:640, y:188, c:GR, w:2 },
   ];
   /* le même exercice au F-16C, lu dans son propre manuel : FCR en TWS */
   const WH = '#E6EDF5';
@@ -2614,10 +2624,10 @@ function demoBoards(){
     sym('f16_hot', 352, 238, 0, WH, .9, ink),
     sym('f16_cold', 330, 128, 0, WH, .9, ink),
     sym('f16_cursor', 352, 238, 0, WH, .9, ink),
-    { t:'text', s:'F-16C · FCR en TWS', x:640, y:110, c:Wh, w:4 },
-    { t:'text', s:'cercle : cible désignée (bugged)', x:640, y:140, c:WH, w:2 },
-    { t:'text', s:'jaune : piste TWS · blanc : piste système', x:640, y:164, c:G, w:2 },
-    { t:'text', s:'trait sous le carré : cible chaude', x:640, y:188, c:WH, w:2 },
+    { t:'text', s:tr('F-16C · FCR en TWS'), x:640, y:110, c:Wh, w:4 },
+    { t:'text', s:tr('cercle : cible désignée (bugged)'), x:640, y:140, c:WH, w:2 },
+    { t:'text', s:tr('jaune : piste TWS · blanc : piste système'), x:640, y:164, c:G, w:2 },
+    { t:'text', s:tr('trait sous le carré : cible chaude'), x:640, y:188, c:WH, w:2 },
   ];
   const flat = (name, objs) => ({ name, objs, nmPx:0, prof:{ ceil, range, linked:false }, map:null, cam:null,
                                   magDec:null, past:[], future:[] });
@@ -2632,7 +2642,7 @@ function demoBoards(){
     sym('fighter', h2x, h2y, beamA, R, 1, { lbl:'BANDIT 2' }),
     sym('fighter', h3x, h3y, 0, R, 1, { lbl:'BANDIT 3' }),
   ];
-  return [board('Ingress', ingress), board('Attaque', attaque),
+  return [board('Ingress', ingress), board(tr('Attaque'), attaque),
           { ...board('Interception', interception), prof:{ ceil, range, linked:false, pane:'fa18', rrng:40 } },
           flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
