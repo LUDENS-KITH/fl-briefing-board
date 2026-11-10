@@ -1589,6 +1589,56 @@ test('Symboles : ✚ Nouveau garde le réglage ; la mission importée en OTAN pr
   ok(a.s('natoSpec(objs.find(o => o.k === "wp"))') === null, 'un waypoint a changé de dessin');
 });
 
+/* ---------- lot 26 : recherche dans la palette ---------- */
+const palq = (a, v) => { const i = a.d.getElementById('palq'); i.value = v; i.dispatchEvent(new a.w.Event('input', { bubbles: true })); };
+const shownTiles = a => [...a.d.querySelectorAll('#pal .tile')].filter(t => t.offsetParent).map(t => t.dataset.k);
+
+test('Palette : la recherche ne laisse que les formes et les écrans qui correspondent, tous onglets confondus', async (ok) => {
+  const a = await open();
+  const q = a.d.getElementById('palq');
+  ok(!!q, 'pas de champ de recherche dans la palette');
+  if (!q) return;
+  const tabs = a.d.getElementById('paltabs');
+  ok(!!(q.compareDocumentPosition(tabs) & 4), 'le champ n\'est pas en tête de la palette');
+  palq(a, LANG === 'en' ? 'tanker' : 'ravitailleur');
+  let s = shownTiles(a);
+  ok(s.includes('tanker') && !s.includes('fighter') && !s.includes('awacs'), `ravitailleur : ${s.join(', ')}`);
+  palq(a, 'TWS');
+  s = shownTiles(a);
+  ok(['fa18_tws', 'f16_tws', 'f16_track'].every(k => s.includes(k)) && !s.includes('fighter') && !s.includes('fa18_rws'),
+     `TWS (écrans d'un autre onglet) : ${s.join(', ')}`);
+  /* un type DCS : ce que l'import en ferait */
+  palq(a, 'SA-11');
+  s = shownTiles(a);
+  ok(s.includes('sam') && !s.includes('fighter'), `SA-11 : ${s.join(', ')}`);
+  palq(a, 'Buk');
+  a.button('#lib');                                        // en OTAN, les familles DCS sont dans la palette
+  palq(a, 'Buk');
+  s = shownTiles(a);
+  ok(s.includes('sam_med') && s.includes('radar'), `Buk en OTAN : ${s.join(', ')}`);
+  /* une vignette trouvée se pose */
+  palq(a, LANG === 'en' ? 'tanker' : 'ravitailleur');
+  a.tile('tanker'); a.click(400, 300);
+  ok(a.s('objs.length === 1 && objs[0].k') === 'tanker', `posé : ${a.s('objs.map(o => o.k).join()')}`);
+});
+
+test('Palette : sans résultat, un message ; Échap vide le champ et rend l\'onglet ; les lettres tapées ne changent pas d\'outil', async (ok) => {
+  const a = await open();
+  const q = a.d.getElementById('palq');
+  if (!q){ ok(false, 'pas de champ de recherche'); return; }
+  palq(a, 'zzzz');
+  ok(shownTiles(a).length === 0, `vignettes pour « zzzz » : ${shownTiles(a).join(', ')}`);
+  const none = a.d.getElementById('palnone');
+  ok(!!none && !!none.offsetParent && /zzzz/.test(none.textContent) && (LANG === 'en' ? /^No /.test(none.textContent) : /^Aucun/.test(none.textContent)),
+     `message : « ${none && none.textContent} »`);
+  q.dispatchEvent(new a.w.KeyboardEvent('keydown', { key: 'p', bubbles: true, cancelable: true }));
+  ok(a.s('tool') !== 'pen', `la lettre « p » tapée dans le champ a pris le crayon`);
+  q.dispatchEvent(new a.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+  ok(q.value === '' && shown(a, 'fighter') && !shown(a, 'fa18_rws') && !(none && none.offsetParent),
+     `après Échap : champ « ${q.value} », chasseur ${shown(a, 'fighter')}, RWS ${shown(a, 'fa18_rws')}`);
+  ok(!!q.placeholder && (LANG === 'en' ? /Search/.test(q.placeholder) : /Chercher/.test(q.placeholder)), `invite : « ${q.placeholder} »`);
+});
+
 /* ---------- lot 20 : la bibliothèque russe, comme la carte F10 en thème russe ---------- */
 const toRu = a => { a.button('#lib'); a.button('#lib'); };
 

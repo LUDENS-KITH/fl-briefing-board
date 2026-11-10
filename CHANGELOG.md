@@ -3,6 +3,22 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.25 — 2026-11-10
+
+Lot 26 du [plan d'action](docs/PLAN.md) : **chercher dans la palette**.
+
+### Ajouté
+- Un champ en tête de palette : un nom, un mot d'écran, un module ou un type d'unité DCS
+  ne laisse que les vignettes qui correspondent, tous onglets confondus, chaque groupe
+  d'écrans avec son module ; un type donne la famille que l'import lui donnerait (et, en
+  silhouettes, la forme qui la remplace). Sans résultat, un message le dit. `Échap` vide
+  le champ ; les lettres tapées n'y déclenchent aucun raccourci.
+
+### Vérifié en exécutant
+2 scénarios au banc, rouges avant le code (filtre, écrans d'un autre onglet, type DCS en
+silhouettes et en OTAN, vignette trouvée posée ; sans résultat, `Échap`, raccourcis,
+invite), en français et en anglais · banc complet dans les deux langues.
+
 ## v1.24 — 2026-11-10
 
 Lot 20 du [plan d'action](docs/PLAN.md) : **la carte F10 en thème russe**.

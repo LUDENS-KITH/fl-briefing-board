@@ -16,6 +16,12 @@ choix est gardé. Les noms DCS (appareils, armes, cartes, missions) ne se tradui
 | Sol / Mer | char, radar, menace sol-air (avec cercle d'engagement), aéroport, navire, porte-avions, FARP |
 | Tactique | ami, hostile, inconnu, waypoint auto-numéroté, objectif, orbite d'attente, point IP, bullseye |
 
+**Chercher** : le champ en tête de la palette ne laisse que les vignettes qui
+correspondent, onglets et modules confondus — un nom (« ravitailleur »), un mot d'écran
+(« TWS »), un module (« A-10C II ») ou un type d'unité DCS (« SA-11 », « Buk ») : le type
+donne la famille que l'import de mission lui donnerait. `Échap` vide le champ et rend la
+palette ; les lettres tapées dans le champ ne sont pas des raccourcis.
+
 Les quatre voilures fixes sont volontairement **distinctes à petite taille** :
 envergure, flèche, nombre de moteurs et taille par défaut diffèrent. Le ravitailleur
 porte sa perche, le civil son empennage en T, le bombardier ses quatre moteurs.

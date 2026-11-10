@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.24', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.25', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -1805,8 +1805,62 @@ addEventListener('paste', e => {
    dans la page ; l'onglet et le module choisis décident lesquelles se voient. */
 let palTab = 'formes', palMod = null;
 const MODULES = [...new Set(GROUPS.map(g => g[2]).filter(Boolean))];
+
+/* recherche (lot 26) : un nom (« ravitailleur »), un mot d'écran (« TWS »), un module
+   (« F-16C ») ou un type DCS (« SA-11 », « Buk ») ne laisse que les vignettes qui
+   correspondent, tous onglets confondus. Un type DCS donne la famille que l'import lui
+   donnerait, et la forme qui la remplace en silhouettes. Échap vide le champ. Le champ
+   est créé une fois : une palette refaite (bibliothèque) le garde, et sa saisie. */
+const palQ = document.createElement('input');
+palQ.id = 'palq'; palQ.type = 'search'; palQ.autocomplete = 'off'; palQ.spellcheck = false;
+const fold = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[\s\-_.\/]/g, '');
+function palHits(q){
+  const f = fold(q);
+  if (!f) return null;
+  const hits = new Set();
+  const fam = k => { const sh = SHAPES[k]; if (!sh) return; hits.add(k); if (sh.natoOnly && sh.like) hits.add(sh.like); };
+  for (const k in SHAPES){
+    const sh = SHAPES[k], g = GROUPS.find(r => r[0] === sh.g) || [];
+    if ([tr(sh.label), sh.label, sh.silTag && tr(sh.silTag), g[1], g[2]].some(w => w && fold(w).includes(f))) hits.add(k);
+  }
+  if (typeof MAPCLASS !== 'undefined') for (const t in MAPCLASS) if (MAPCLASS[t][1] && fold(t).includes(f)) fam(MAPCLASS[t][1]);
+  const tf = MIZ.typeFamily(q.trim());
+  if (tf) fam(tf);
+  return hits;
+}
+function applyPal(){
+  const byId = id => document.getElementById(id);           // $ n'est pas encore défini au premier dessin
+  const hits = palHits(palQ.value), tabs = byId('paltabs'), mods = byId('palmods');
+  if (tabs) tabs.hidden = !!hits;
+  if (mods) mods.hidden = !!hits || palTab !== 'ecrans';
+  let n = 0;
+  pal.querySelectorAll('.grid').forEach(grid => {
+    const mod = grid.dataset.mod, h = grid.previousElementSibling;
+    let any = 0;
+    for (const t of grid.children){ const on = !hits || hits.has(t.dataset.k); t.hidden = !on; if (on) any++; }
+    const off = hits ? !any : mod ? palTab !== 'ecrans' || mod !== palMod : palTab !== 'formes';
+    grid.hidden = h.hidden = off;
+    h.textContent = hits && mod ? h.dataset.title + ' · ' + mod : h.dataset.title;
+    if (hits) n += any;
+  });
+  const none = byId('palnone');
+  if (none){
+    none.hidden = !hits || n > 0;
+    none.textContent = tr('Aucune forme ne correspond à « {0} »', palQ.value.trim());
+  }
+}
+palQ.addEventListener('input', applyPal);
+palQ.addEventListener('keydown', e => {
+  e.stopPropagation();                         // les lettres tapées ne sont pas des raccourcis
+  if (e.key !== 'Escape') return;
+  e.preventDefault();
+  if (palQ.value){ palQ.value = ''; applyPal(); } else palQ.blur();
+});
+
 function buildPalette(){
 pal.textContent = '';
+palQ.placeholder = tr('Chercher : nom, type DCS, module…');
+pal.appendChild(palQ);
 const tabs = document.createElement('div'); tabs.id = 'paltabs';
 for (const [v, t] of [['formes', 'Formes'], ['ecrans', 'Écrans de bord']]){
   const b = document.createElement('button'); b.dataset.pal = v; b.textContent = tr(t);
@@ -1822,10 +1876,9 @@ for (const m of MODULES){
 }
 pal.appendChild(mods);
 for (const [g, titre, mod] of GROUPS){
-  const off = mod ? palTab !== 'ecrans' || mod !== palMod : palTab !== 'formes';
-  const h = document.createElement('div'); h.className = 'grp'; h.textContent = titre; h.hidden = off;
+  const h = document.createElement('div'); h.className = 'grp'; h.textContent = h.dataset.title = titre;
   pal.appendChild(h);
-  const grid = document.createElement('div'); grid.className = 'grid'; grid.hidden = off;
+  const grid = document.createElement('div'); grid.className = 'grid'; grid.dataset.mod = mod || '';
   pal.appendChild(grid);
 
   for (const k in SHAPES){
@@ -1847,7 +1900,11 @@ for (const [g, titre, mod] of GROUPS){
     grid.appendChild(b);
   }
 }
+const none = document.createElement('div'); none.id = 'palnone'; none.hidden = true;
+pal.appendChild(none);
+applyPal();
 }
+
 palMod = MODULES[0];
 buildPalette();
 function setPal(tab, mod){
