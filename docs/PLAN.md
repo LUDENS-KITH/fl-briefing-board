@@ -48,7 +48,7 @@ engagés.
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | v1.22 | fait le 2026-11-10 |
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | v1.23 | fait le 2026-11-10 |
-| 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | proposé le 2026-11-10 |
+| 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | arrêté le 2026-11-10 : attend un relevé dans DCS |
 | 26 | Recherche dans la palette | proposition | S | lot 19 | v1.25 | fait le 2026-11-10 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
@@ -1048,6 +1048,24 @@ Si elles se lisent : une table publiée (type → portée maximale d'engagement,
 maximale si elle existe), le cercle posé au rayon réel sur une carte, l'étiquette dit
 « portée max. DCS » — **une enveloppe, pas une zone de destruction**, comme la vue radar
 qui montre la géométrie sans simuler la détection.
+
+**Arrêté le 2026-11-10, à l'inconnue.** Le cercle de menace de l'éditeur et de la carte
+F10 a pour rayon le champ `ThreatRange` de la fiche de l'unité (`me_mission.lua` de
+l'éditeur), le cercle de détection `DetectionRange`. Pour les défenses aériennes de base
+(Buk, Kub, Osa, Tor, Hawk, Patriot, Roland…), ces fiches sont dans la base chiffrée du
+jeu ; les quelques fiches lisibles (S-300 et NASAMS des CoreMods, par exemple) prennent ce
+rayon dans des gabarits de la même base chiffrée (`GT.WS[1].LN[1].distanceMax`). Les bases
+de menaces du cartouche de données (F-16C, F/A-18C, AH-64D) listent les types, sans rayon. Les fichiers de missiles se lisent, mais
+leur `Range_max` est une autre grandeur, la portée du missile : 46 km pour le 9M38M1 du
+Buk, que l'encyclopédie du jeu engage de 3 à 35 km. La publier comme portée du système
+serait faux ; le cercle reste un symbole.
+
+**Pour reprendre** : `tools/portees_probe.lua`, posé une fois dans les Hooks de DCS,
+demande au jeu ces trois champs pour 143 types (ceux des 30 111 missions du poste et de
+la table du lot 21) et les écrit dans un fichier ; `tools/build_portees.py` en fait la
+table `portees.js`. Essayés contre un faux DCS, pas encore dans le jeu : il faut **un
+lancement de DCS jusqu'au menu**, à l'accord de Vince. Ensuite : le cercle au rayon
+relevé, banc et tests rouges d'abord, comme prévu ci-dessus.
 
 #### Lot 26 — Recherche dans la palette
 
