@@ -1600,7 +1600,7 @@ test('Écrans de bord : la palette les range à part, un onglet par module', asy
   ok(shown(a, 'fighter') && !shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'à l\'ouverture, les écrans sont parmi les formes');
   a.button('#paltabs [data-pal="ecrans"]');
   const mods = [...a.d.querySelectorAll('#palmods button')].map(b => b.textContent);
-  ok(mods.join() === 'F/A-18C,F-16C', `modules : ${mods.join(', ')}`);
+  ok(mods.join() === 'F/A-18C,F-16C,A-10C II', `modules : ${mods.join(', ')}`);
   ok(!shown(a, 'fighter') && shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'onglet Écrans de bord : pas seulement le F/A-18C');
   a.button('#palmods button:nth-child(2)');
   ok(shown(a, 'f16_rws') && shown(a, 'f16_track') && !shown(a, 'fa18_rws'), 'module F-16C : pas seulement ses écrans');
@@ -1637,6 +1637,63 @@ test('Écrans de bord : le F-16C a le cadre de la figure p. 394 — échelle d\'
   ok(line === 0, `trait continu de l'échelle d'élévation : ${line} pixels`);
   const inv = a.s(INK(485, 462, 4, 'R > 200 && G > 200 && B > 200'));
   ok(inv >= 24, `FCR en vidéo inverse : ${inv}/64 pixels blancs (lettres noires dans un pavé blanc)`);
+});
+
+/* ---------- lot 24 : l'A-10C II, TAD, pod de désignation, DSMS ---------- */
+test("Écrans de bord : l'A-10C II a son onglet — TAD, pod, DSMS et les symboles du TAD", async (ok) => {
+  const a = await open();
+  a.button('#paltabs [data-pal="ecrans"]');
+  const b = [...a.d.querySelectorAll('#palmods button')].find(x => x.textContent === 'A-10C II');
+  ok(!!b, 'pas de module A-10C II');
+  if (!b) return;
+  b.click();
+  const keys = ['a10_tad', 'a10_tgp', 'a10_dsms', 'a10_bull', 'a10_stpt', 'a10_spi', 'a10_cursor', 'a10_tgpd',
+                'a10_flight', 'a10_sadl', 'a10_ground', 'a10_minispi', 'a10_point', 'a10_laser'];
+  const miss = keys.filter(k => !shown(a, k));
+  ok(!miss.length, `vignettes absentes : ${miss.join(', ')}`);
+  ok(!shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'les écrans des autres modules se montrent');
+});
+
+test('Écrans de bord : le TAD de la figure 228 — anneaux à 90 % et 50 % de la largeur, appareil au centre, échelle au clavier', async (ok) => {
+  const a = await open();
+  a.tile('a10_tad'); a.click(520, 360);
+  ok(a.s('objs.length === 1 && objs[0].k') === 'a10_tad', 'TAD non posé');
+  /* demi-côté 153 px : l'anneau extérieur à 0,711, l'intérieur à 0,354 */
+  const G = 'G > 100 && G > R + 40';
+  ok(a.s(INK(629, 360, 2, G)) > 0, `anneau extérieur : ${a.s(INK(629, 360, 2, G))} pixels verts`);
+  ok(a.s(INK(574, 360, 2, G)) > 0, `anneau intérieur : ${a.s(INK(574, 360, 2, G))} pixels verts`);
+  ok(a.s(INK(602, 360, 3, G)) === 0, `entre les anneaux : ${a.s(INK(602, 360, 3, G))} pixels verts`);
+  ok(a.s(INK(520, 360, 3, G)) > 4, `appareil au centre : ${a.s(INK(520, 360, 3, G))} pixels verts`);
+  a.key('v'); a.click(520, 360);
+  a.key('ArrowUp');
+  ok(a.s('objs[0].rng') === 80, `échelle après ↑ : ${a.s('objs[0].rng')}`);
+});
+
+test('Écrans de bord : le pod de désignation sur sa vidéo, le DSMS avec la station choisie en blanc', async (ok) => {
+  let a = await open();
+  a.tile('a10_tgp'); a.click(520, 360);
+  /* la vidéo du pod remplit le verre : gris, à (0,5 ; 0,2) du centre */
+  const vid = a.s(PX(596, 391, 2, [74, 81, 86]));
+  ok(vid === 16, `vidéo du pod : ${vid}/16 pixels gris`);
+  a = await open();
+  a.tile('a10_dsms'); a.click(520, 360);
+  /* station 5, en haut à gauche, dans le profil choisi : son pavé est blanc (figure 211) */
+  const st5 = a.s(INK(459, 288, 2, 'R > 200 && G > 200 && B > 200'));
+  ok(st5 >= 12, `station 5 choisie : ${st5}/16 pixels blancs`);
+  /* station 4, dessous : un cadre vert, vide au milieu */
+  const st4 = a.s(INK(459, 325, 2, 'R > 200 && G > 200 && B > 200'));
+  ok(st4 === 0, `station 4 non choisie : ${st4} pixels blancs`);
+});
+
+test('Écrans de bord : les symboles du TAD et du pod se posent droits, à leur couleur', async (ok) => {
+  const a = await open();
+  a.tile('a10_spi'); a.drag(400, 300, 480, 300);
+  ok(a.s('objs.length === 1 && objs[0].k') === 'a10_spi', 'SPI non posé');
+  ok(a.s('objs[0].s === SHAPES.a10_spi.s0'), `taille : ${a.s('objs[0].s')}`);
+  a.tile('a10_stpt'); a.click(600, 300);
+  ok(a.s('objs[1].c') === '#D1A94A', `point tournant : ${a.s('objs[1].c')}`);
+  a.tile('a10_flight'); a.click(700, 300);
+  ok(a.s('objs[2].c') === '#2F8CFF', `membre de la patrouille : ${a.s('objs[2].c')}`);
 });
 
 /* ---------- lot 21 : chaque unité à son symbole DCS, ce que la carte cache reste caché ---------- */

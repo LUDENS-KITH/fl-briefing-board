@@ -47,7 +47,7 @@ engagés.
 | 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | v1.21 | fait le 2026-11-10 |
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | v1.22 | fait le 2026-11-10 |
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
-| 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | — | proposé le 2026-11-10 |
+| 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | v1.23 | fait le 2026-11-10 |
 | 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | proposé le 2026-11-10 |
 | 26 | Recherche dans la palette | proposition | S | lot 19 | — | proposé le 2026-11-10 |
 
@@ -1019,6 +1019,14 @@ F-15E, AH-64D, F-14, Mirage 2000C.
 
 **Fait quand** : comme le lot 2 (§5.4), plus la table des écarts du lot 23 vide pour
 chaque page.
+
+**Fait le 2026-11-10 (v1.23).** Pages des figures de référence : TAD en CEN (fig. 228,
+p. 359), pod en A-G (fig. 246, p. 389), état du DSMS (fig. 211, p. 318), chacune mesurée
+sur sa figure et rendue à côté d'elle ; dix symboles du TAD et de la liaison SA, deux
+réticules du pod. Table des écarts vide pour les trois pages. **Écarts au plan** : le
+mode DEP, les vues EXP et les autres pages du pod et du DSMS restent à faire, page par
+page ; RADAR.md dit ce qui est laissé de côté. **Pas encore fait** : la relecture dans le
+cockpit, qui demande d'ouvrir DCS.
 
 #### Lot 25 — Cercles de menace au rayon du système
 

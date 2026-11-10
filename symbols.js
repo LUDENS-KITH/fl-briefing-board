@@ -931,3 +931,309 @@ Object.assign(SHAPES, {
   }},
 });
 GROUPS.push(['f16', 'Radar FCR air-air', 'F-16C']);
+
+/* ---------------- A-10C II (lot 24) ----------------
+   DCS A-10C II Flight Manual (EN), installé avec le module : TAD p. 354-381, pod de
+   désignation p. 382-409, DSMS p. 317-353. Lu pour lui-même : rien n'est repris des
+   deux autres modules. Places mesurées sur les figures 228 (TAD, p. 359), 246 (pod,
+   A-G, p. 389) et 211 (DSMS, p. 318), en unités du repère, verre à ±0,79. */
+
+/* les 20 boutons d'un MFCD : OSB 1 → 5 en haut de gauche à droite, 6 → 10 à droite de
+   haut en bas, 11 → 15 en bas de droite à gauche, 16 → 20 à gauche de bas en haut
+   (fig. 228 : CNTL = OSB 1, SPI = OSB 6, DCLT = OSB 11, TAD = OSB 15, MAP = OSB 20).
+   Les boutons des côtés ne sont pas centrés : la bascule CON tient le bas (fig. 228). */
+const MFCD_K = [-.52, -.30, -.07, .17, .40];
+const MFCD_OSB = (() => {
+  const p = {}, k = [-.50, -.25, 0, .25, .50];
+  for (let i = 0; i < 5; i++){
+    p[1 + i]  = { x: k[i], y: -.94, lx: k[i], ly: -.745, al: 'center' };
+    p[6 + i]  = { x: .935, y: MFCD_K[i], lx: .715, ly: MFCD_K[i], al: 'right' };
+    p[15 - i] = { x: k[i], y: .945, lx: k[i], ly: .745, al: 'center' };
+    p[20 - i] = { x: -.935, y: MFCD_K[i], lx: -.725, ly: MFCD_K[i], al: 'left' };
+  }
+  return p;
+})();
+const A10_WH = '#E6EDF5';
+
+/* boîtier : 20 boutons, bascules ADJ et DSP en haut, CON et BRT en bas, SYM à droite
+   du rang du bas, bouton DAY/NT/OFF à gauche (fig. 228) */
+function mfcdBezel(c){
+  const lw = c.lineWidth;
+  c.save();
+  c.lineWidth = lw * .5;
+  c.fillStyle = '#161D25'; c.strokeStyle = '#3C4854';
+  c.beginPath(); c.roundRect(-1, -1, 2, 2, .06); c.fill(); c.stroke();
+  c.fillStyle = '#26303A';
+  for (const n in MFCD_OSB){
+    const b = MFCD_OSB[n];
+    c.beginPath(); c.roundRect(b.x - .045, b.y - .045, .09, .09, .015); c.fill(); c.stroke();
+  }
+  for (const [x, y] of [[-.935, -.80], [.935, -.80], [-.935, .70], [.935, .70]]){
+    c.beginPath(); c.roundRect(x - .045, y - .11, .09, .22, .015); c.fill(); c.stroke();
+  }
+  c.beginPath(); c.roundRect(.70, .905, .18, .08, .015); c.fill(); c.stroke();
+  c.beginPath(); c.arc(-.79, .945, .05, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = HALO;
+  c.beginPath(); c.roundRect(-GLASS, -GLASS, 2 * GLASS, 2 * GLASS, .03); c.fill();
+  c.restore();
+}
+
+/* symbole de référence d'attitude, en bas à gauche de chaque page (p. 384 ; fig. 228) :
+   une coupe sous l'horizon, ses bouts tournés vers le bas, l'appareil au milieu */
+function a10Ars(c, x = -.69, y = .64){
+  c.beginPath(); c.arc(x, y - .025, .075, .35, Math.PI - .35); c.stroke();
+  c.beginPath();
+  c.moveTo(x - .095, y + .012); c.lineTo(x - .08, y); c.lineTo(x - .015, y);
+  c.moveTo(x + .015, y); c.lineTo(x + .08, y); c.lineTo(x + .095, y + .012);
+  c.moveTo(x, y - .015); c.lineTo(x, y - .05);
+  c.stroke();
+  c.beginPath(); c.arc(x, y, .015, 0, 7); c.stroke();
+}
+
+/* libellés des boutons, et champs de données [texte, x, y, alignement, taille] */
+function a10Labels(c, sc, bg){
+  for (const [n, t] of Object.entries(sc.pb)){
+    const b = MFCD_OSB[n];
+    scopeLabel(c, t, b.lx, b.ly, b.al, bg || (+n <= 5 || (+n >= 11 && +n <= 15) ? HALO : null));
+  }
+  for (const [t, x, y, al, size, box] of sc.data || []){
+    if (box) scopeLabel(c, t, x, y, al || 'center', HALO, size || .056);
+    else scopeText(c, t, x, y, al || 'center', size || .056);
+  }
+}
+
+/* l'appareil vu de dessus, plein, au centre en CEN (p. 357 ; fig. 228) */
+function a10Ownship(c){
+  c.fillRect(-.009, -.048, .018, .088);                    // fuselage
+  c.fillRect(-.052, -.012, .104, .016);                    // ailes droites
+  c.fillRect(-.025, .006, .014, .024); c.fillRect(.011, .006, .014, .024);   // réacteurs
+  c.fillRect(-.03, .034, .06, .01);                        // empennage
+}
+
+/* page TAD, en CEN : l'appareil au centre, l'anneau extérieur à l'échelle (90 % de la
+   largeur), l'intérieur à la moitié (p. 356) ; affichage cap en haut, nord en triangle
+   plein (p. 357). Le cap de la figure, 330°, place le nord à 30° à droite. */
+function a10Tad(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth;
+  mfcdBezel(c);
+  c.save();
+  c.lineWidth = lw * .35;
+  const R = .711;
+  c.beginPath(); c.arc(0, 0, R, 0, 7); c.stroke();
+  c.beginPath(); c.arc(0, 0, R / 2, 0, 7); c.stroke();
+  a10Ownship(c);
+  if (o.mini){ c.restore(); return; }
+  /* repères de l'anneau intérieur : est, sud, ouest en traits qui le croisent, le nord en
+     triangle plein posé dehors, pointe vers l'appareil (p. 357 ; fig. 228) */
+  const at = (b, r) => [Math.sin(b) * r, -Math.cos(b) * r], N = -sc.hdg * Math.PI / 180;
+  c.beginPath();
+  for (let k = 1; k < 4; k++){
+    const b = N + k * Math.PI / 2, [x1, y1] = at(b, R / 2 - .022), [x2, y2] = at(b, R / 2 + .022);
+    c.moveTo(x1, y1); c.lineTo(x2, y2);
+  }
+  c.stroke();
+  const [ax, ay] = at(N, R / 2 + .012), [l1, m1] = at(N - .07, R / 2 + .045), [l2, m2] = at(N + .07, R / 2 + .045);
+  c.beginPath(); c.moveTo(ax, ay); c.lineTo(l1, m1); c.lineTo(l2, m2); c.closePath(); c.fill();
+  /* cadre des libellés : un trait sous le rang du haut et sur celui du bas, deux à
+     gauche et à droite ; les libellés l'interrompent (fig. 228) */
+  c.beginPath();
+  c.moveTo(-.78, -.72); c.lineTo(.64, -.72);
+  c.moveTo(-.66, .72); c.lineTo(.735, .72);
+  c.moveTo(.735, -.60); c.lineTo(.735, .72);
+  c.moveTo(-.755, -.62); c.lineTo(-.755, .55);
+  c.stroke();
+  a10Ars(c);
+  a10Labels(c, sc);
+  scopeText(c, String(o.rng ?? sc.rng), .69, -.757, 'center', .09);       // échelle (p. 360)
+  c.restore();
+}
+
+/* page du pod, A-G : la vidéo du capteur remplit le verre, la symbologie est blanche,
+   les libellés verts sur un pavé noir (p. 384, 389). Le réticule de la figure est celui
+   de la poursuite de zone, avec les coins du grand champ (fig. 249, p. 396). */
+function a10Tgp(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth, ink = c.strokeStyle;
+  mfcdBezel(c);
+  c.save();
+  c.fillStyle = '#4A5156';
+  c.beginPath(); c.roundRect(-GLASS, -GLASS, 2 * GLASS, 2 * GLASS, .03); c.fill();
+  c.lineWidth = lw * .35;
+  c.strokeStyle = ink;
+  c.strokeRect(-.72, -.73, 1.46, 1.43);                    // cadre vert (fig. 246)
+  c.strokeStyle = c.fillStyle = A10_WH;
+  c.beginPath();
+  for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]){
+    c.moveTo(sx * .195, sy * .14); c.lineTo(sx * .195, sy * .195); c.lineTo(sx * .14, sy * .195);
+  }
+  c.moveTo(0, -.19); c.lineTo(0, -.05); c.moveTo(0, .05); c.lineTo(0, .19);
+  c.moveTo(-.18, 0); c.lineTo(-.04, 0); c.moveTo(.04, 0); c.lineTo(.18, 0);
+  c.stroke();
+  if (o.mini){ c.restore(); return; }
+  /* flèche du nord, en haut à droite : un « N » fixe, la flèche vers le nord, un second
+     trait est-ouest (p. 385, n° 7) */
+  const nx = .455, ny = -.57;
+  c.beginPath();
+  c.moveTo(nx - .07, ny + .02); c.lineTo(nx + .07, ny - .02);
+  c.moveTo(nx + .02, ny - .06); c.lineTo(nx - .02, ny + .06);
+  c.moveTo(nx + .07, ny - .02); c.lineTo(nx + .04, ny - .03); c.moveTo(nx + .07, ny - .02); c.lineTo(nx + .05, ny + .005);
+  c.stroke();
+  scopeText(c, 'N', nx, ny, 'center', .05);
+  for (const [t, x, y, al] of sc.big) scopeText(c, t, x, y, al || 'center', .075);
+  /* gain et niveau, entre les flèches des boutons 19 et 20 (p. 396, n° 11) */
+  c.fillStyle = c.strokeStyle = ink;
+  const tri = (y, up) => { const d = up ? -.03 : .03; c.beginPath(); c.moveTo(-.725, y - d); c.lineTo(-.655, y - d); c.lineTo(-.69, y + d); c.closePath(); c.fill(); };
+  tri(-.53, true); tri(-.31, false);
+  /* actions système : un petit losange à côté (TST, LSS) */
+  for (const [x, y] of [[.43, -.752], [.755, -.52]]){
+    c.beginPath(); c.moveTo(x, y - .015); c.lineTo(x + .015, y); c.lineTo(x, y + .015); c.lineTo(x - .015, y); c.closePath(); c.fill();
+  }
+  a10Ars(c);
+  a10Labels(c, sc, HALO);
+  c.restore();
+}
+
+/* page d'état du DSMS : les 11 stations en pavés, numéro à côté, quantité dans son
+   petit cadre ; les stations du profil actif sont blanches ; au centre, le profil
+   (mode du HUD, nom souligné, largage, fusée, quantité, intervalle) ; l'obus restant
+   et le chronomètre des Maverick en bas (fig. 211, p. 318-319) */
+const A10_STATIONS = {
+  1: ['ALQ131 D'], 2: ['M-151\nPMI', '19'], 3: ['AGM-65K\n117   STBY', '1'], 4: ['MK-84', '1'], 5: ['MK-82', '1', true],
+  7: ['MK-82', '1', true], 8: ['MK-84', '1'], 9: ['AGM-65K\n117   STBY', '1'], 10: ['LITENING'], 11: ['AIM-9\n      OFF', '2'],
+};
+function a10Dsms(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth, ink = c.strokeStyle;
+  mfcdBezel(c);
+  c.save();
+  c.lineWidth = lw * .35;
+  const full = !o.mini;
+  {
+    for (let n = 1; n <= 11; n++){
+      if (n === 6) continue;
+      const left = n <= 5, y = left ? MFCD_K[5 - n] : MFCD_K[n - 7], [t, q, on] = A10_STATIONS[n] || [''];
+      const x0 = left ? -.65 : .355, w = .305, h = .145, y0 = y - h / 2;
+      c.strokeStyle = c.fillStyle = on ? A10_WH : ink;
+      if (on) c.fillRect(x0, y0, w, h); else c.strokeRect(x0, y0, w, h);
+      if (q){
+        const qw = q.length > 1 ? .09 : .046, qx = left ? x0 + w : x0 - qw;      // « 19 » : un cadre plus large (fig. 211)
+        if (on) c.fillRect(qx, y - .04, qw, .1); else c.strokeRect(qx, y - .04, qw, .1);
+        if (full){ c.save(); if (on) c.fillStyle = HALO; scopeText(c, q, qx + qw / 2, y + .01, 'center', .075); c.restore(); }
+      }
+      if (!full) continue;
+      c.save(); if (on) c.fillStyle = HALO;
+      const lines = t.split('\n');
+      lines.forEach((l, i) => scopeText(c, l, x0 + .015, y0 + .035 + i * .062, 'left', .055));
+      c.restore();
+      c.fillStyle = on ? A10_WH : ink;
+      scopeText(c, String(n), left ? -.70 : .71, y, 'center', .09);
+    }
+    c.strokeStyle = c.fillStyle = ink;
+    c.strokeRect(-.147, -.665, .313, .152);                 // station 6, vide sur la figure
+    if (!full){ c.restore(); return; }
+    scopeText(c, '6', .01, -.72, 'center', .09);
+    c.beginPath(); c.moveTo(-.145, -.116); c.lineTo(.15, -.116); c.stroke();   // nom du profil souligné
+    c.strokeRect(.31, .62, .36, .07);                        // chronomètre EO
+    a10Ars(c);
+    a10Labels(c, sc);
+    for (const [t, x, y, al] of sc.big) scopeText(c, t, x, y, al || 'center', .09);
+  }
+  c.restore();
+}
+
+const a10Page = (label, draw, scope) => ({ g:'a10', label, under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
+  ldy:1.12, col:'#34D399', draw, scope });
+
+/* symbole du TAD : droit, à sa couleur, de la taille d'une piste */
+const a10Sym = (label, col, draw, more = {}) => ({ g:'a10s', label, upright:true, fixed:true, s0:.5, tile:.5, col, draw, ...more });
+
+/* le SPI, « pièce montée » à trois étages (p. 356) ; le mini-SPI d'un autre appareil
+   de la liaison en a un de moins (p. 378) */
+const CAKE = {
+  3: [[-.55, .45], [.55, .45], [.55, .15], [.35, .15], [.35, -.15], [.15, -.15], [.15, -.45],
+      [-.15, -.45], [-.15, -.15], [-.35, -.15], [-.35, .15], [-.55, .15]],
+  2: [[-.45, .3], [.45, .3], [.45, 0], [.2, 0], [.2, -.3], [-.2, -.3], [-.2, 0], [-.45, 0]],
+};
+const cake = (c, tiers) => { poly(c, CAKE[tiers]); c.stroke(); };
+/* point de navigation : un carré pointé (p. 355-356) */
+const wpBox = c => { c.strokeRect(-.42, -.42, .84, .84); c.beginPath(); c.arc(0, 0, .1, 0, 7); c.fill(); };
+
+Object.assign(SHAPES, {
+  a10_tad: a10Page('Écran TAD', a10Tad,
+    { page:'tad', rng:40, hdg:330, ranges:[5, 10, 20, 40, 80, 160],
+      pb: { 1:'→CNTL', 2:'#ALL', 3:'LOFF', 4:'ACT', 5:'NONE', 6:'SPI\nOFF', 9:'MGRS↕', 10:'NET→',
+            11:'DCLT', 12:'STAT', 13:'TGP', 14:'DSMS', 15:'#TAD', 17:'DB\nFULL', 18:'HOOK\nOWN', 20:'MAP\nOFF' },
+      data: [['BULL', -.78, -.745, 'left', .062, true], ['231°/022', -.78, -.67, 'left'], ['NO MAP', .73, -.64, 'right'],
+             ['↕', -.755, -.55], ['↕', -.755, -.09], ['°', -.755, .13],
+             ['232°/022/', .57, .425, 'right'], ['6562', .56, .487, 'right'], ['38T KM 86645 83499', 0, .678],
+             ['05', -.78, .745, 'left', .062, true]] }),
+  a10_tgp: a10Page('Écran du pod (A-G)', a10Tgp,
+    { page:'tgp',
+      pb: { 1:'→CNTL', 2:'#A-G', 3:'STBY', 4:'A-A', 5:'#TST', 6:'LSS', 7:'LSR↕', 18:'↕GAIN',
+            11:'DCLT', 12:'MSG', 13:'CDU', 14:'MAV', 15:'#TGP' },
+      data: [['0Z', -.77, -.752, 'left', .056, true], ['WIDE', -.77, -.68, 'left', .056, true], ['WHOT', .78, -.752, 'right', .056, true],
+             ['0', .78, -.68, 'right', .056, true], ['3G', -.73, -.41, 'left', .056, true], ['00:45:55', -.77, .50, 'left', .056, true],
+             ['N42 43.789 E042 48.398', 0, .59, 'center', .056, true], ['116813', 0, .66, 'center', .056, true],
+             ['07', -.77, .745, 'left', .062, true]],
+      big: [['M1', -.57, -.445], ['50F', -.01, -.40], ['491M', .44, -.06],
+            ['10', -.56, .40], ['AREA', -.09, .40], ['L', .18, .40], ['T', .345, .40], ['64.8', .55, .40]] }),
+  a10_dsms: a10Page('Écran DSMS', a10Dsms,
+    { page:'dsms',
+      pb: { 1:'→PROF', 2:'→MSL', 4:'→SJET', 5:'→INV', 12:'STAT', 13:'TGP', 14:'#DSMS', 15:'TAD' },
+      data: [['CCIP', 0, -.288], ['RIP SGL', 0, -.055], ['NOSE', 0, .003], ['QTY 1', 0, .06], ['75 FT', 0, .114],
+             ['EO 00:09:59', .49, .657], ['05', -.78, .726, 'left', .062]],
+      big: [['MK-82', 0, -.17], ['1150 TP', -.03, .40]] }),
+
+  /* ---- symboles du TAD (p. 355-358) et de la liaison SA (p. 377-378) ---- */
+  /* bullseye : anneaux concentriques autour d'un disque plein (p. 355) */
+  a10_bull: a10Sym('Bullseye (TAD)', '#34D399', c => {
+    c.beginPath(); c.arc(0, 0, .62, 0, 7); c.stroke();
+    c.beginPath(); c.arc(0, 0, .36, 0, 7); c.stroke();
+    c.beginPath(); c.arc(0, 0, .13, 0, 7); c.fill();
+  }),
+  /* point tournant : un carré, vert ; jaune quand c'est le point actif (p. 355) */
+  a10_wp: a10Sym('Point de navigation', '#34D399', wpBox),
+  a10_stpt: a10Sym('Point tournant actif', '#D1A94A', wpBox),
+  a10_spi: a10Sym('SPI', A10_WH, c => cake(c, 3)),
+  /* curseur du TAD : deux traits perpendiculaires (p. 356) ; il se pose par-dessus */
+  a10_cursor: a10Sym('Curseur du TAD', '#34D399', c => {
+    c.beginPath(); c.moveTo(-.6, 0); c.lineTo(.6, 0); c.moveTo(0, -.6); c.lineTo(0, .6); c.stroke();
+  }, { over:true }),
+  /* losange du pod : où regarde le pod de désignation (p. 358) */
+  a10_tgpd: a10Sym('Losange du pod', '#34D399', c => {
+    c.beginPath(); c.moveTo(0, -.5); c.lineTo(.32, 0); c.lineTo(0, .5); c.lineTo(-.32, 0); c.closePath(); c.stroke();
+  }),
+  /* membre de la patrouille : cercle bleu, son numéro au centre, l'altitude en milliers
+     de pieds dessous (p. 377) */
+  a10_flight: a10Sym('Membre de la patrouille', '#2F8CFF', (c, o) => {
+    c.beginPath(); c.arc(0, 0, .45, 0, 7); c.stroke();
+    if (!(o && o.mini)){ scopeText(c, '3', 0, .02, 'center', .5); scopeText(c, '15', 0, .8, 'center', .4); }
+  }),
+  /* autre appareil de la liaison SA : cercle vert pointé, l'altitude dessous (p. 378) */
+  a10_sadl: a10Sym('Appareil de la liaison SA', '#34D399', (c, o) => {
+    c.beginPath(); c.arc(0, 0, .45, 0, 7); c.stroke();
+    c.beginPath(); c.arc(0, 0, .1, 0, 7); c.fill();
+    if (!(o && o.mini)) scopeText(c, '15', 0, .8, 'center', .4);
+  }),
+  /* forces amies au sol : une croix verte (p. 378) */
+  a10_ground: a10Sym('Amis au sol (EPLRS)', '#34D399', c => {
+    c.beginPath(); c.moveTo(-.4, -.4); c.lineTo(.4, .4); c.moveTo(.4, -.4); c.lineTo(-.4, .4); c.stroke();
+  }),
+  a10_minispi: a10Sym('Mini-SPI', '#2F8CFF', c => { cake(c, 2); }),
+  /* réticules du pod (fig. 249, p. 396) : poursuite de point, un carré au centre ;
+     marqueur laser, des butées au bout des branches */
+  a10_point: a10Sym('Réticule poursuite de point', A10_WH, c => {
+    c.beginPath();
+    c.moveTo(-.8, 0); c.lineTo(-.15, 0); c.moveTo(.15, 0); c.lineTo(.8, 0);
+    c.moveTo(0, -.8); c.lineTo(0, -.15); c.moveTo(0, .15); c.lineTo(0, .8);
+    c.stroke();
+    c.strokeRect(-.15, -.15, .3, .3);
+  }, { over:true }),
+  a10_laser: a10Sym('Réticule marqueur laser', A10_WH, c => {
+    c.beginPath();
+    c.moveTo(-.8, 0); c.lineTo(-.12, 0); c.moveTo(.12, 0); c.lineTo(.8, 0);
+    c.moveTo(0, -.8); c.lineTo(0, -.12); c.moveTo(0, .12); c.lineTo(0, .8);
+    c.moveTo(-.8, -.12); c.lineTo(-.8, .12); c.moveTo(.8, -.12); c.lineTo(.8, .12);
+    c.moveTo(-.12, -.8); c.lineTo(.12, -.8); c.moveTo(-.12, .8); c.lineTo(.12, .8);
+    c.stroke();
+  }, { over:true }),
+});
+GROUPS.push(['a10', 'Écrans MFCD', 'A-10C II'], ['a10s', 'Symboles du TAD et du pod', 'A-10C II']);
