@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.23', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.24', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -32,7 +32,7 @@ let nmPx = 0;                           // pixels par mille nautique
 let tb = 1;                             // grossissement des textes : > 1 seulement pendant l'export kneeboard
 let bare = false;                       // dessin d'export : sans les aides d'édition (cadre du kneeboard)
 let unit = 'nm', measOn = false;        // unité d'affichage des distances ; cotes sur les prochains traits
-let lib = 'sil';                        // symboles : 'sil' silhouettes du tableau, 'nato' comme la carte F10 (lot 19)
+let lib = 'sil';                        // symboles : 'sil' silhouettes du tableau, 'nato' comme la carte F10 (lot 19), 'ru' comme son thème russe (lot 20)
 
 /* ---------- carte vivante : fond de carte réel, objets accrochés au terrain ----------
    Sans carte, le plan garde son repère écran (cam = null), comme avant. Avec une carte,
@@ -995,6 +995,13 @@ function natoSpec(o){
     ? Math.round(((a * 180 / Math.PI) % 360 + 360) % 360) : null;
   return { sidc: sh.nato || null, fill: o.c, direction };
 }
+/* thème russe (lot 20) : le glyphe du projet, droit, à la couleur de l'objet. Comme en
+   OTAN, la coupe garde les silhouettes. */
+function ruSpec(o){
+  const sh = o && o.t === 'sym' && SHAPES[o.k];
+  if (lib !== 'ru' || !sh || o.v === 'p' || !(sh.ru || sh.ruDraw)) return null;
+  return { key: sh.ru ? sh.ru.key : sh.dcs, fill: o.c };
+}
 /* milsymbol dessine dans une image, à la taille réelle de l'écran (densité de pixels et
    export compris) : une image par code, couleur, taille et direction */
 const natoCache = new Map();
@@ -1035,12 +1042,33 @@ function paintNato(c, o, sh, spec, s){
   natoBox.set(o, { bottom: (fr.h - fr.ay) / k });
 }
 
+/* l'icône russe de 32 pixels tient dans 1,3 fois le cadre OTAN : même encombrement à l'écran */
+const RU_K = .65;
+function paintRu(c, o, sh, s){
+  const halo = dark && !o.mini ? 'rgba(230,237,245,.9)' : '';
+  if (sh.ring && !o.mini){                      // cercle d'engagement, comme en OTAN
+    c.save(); c.lineWidth = o.w || 4; c.setLineDash([.16 * s, .13 * s]);
+    c.beginPath(); c.arc(o.x, o.y, 1.6 * s, 0, 7); c.stroke(); c.restore();
+  }
+  if (!sh.ru){                                  // le FARP : l'icône commune aux deux thèmes
+    c.save(); c.translate(o.x, o.y); c.scale(s, s); c.lineWidth = 2.2 / s;
+    c.fillStyle = o.c; sh.ruDraw(c, halo); c.restore();
+    natoBox.set(o, { bottom: .74 * s });
+    return;
+  }
+  const u = (o.mini ? 23 : SIZE * (o.s || 1) / (sh.s0 || 1) * NATO_K) * RU_K;
+  c.save(); c.translate(o.x, o.y); c.scale(u, u);
+  ruPaint(c, sh.ru, o.c, halo);
+  c.restore();
+  natoBox.set(o, { bottom: u * (sh.ru.n || 32) / 32 });
+}
+
 function paintSym(c, o){
   const sh = SHAPES[o.k]; if (!sh) return;
   const s = SIZE * (o.s || 1), side = o.v === 'p' && sh.side;
-  const spec = natoSpec(o);
-  if (spec){
-    paintNato(c, o, sh, spec, s);
+  const spec = natoSpec(o), rspec = !spec && ruSpec(o);
+  if (spec || rspec){
+    if (spec) paintNato(c, o, sh, spec, s); else paintRu(c, o, sh, s);
     if (sh.num || o.mini) return;
     const src = o.__src || o, ra = routeAlt.has(src) ? altText(routeAlt.get(src)) : '';
     const under = [o.lbl, ra].filter(Boolean).join(' · ');
@@ -1103,7 +1131,7 @@ function paintSym(c, o){
 function labelY(o){
   const sh = SHAPES[o.k] || {}, s = SIZE * (o.s || 1);
   if (o.v === 'p') return o.y - s * .95 - 16;         // coupe : étiquette au-dessus
-  const nb = natoSpec(o) && natoBox.get(o);
+  const nb = (natoSpec(o) || ruSpec(o)) && natoBox.get(o);
   if (nb) return o.y + Math.max(nb.bottom, sh.ring ? 1.6 * s : 0) + 4;   // sous le symbole OTAN dessiné
   return o.y + s * (sh.ldy || (o.k === 'sam' || sh.ring ? 1.7 : 1.2)) + (sh.tag || sh.silTag ? 15 : 2);
 }
@@ -1801,7 +1829,7 @@ for (const [g, titre, mod] of GROUPS){
   pal.appendChild(grid);
 
   for (const k in SHAPES){
-    if (SHAPES[k].g !== g || (SHAPES[k].natoOnly && lib !== 'nato')) continue;
+    if (SHAPES[k].g !== g || (SHAPES[k].natoOnly && lib === 'sil')) continue;
     const b = document.createElement('button');
     b.className = 'tile' + (tool === 'sym' && k === symKey ? ' on' : '');
     b.dataset.k = k; b.title = SHAPES[k].label;
@@ -1828,9 +1856,9 @@ function setPal(tab, mod){
   buildPalette();
 }
 function setLib(v){
-  lib = v === 'nato' ? 'nato' : 'sil';
+  lib = v === 'nato' || v === 'ru' ? v : 'sil';
   /* une famille DCS choisie n'a plus de vignette en silhouettes : retour à la sélection */
-  const lost = lib !== 'nato' && tool === 'sym' && SHAPES[symKey] && SHAPES[symKey].natoOnly;
+  const lost = lib === 'sil' && tool === 'sym' && SHAPES[symKey] && SHAPES[symKey].natoOnly;
   buildPalette();                                  // la vignette de la forme choisie y reste allumée
   if (lost) setTool('select');
 }
@@ -2183,7 +2211,7 @@ document.getElementById('zfit').onclick = () => {
 addEventListener('keyup', e => { if (e.key === ' ') spaceHeld = false; });
 
 $('hdg').onclick = () => { headRef = headRef === 'mag' ? 'true' : 'mag'; commit(); };
-$('lib').onclick = () => { setLib(lib === 'nato' ? 'sil' : 'nato'); commit(); };
+$('lib').onclick = () => { setLib({ sil: 'nato', nato: 'ru', ru: 'sil' }[lib]); commit(); };   // Silhouettes · OTAN · Russe
 $('decl').onclick = () => {
   const v = prompt(tr('Déclinaison magnétique de cette planche, en degrés : Est positif (6 ou 6E), Ouest négatif (-2 ou 2W).\nRecopiez celle de votre mission DCS pour des caps identiques au cockpit. Laissez vide pour le calcul automatique sur carte (WMM2025).'),
                    magDec === null ? '' : String(magDec).replace('.', LANG === 'en' ? '.' : ','));
@@ -2699,8 +2727,8 @@ function commit(){
   $('scale').textContent = tr(cam ? 'Échelle auto' : 'Échelle');
   $('hdg').textContent = tr(headRef === 'mag' ? 'Cap mag.' : 'Cap vrai');
   $('hdg').classList.toggle('on', headRef === 'mag');
-  $('lib').textContent = tr(lib === 'nato' ? 'Symboles OTAN' : 'Silhouettes');
-  $('lib').classList.toggle('on', lib === 'nato');
+  $('lib').textContent = tr(lib === 'nato' ? 'Symboles OTAN' : lib === 'ru' ? 'Symboles russes' : 'Silhouettes');
+  $('lib').classList.toggle('on', lib !== 'sil');
   const dc = cam ? declAt(cam.x, cam.y) : declAt(0, 0);
   $('decl').textContent = dc === null ? tr('Décl. ?') : tr('Décl. {0}', fmtDecl(dc));
   $('decl').title = tr(magDec !== null ? 'Déclinaison saisie pour cette planche — cliquer pour la changer ou revenir au calcul automatique'
@@ -2879,7 +2907,7 @@ $('movingsave').onclick = () => {
   split = !!(data && data.split);
   if (data && data.showAF === false) showAF = false;
   if (data && data.headRef === 'mag') headRef = 'mag';
-  if (data && data.lib === 'nato' && !DEMO) setLib('nato');
+  if (data && (data.lib === 'nato' || data.lib === 'ru') && !DEMO) setLib(data.lib);
   if (data && data.palTab) setPal(data.palTab, data.palMod);
   if (data && data.designer) setDesigner(true);
   if (DEMO){
