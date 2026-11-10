@@ -3,6 +3,39 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.21 — 2026-11-10
+
+Lot 21 du [plan d'action](docs/PLAN.md) : **une mission importée ressemble à sa carte F10,
+et ne montre au pilote rien de ce que la carte lui cache**.
+
+### Ajouté
+- **Tous les groupes au sol et en mer** sont importés, chacun à la famille de son unité
+  principale (chars, véhicules de combat, artillerie, lance-roquettes, infanterie,
+  camions, défenses aériennes par portée, navires) ; l'étiquette porte le nom du groupe
+  et ses types comptés.
+- `mapclass.js` : la table type DCS → icône de la carte F10 → famille, relevée dans
+  l'installation par `tools/build_mapclass.py` (900 types des packs et des mods, 451 à
+  une famille du tableau). Seule la table est publiée.
+- Deux familles : **Infanterie** (icône 0201 de DCS) et **Unité terrestre** (cadre nu,
+  pour un type que la table ne connaît pas).
+- Réglage **Vue pilote / Vue du concepteur** : la seconde pose aussi les groupes cachés,
+  marqués « caché ». Gardé.
+- Bilan de l'import : groupes au sol, unités cachées non posées, unités au symbole de leur
+  catégorie et leurs types.
+
+### Corrigé
+- Un groupe caché sur la carte F10 était posé sur la planche : le tableau dévoilait au
+  pilote les sites que la mission lui cache (relevé sur la Sandbox Colchide).
+
+### Vérifié en exécutant
+`test_miz` 100/100 (mission fabriquée : artillerie, chars, SAM et navire cachés, type
+inconnu) · `test_symboles` 309/309 · 2 scénarios au banc, rouges sur la v1.19 · banc 96/96
+en français et en anglais. Sandbox Colchide relue : 41 groupes cachés (211 unités) ne sont
+plus posés en vue pilote ; posés et marqués en vue du concepteur ; vue à l'écran en OTAN.
+**Écart** : les véhicules et navires de base de DCS (121 unités, 32 types sur la Sandbox)
+prennent le symbole de leur catégorie — leur base est chiffrée, aucun fichier lisible ne
+donne leur icône.
+
 ## v1.20 — 2026-11-10
 
 Lot 23 du [plan d'action](docs/PLAN.md) : **les écrans de bord rangés par module, et

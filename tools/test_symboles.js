@@ -42,7 +42,7 @@ for (const k of coded){
 
 /* ---------- les familles de la carte DCS ---------- */
 const FAMILIES = ['attack', 'cargo', 'recon', 'attack_helo', 'ifv', 'artillery', 'mlrs', 'truck', 'aaa',
-                  'sam_short', 'sam_med', 'sam_long', 'cp', 'ew', 'sub'];
+                  'sam_short', 'sam_med', 'sam_long', 'cp', 'ew', 'sub', 'infantry', 'ground'];
 for (const k of FAMILIES){
   const sh = S[k];
   ok(!!sh, `famille DCS absente : ${k}`);

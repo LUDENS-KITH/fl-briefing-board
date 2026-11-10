@@ -161,6 +161,7 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 | `headRef` | `true` `mag` | référence des caps affichés ; persistée |
 | `magDec` | nombre ou `null` | déclinaison saisie pour la planche (° Est positif) ; dans l'historique |
 | `split` | booléen | écran partagé plan / coupe ; persisté |
+| `designer` | booléen | import d'une mission en vue du concepteur : les groupes cachés sur la carte F10 posés, marqués « caché » (lot 21) ; persisté, hors fichier de briefing |
 | `palTab`, `palMod` | `formes` `ecrans` ; module (`F/A-18C`…) | onglet et module de la palette (lot 23) ; persistés, hors fichier de briefing |
 | `lib` | `sil` `nato` | bibliothèque de symboles de tout le briefing : silhouettes du tableau, ou symboles OTAN de la carte F10 (lot 19) ; persistée et écrite dans le fichier de briefing, hors historique ; `setLib()` la change et refait la palette |
 | `prof` | `{ ceil, range, linked, pane, rrng, raz, grid }` | plafond (ft), largeur (NM) et route liée de la planche montée ; vue du panneau du bas (`fa18`, `f16`, absente = coupe), échelle et balayage de la vue radar ; `grid` : mission importée sans carte, caps de grille ; dans l'historique |
@@ -456,7 +457,7 @@ en v0.1 (voir [ETAT.md](ETAT.md) §6).
 | | |
 |---|---|
 | Clé | `fl-briefing-board-v3` |
-| Contenu | `{ cur, unit, split, showAF, headRef, lib, palTab, palMod, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
+| Contenu | `{ cur, unit, split, showAF, headRef, lib, palTab, palMod, designer, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
 | Images de fond | un objet `img` garde sa place, sa taille et son `id` ; ses octets vivent en **IndexedDB** (base `fl-briefing-board`, magasin `images`, clé = `id`). Au démarrage, `restoreImages()` les relit, retire les images introuvables en le disant, puis n'y garde que les `id` encore cités |
 | Écriture | à chaque `commit()` |
 | Échec | capturé et ignoré — le tableau reste utilisable, il ne se souvient pas |

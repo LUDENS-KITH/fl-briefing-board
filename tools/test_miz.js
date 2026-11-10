@@ -329,6 +329,46 @@ const soutien = `mission =
   eq('réécriture : références non doublées', u3[1].DTC.Cartridges,
      { 1: { name: 'Escadron', default: false }, 2: { name: 'Escadron - FL Briefing', default: true } });
 
+  /* 6. lot 21 : chaque groupe au sol et en mer à son symbole DCS ; ce que la carte F10
+     cache reste caché, sauf en vue du concepteur. Types pris dans mapclass.js (relevé de
+     l'installation) : CH_2S1 artillerie (0006), T62M char (0001) ; Ural-375, véhicule de
+     base de DCS, n'y est pas : il prend la famille de sa catégorie et le bilan le compte. */
+  const sol = `mission =
+{
+  ["theatre"] = "Caucasus",
+  ["coalition"] = { ["red"] = { ["country"] = { [1] = { ["name"] = "Russia",
+    ["vehicle"] = { ["group"] = {
+      [1] = { ["name"] = "Batterie", ["x"] = -280000, ["y"] = 680000, ["hidden"] = false,
+              ["units"] = { [1] = { ["type"] = "CH_2S1", }, [2] = { ["type"] = "CH_2S1", }, }, },
+      [2] = { ["name"] = "Chars", ["x"] = -281000, ["y"] = 681000,
+              ["units"] = { [1] = { ["type"] = "T62M", }, [2] = { ["type"] = "Ural-375", }, [3] = { ["type"] = "T62M", }, }, },
+      [3] = { ["name"] = "SA-11 caché", ["x"] = -282000, ["y"] = 682000, ["hidden"] = true,
+              ["units"] = { [1] = { ["type"] = "SA-11 Buk LN 9A310M1", }, [2] = { ["type"] = "SA-11 Buk SR 9S18M1", }, [3] = { ["type"] = "SA-11 Buk CC 9S470M1", }, }, },
+      [4] = { ["name"] = "Ravitaillement", ["x"] = -283000, ["y"] = 683000,
+              ["units"] = { [1] = { ["type"] = "Ural-375", }, }, },
+    }, },
+    ["ship"] = { ["group"] = {
+      [1] = { ["name"] = "Patrouille cachée", ["x"] = -200000, ["y"] = 500000, ["hidden"] = true,
+              ["units"] = { [1] = { ["type"] = "MOLNIYA", }, }, },
+    }, },
+  }, }, }, },
+}`;
+  const pilote = await MIZ.readMiz(zip([['mission', sol]]));
+  const fam = g => [g.name, g.k, g.side];
+  eq('lot 21 : groupes au sol posés, à la famille de leur unité principale', pilote.ground.map(fam),
+     [['Batterie', 'artillery', 'red'], ['Chars', 'tank', 'red'], ['Ravitaillement', 'ground', 'red']]);
+  eq('lot 21 : le SAM et le navire cachés ne sont pas posés', pilote.threats.map(t => t.name), []);
+  eq('lot 21 : unités cachées au bilan', [pilote.hiddenGroups, pilote.hiddenUnits], [2, 4]);
+  eq('lot 21 : type absent de la table, rangé à sa catégorie et compté', [pilote.unknownUnits, pilote.unknownTypes], [2, ['Ural-375']]);
+  eq('lot 21 : le détail des types', pilote.ground[1].types, ['T62M', 'Ural-375', 'T62M']);
+  const concepteur = await MIZ.readMiz(zip([['mission', sol]]), { designer: true });
+  eq('lot 21 : en vue du concepteur, les cachés posés et marqués', concepteur.threats.map(t => [t.name, t.k, t.kind, t.hidden]),
+     [['SA-11 caché', 'sam', 'sam', true], ['Patrouille cachée', 'ship', 'ship', true]]);
+  eq('lot 21 : en vue du concepteur, rien de caché au bilan', [concepteur.hiddenGroups, concepteur.hiddenUnits], [0, 0]);
+  eq('lot 21 : les groupes visibles ne sont pas marqués', concepteur.ground.map(g => !!g.hidden), [false, false, false]);
+  eq('lot 21 : mission du lot 6 — le convoi de base posé à sa catégorie, menaces inchangées',
+     [m.ground.map(fam), m.threats.map(t => t.k)], [[['Convoi', 'ground', 'red']], ['sam', 'radar', 'carrier', 'ship']]);
+
   /* refus */
   const refus = async (label, fn, re) => { let e = ''; try { await fn(); } catch (x){ e = x.message; } eq(label, re.test(e), true); };
   const colt = zip([['mission', mission.replace(/FA-18C_hornet/g, 'F-16C_50')]]);
