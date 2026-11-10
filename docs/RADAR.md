@@ -1,8 +1,9 @@
-# Kit radar — sources
+# Écrans de bord — sources
 
 > Document vivant, ouvert le **2026-09-30** avec la **v1.3** : F/A-18C et F-16C ; repris le
-> **2026-11-10** avec la **v1.20** (lot 23) : écrans remis au plus près des figures.
-> Chaque élément du kit radar cite ici sa source. Un symbole ou un libellé sans source
+> **2026-11-10** avec la **v1.20** (lot 23) : écrans remis au plus près des figures ; la
+> **v1.23** (lot 24) y ajoute l'A-10C II, et il devient la table des sources de **tous les
+> écrans de bord**, radar ou non. Chaque élément du kit cite ici sa source. Un symbole ou un libellé sans source
 > n'entre pas dans le kit ([PLAN.md](PLAN.md) §5.3).
 
 **Règle depuis le lot 23** : un élément **visible sur une figure** du manuel entre, avec
@@ -236,3 +237,103 @@ Relevés en rendant chaque écran du kit à côté de sa figure, le 2026-11-10 :
 - **Le symbole de steerpoint** (« wedding cake », p. 397 n° 18) : sa forme n'est pas
   décrite, seulement montrée en petit.
 - **Les classes NCTR** et **la cible AIM-120** (p. 404) : prévues avec l'emploi des armes.
+
+## A-10C II — pages TAD, pod de désignation (TGP) et DSMS (lot 24)
+
+Source unique : *DCS A-10C II Flight Manual* (Eagle Dynamics, anglais), installé avec le
+module : DSMS p. 317-353, TAD p. 354-381, pod p. 382-409. Lu pour lui-même : rien n'est
+repris des deux autres modules. Places **mesurées sur les figures 228** (TAD, p. 359),
+**246** (pod, page A-G, p. 389) et **211** (DSMS, p. 318), rendues en grand et
+quadrillées ; l'unité du kit y est le demi-côté du verre divisé par 0,79.
+
+### Le boîtier (MFCD)
+
+| Élément | Dessin | Source |
+|---|---|---|
+| 20 boutons : OSB 1 à 5 en haut de gauche à droite, 6 à 10 à droite de haut en bas, 11 à 15 en bas de droite à gauche, 16 à 20 à gauche de bas en haut | carrés gris | p. 359 : CNTL = OSB 1, SPI = OSB 6, DCLT = OSB 11, TAD = OSB 15, MAP = OSB 20 (n° 1 à 18 de la figure 228) |
+| Boutons des côtés décalés vers le haut, à −0,52, −0,30, −0,07, +0,17, +0,40 | mesuré | figures 228, 246 et 211 (mêmes rangs : SPI, LSS, station 5 ; HOOK, GAIN, station 3) |
+| Bascules ADJ et DSP en haut, CON et BRT en bas, SYM à droite du rang du bas, bouton DAY/NT/OFF à gauche | rectangles gris, cercle | figure 228 |
+| Verre à ±0,79 | mesuré | figures 228, 246, 211 |
+| Symbole de référence d'attitude en bas à gauche | coupe, horizon aux bouts tournés vers le bas, appareil | p. 384 (« Attitude Reference Symbol ») ; dessin de la figure 228 |
+| Page affichée en vidéo inverse au rang du bas, page choisie au rang du haut | pavé vert, lettres noires | figures 228, 246, 211 |
+
+### Page TAD
+
+| Élément | Dessin | Source |
+|---|---|---|
+| Mode CEN : l'appareil au centre | symbole plein, vu de dessus | p. 357 |
+| Anneau extérieur à l'échelle, 90 % de la largeur ; intérieur à la moitié | cercles à 0,711 et 0,354 | p. 356 ; mesurés sur la figure 228 |
+| Échelle : 5, 10, 20, 40, 80, 160 NM en CEN, ↑ ↓ au clavier | nombre en haut à droite, plus grand | p. 360 ; texte de la figure (`40`) |
+| Repères de l'anneau intérieur : nord en triangle plein, est, sud, ouest en traits | triangle dehors, pointe vers l'appareil ; traits qui croisent l'anneau | p. 357 ; figure 228 (cap 330°, nord à 30° à droite) |
+| Cadre des libellés : un trait sous le rang du haut, sur celui du bas, deux traits verticaux | traits interrompus par les libellés | figure 228 |
+| Libellés | OSB 1 `→CNTL` · 2 `ALL` (choisi) · 3 `LOFF` · 4 `ACT` · 5 `NONE` · 6 `SPI OFF` · 9 `MGRS↕` · 10 `NET→` · 11 `DCLT` · 12 `STAT` · 13 `TGP` · 14 `DSMS` · 15 `TAD` · 17 `DB FULL` · 18 `HOOK OWN` · 20 `MAP OFF` | figure 228, p. 359-366 |
+| Champs de données, texte d'exemple | `BULL`, `231°/022` (bullseye), `NO MAP`, `232°/022/` et `6562` (symbole accroché), `38T KM 86645 83499`, `05` | figure 228, p. 365-366 |
+
+### Symboles du TAD et de la liaison SA
+
+| Symbole | Dessin | Source |
+|---|---|---|
+| Bullseye | anneaux concentriques autour d'un disque plein | p. 355 |
+| Point de navigation | carré pointé, vert | p. 355-356 |
+| Point tournant actif | le même, jaune | p. 355 |
+| SPI | « pièce montée » à trois étages, blanc sur la figure | p. 356 ; figure 228 |
+| Curseur du TAD | deux traits perpendiculaires, vert ; se pose par-dessus | p. 356 |
+| Losange du pod | losange vert : où regarde le pod | p. 358 |
+| Membre de la patrouille | cercle bleu, son numéro au centre, l'altitude en milliers de pieds dessous (exemple `3`, `15`) | p. 377 |
+| Appareil de la liaison SA | cercle vert pointé, altitude dessous | p. 378 |
+| Amis au sol (EPLRS) | croix verte | p. 378 |
+| Mini-SPI | la pièce montée à deux étages, bleue | p. 378 |
+
+### Page du pod, A-G
+
+| Élément | Dessin | Source |
+|---|---|---|
+| Vidéo du capteur sous la symbologie | verre gris | figures 243 et 246 |
+| Cadre vert, libellés verts sur un pavé noir, symbologie blanche | traits, pavés | figure 246 |
+| Réticule de poursuite de zone, coins du grand champ | croix ouverte, quatre coins | fig. 249, p. 396 ; figure 246 |
+| Champ, capteur, altitude radar, masque, indice INS | `0Z`, `WIDE`, `WHOT`, `0`, `M1`, `10` | p. 384-385 n° 1, 5, 6, 8, 9 |
+| Flèche du nord | « N » fixe, flèche et trait est-ouest | p. 385 n° 7 |
+| Gain ou niveau entre les flèches des OSB 19 et 20 | △ `3G` ▽ | p. 396 n° 11 |
+| Actions système marquées d'un losange | `TST`, `LSS` | figure 246 |
+| Libellés | OSB 1 `→CNTL` · 2 `A-G` (choisi) · 3 `STBY` · 4 `A-A` · 5 `TST` · 6 `LSS` · 7 `LSR↕` · 18 `↕GAIN` · 11 `DCLT` · 12 `MSG` · 13 `CDU` · 14 `MAV` · 15 `TGP` | figure 246, p. 389-396 |
+| Champs de données, texte d'exemple | `50F`, `491M`, `AREA`, `L`, `T`, `64.8`, `00:45:55`, `N42 43.789 E042 48.398`, `116813`, `07` | figure 246, p. 389-399 |
+
+| Réticule (palette) | Dessin | Source |
+|---|---|---|
+| Poursuite de point | croix, carré au centre | fig. 249, p. 396 |
+| Marqueur laser | croix, butées au bout des branches | fig. 249, p. 396 |
+
+### Page d'état du DSMS
+
+| Élément | Dessin | Source |
+|---|---|---|
+| Onze stations en pavés, numéro à côté, quantité dans un petit cadre | cadres verts | p. 317-318, p. 322 (fig. 214) ; figure 211 |
+| Stations du profil actif en blanc | pavés blancs, lettres noires | figure 211 (stations 5 et 7) |
+| Station 6 au centre, sous son numéro | cadre vide sur la figure | figure 211 |
+| Profil actif : mode du HUD, nom souligné, largage, fusée, quantité, intervalle | `CCIP`, `MK-82`, `RIP SGL`, `NOSE`, `QTY 1`, `75 FT` | p. 318-319 |
+| Obus restants et mode du canon | `1150 TP` | p. 318 ; figure 211 |
+| Chronomètre des Maverick | `EO 00:09:59`, encadré | p. 324 (fig. 215) ; figure 211 |
+| Emports de la figure | `ALQ131 D`, `M-151 PMI` ×19, `AGM-65K 117 STBY`, `MK-84`, `MK-82`, `LITENING`, `AIM-9 OFF` ×2 | figure 211 |
+| Libellés | OSB 1 `→PROF` · 2 `→MSL` · 4 `→SJET` · 5 `→INV` · 12 `STAT` · 13 `TGP` · 14 `DSMS` (affiché) · 15 `TAD` | figure 211, p. 318 |
+
+### Écarts aux figures
+
+Relevés en rendant chaque page du kit à côté de sa figure, le 2026-11-10 :
+
+| Écart relevé | Page | Corrigé |
+|---|---|---|
+| Cadre de quantité à deux chiffres (`19`) trop étroit | DSMS | oui |
+| Losange de `TST` caché sous son libellé | pod | oui |
+
+**Écarts restants : aucun** pour les trois pages.
+
+### Laissé de côté
+
+- **Le mode DEP** (appareil à 27,5 % du bas, arcs de 130°, p. 357) et **EXP1/EXP2**
+  (p. 370-371) : le kit dessine le CEN de la figure 228.
+- **La carte sous le TAD** (`MAP`, p. 360) : la planche a déjà la sienne.
+- **La ligne d'accroche** jaune tiretée (p. 365) : un trait du tableau la dessine.
+- **Les autres pages du pod** (attente, A-A, LSS, p. 386-408) et **du DSMS** (profils,
+  inventaire, largage sélectif, missiles, p. 326-353) : la page de chaque figure de
+  référence d'abord.
+- **Le numéro à côté du point tournant** (p. 355) : dans l'étiquette.

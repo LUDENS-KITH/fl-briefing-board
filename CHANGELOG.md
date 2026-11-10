@@ -3,6 +3,27 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.23 — 2026-11-10
+
+Lot 24 du [plan d'action](docs/PLAN.md) : **l'A-10C II, module de l'escadrille Sucellus,
+entre dans les écrans de bord**.
+
+### Ajouté
+- Onglet **A-10C II** dans les écrans de bord : page **TAD** (anneaux de distance à
+  l'échelle, appareil au centre, nord et repères cardinaux, ↑ ↓ changent l'échelle),
+  page du **pod de désignation** (A-G, vidéo, réticule de poursuite de zone), page
+  d'état du **DSMS** (onze stations, profil actif, canon, chronomètre des Maverick) —
+  boîtier MFCD à ses 20 boutons et ses bascules.
+- Symboles du TAD et de la liaison SA : bullseye, point de navigation, point tournant
+  actif, SPI, curseur, losange du pod, membre de la patrouille, appareil de la liaison,
+  amis au sol, mini-SPI ; réticules du pod : poursuite de point, marqueur laser.
+- `docs/RADAR.md` devient la table des sources de tous les écrans de bord.
+
+### Vérifié en exécutant
+4 scénarios au banc, rouges avant le code · banc complet en français et en anglais ·
+les trois pages rendues à côté des figures 228, 246 et 211 du manuel : deux écarts
+relevés, corrigés. **Pas encore vu dans le cockpit** : il faut ouvrir DCS.
+
 ## v1.22 — 2026-11-10
 
 Lot 22 du [plan d'action](docs/PLAN.md) : **le briefing reprend ce que l'auteur a tracé sur

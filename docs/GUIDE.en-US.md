@@ -55,10 +55,10 @@ heading, size, color and name.
 The demo has an **Order of battle** board to try it. Each symbol's code and the DCS icon
 it reproduces: [docs/SYMBOLES.md](SYMBOLES.md) (in French).
 
-## Radar Kit — F/A-18C and F-16C
+## Cockpit Displays — F/A-18C, F-16C, A-10C II
 
 Cockpit displays have their own palette tab: **Cockpit displays**, next to **Shapes**.
-Inside, one button per module (**F/A-18C**, **F-16C**), each with its air-to-air radar
+Inside, one button per module (**F/A-18C**, **F-16C**, **A-10C II**), each with its
 pages and their symbols. The tab and module you pick are remembered. Everything is drawn
 from the module's ED manual, and every element cites its page: [RADAR.md](RADAR.md)
 (in French). Each display follows the manual's figure: glass, scales, labels where they
@@ -99,6 +99,20 @@ aircraft.
   search target or on the display background, it makes it a bugged system track — a hot
   target keeps its heading, toward the aircraft.
 - **A-A cursor**, **jamming** chevrons and **bullseye**.
+
+**A-10C II — TAD, targeting pod, DSMS**
+
+- **TAD page:** the tactical picture in centered mode, the aircraft in the middle, both
+  range rings (the outer one at the scale, the inner one at half), north as a filled
+  triangle. When selected, `↑` `↓` change the scale (5 to 160 NM).
+- **TGP page (A-G):** the pod video under its area-track reticle, its labels and data
+  fields; the **point track reticle** and **laser marker reticle** go on top.
+- **DSMS page:** the eleven stations, those of the active profile in white, the profile
+  in the middle, rounds remaining. The stores are the manual figure's: your flight's go
+  in the label.
+- **TAD symbols:** bullseye, waypoint (green) and active steerpoint (yellow), SPI,
+  cursor, TGP diamond; and the SA Link: flight member (blue, with its number), SA Link
+  member, friendly ground, mini-SPI.
 
 Prepare radar boards **without a map**: on a map, a display would follow the terrain
 as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" boards).

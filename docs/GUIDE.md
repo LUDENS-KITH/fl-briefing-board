@@ -55,11 +55,11 @@ place, son cap, sa taille, sa couleur et son nom.
 La démo a une planche **Ordre de bataille** pour essayer. Le code de chaque symbole et
 l'icône DCS qu'il reproduit : [docs/SYMBOLES.md](SYMBOLES.md).
 
-## Kit radar — F/A-18C et F-16C
+## Écrans de bord — F/A-18C, F-16C, A-10C II
 
 Les écrans ont leur onglet dans la palette : **Écrans de bord**, à côté de **Formes**.
-Dedans, un bouton par module (**F/A-18C**, **F-16C**), et pour chacun ses pages radar
-air-air et leurs symboles. L'onglet et le module choisis se gardent. Tout est dessiné
+Dedans, un bouton par module (**F/A-18C**, **F-16C**, **A-10C II**), et pour chacun ses
+pages et leurs symboles. L'onglet et le module choisis se gardent. Tout est dessiné
 d'après le manuel ED du module, et chaque élément cite sa page : [RADAR.md](RADAR.md).
 Chaque écran reprend ce que montre la figure du manuel : verre, graduations, libellés à
 leur place (en colonne ou encadrés comme dans le cockpit), et les champs de données (cap,
@@ -102,6 +102,21 @@ une marque ne se pose que sur une piste de son appareil.
   planche. Posée sur une cible de recherche ou sur le fond de l'écran, elle en fait une
   piste système désignée — une cible chaude garde son cap, vers l'appareil.
 - **Curseur A-A**, **brouillage** (chevrons) et **bullseye**.
+
+**A-10C II — TAD, pod de désignation, DSMS**
+
+- **Écran TAD** : la situation tactique en mode centré, l'appareil au milieu, les deux
+  anneaux de distance (l'extérieur à l'échelle, l'intérieur à la moitié), le nord en
+  triangle plein. Sélectionné, `↑` `↓` changent l'échelle (5 à 160 NM).
+- **Écran du pod (A-G)** : la vidéo du pod sous son réticule de poursuite de zone, ses
+  libellés et ses champs ; les réticules **poursuite de point** et **marqueur laser**
+  se posent par-dessus.
+- **Écran DSMS** : les onze stations, celles du profil actif en blanc, le profil au
+  centre, les obus restants. Les emports sont ceux de la figure du manuel : ceux de
+  votre vol vont dans l'étiquette.
+- **Symboles du TAD** : bullseye, point de navigation (vert) et point tournant actif
+  (jaune), SPI, curseur, losange du pod ; et la liaison SA : membre de la patrouille
+  (bleu, son numéro), autre appareil de la liaison, amis au sol, mini-SPI.
 
 Le radar se prépare de préférence sur une planche **sans carte** : sur une carte, un
 écran suivrait le terrain au gré du zoom. La démo en ligne en montre deux (planches
