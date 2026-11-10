@@ -115,17 +115,29 @@ nouvelle planche.
 - S'il y a plusieurs **vols pilotables** (groupes dont un appareil est « Client » ou
   « Player »), choisissez le vôtre dans la liste.
 - La planche porte sa **route** — waypoints numérotés, avec leur nom et leur altitude,
-  le nom du vol sur le premier —, le **bullseye** de sa coalition, les **défenses
-  aériennes** (SAM, artillerie, radars d'alerte) et les **navires** des deux camps, à la
-  couleur de leur camp et sous leur nom de groupe.
+  le nom du vol sur le premier —, le **bullseye** de sa coalition, et **tous les groupes
+  au sol et en mer** des deux camps (défenses aériennes, chars, artillerie, infanterie,
+  camions, navires), à la couleur de leur camp. Chaque groupe prend la famille de son
+  unité principale, celle que lui donne la carte F10 ; son étiquette porte son nom et ses
+  types — « Chars · 2× T62M, Ural-375 ». Avec **Symboles OTAN**, ce sont les symboles de
+  la carte F10.
 - La coupe s'ouvre, route liée : le profil du vol se lit tout de suite. Une altitude
   « sol » (AGL dans l'éditeur) est signalée « alt. sol ».
 - Sur les théâtres dont la projection est mesurée — Caucase, Syrie, Golfe Persique,
   Sinaï, Afghanistan, Mariannes, Kola —, tout se pose **sur la carte**, au mètre près.
   Ailleurs, sur une **planche sans carte** à l'échelle exacte, nord de la grille DCS en
   haut ; ses caps portent alors un « G » (grille).
-- Les unités au sol reconnues comme défense aérienne le sont par leur type DCS ; les
-  autres (chars, camions…) ne sont pas importées.
+- **Ce que la carte F10 cache reste caché** : un groupe caché dans l'éditeur n'est pas
+  posé, et le bilan de l'import dit combien d'unités sont restées cachées. Pour préparer
+  la mission, **Vue pilote** dans la barre passe en **Vue du concepteur** : les groupes
+  cachés sont posés aussi, marqués « caché » en tête de leur étiquette. Le réglage se
+  garde.
+- Le symbole de chaque type vient de l'installation de DCS : les types des packs et des
+  mods le déclarent en clair. Les véhicules et navires de base de DCS (T-72B, M-2
+  Bradley…) ne le déclarent nulle part en clair : ils prennent le symbole de leur
+  catégorie — **Unité terrestre**, cadre nu, ou navire —, et le bilan de l'import les
+  compte et les nomme. Les défenses aériennes restent reconnues à leur type, comme
+  avant.
 - Les **ravitailleurs** et les **AWACS** de l'IA, reconnus à la tâche de leur groupe dans
   l'éditeur (« Refueling », « AWACS »), viennent aussi, des deux camps : leur **route**
   en tireté, leur **orbite** en symbole d'hippodrome, et l'appareil accroché dessus,

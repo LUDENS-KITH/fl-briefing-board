@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.20', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.21', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -2267,9 +2267,20 @@ $('openfile').onchange = e => { const f = e.target.files[0]; e.target.value = ''
    les navires (miz.js). Sur un théâtre dont la projection est mesurée (projections.js),
    tout se pose sur la carte ; sinon, sur une planche sans carte à l'échelle exacte, nord
    de la grille DCS en haut, et ses caps le disent (« G »). */
+/* vue du concepteur (lot 21) : les groupes cachés sur la carte F10 sont posés quand même,
+   marqués, pour celui qui prépare la mission ; par défaut, la vue du pilote ne les pose pas */
+let designer = false;
+function setDesigner(v){
+  designer = !!v;
+  const b = $('mizview');
+  b.textContent = tr(designer ? 'Vue du concepteur' : 'Vue pilote');
+  b.classList.toggle('on', designer);
+}
+setDesigner(false);
+$('mizview').onclick = () => { setDesigner(!designer); commit(); };
 async function openMission(file){
   let m;
-  try { m = await MIZ.readMiz(new Uint8Array(await file.arrayBuffer())); }
+  try { m = await MIZ.readMiz(new Uint8Array(await file.arrayBuffer()), { designer }); }
   catch (e){ toast(tr('Mission illisible : {0}', trMsg(e.message))); return; }
   const base = file.name.replace(/\.miz$/i, '').slice(0, 40) || 'Mission';
   if (m.flights.length > 1) return chooseFlight(m, base);
@@ -2295,11 +2306,21 @@ $('mizbox').onclick = e => { if (e.target.id === 'mizbox' || e.target.id === 'mi
 
 const SIDE_COL = { blue: '#2F8CFF', red: '#FF4D4D', neutrals: '#D1A94A' };
 const THREAT_SYM = { sam: 'sam', radar: 'radar', ship: 'ship', carrier: 'carrier' };
+/* l'étiquette d'un groupe importé (lot 21) : son nom, puis ses types, comptés — « 2× T62M,
+   Ural-375 » ; marqué « caché » en tête quand la carte F10 le cache (vue du concepteur) */
+function groupLabel(t){
+  const n = new Map();
+  for (const ty of t.types || []) n.set(ty, (n.get(ty) || 0) + 1);
+  const list = [...n].map(([ty, c]) => c > 1 ? `${c}× ${ty}` : ty);
+  const types = list.length > 3 ? list.slice(0, 2).join(', ') + ', ' + tr('+{0} types', list.length - 2) : list.join(', ');
+  return [t.hidden && tr('caché'), t.name, types].filter(Boolean).join(' · ');
+}
 function importMission(m, f, base){
   const proj = PROJECTIONS[m.theatre], onMap = !!(proj && THEATRES.some(t => t.id === m.theatre));
-  const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [], sup = m.support || [];
-  const all = [...wps, ...m.threats, ...(be ? [be] : []), ...sup.flatMap(a => a.points)];
-  if (!all.length){ toast(tr('Rien à importer : ni vol pilotable, ni menace, ni bullseye')); return; }
+  const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [], sup = m.support || [], grd = m.ground || [];
+  const all = [...wps, ...m.threats, ...grd, ...(be ? [be] : []), ...sup.flatMap(a => a.points)];
+  if (!all.length){ toast(tr('Rien à importer : ni vol pilotable, ni menace, ni bullseye')
+                          + (m.hiddenUnits ? ' — ' + tr('{0} unités cachées sur la carte F10', m.hiddenUnits) : '')); return; }
   cancelGesture(); leaveGesture();
   split = true; fit();                                   // la route liée se lit dans la coupe
   let pos, camM = null, nmPxM = 0, grid = null;
@@ -2319,7 +2340,9 @@ function importMission(m, f, base){
     grid = { theatre: m.theatre, top, left, k, ox, oy };   // le repère, pour revenir aux mètres DCS (lot 9)
   }
   const sym = (k, q, c, extra) => { const [x, y] = pos(q); return { t:'sym', k, x, y, a:0, s: SHAPES[k].s0 || 1, c, w:4, n:0, ...extra }; };
-  const out = m.threats.map(t => sym(THREAT_SYM[t.kind], t, SIDE_COL[t.side] || SIDE_COL.neutrals, { lbl: t.name }));
+  /* chaque groupe à la famille de son unité principale (miz.js) ; les menaces par-dessus */
+  const out = [...grd, ...m.threats].map(t => sym(SHAPES[t.k] ? t.k : THREAT_SYM[t.kind], t,
+                                                    SIDE_COL[t.side] || SIDE_COL.neutrals, { lbl: groupLabel(t) }));
   if (be) out.push(sym('bullseye', be, '#D1A94A'));
   /* le premier point porte le nom du vol : l'étiquette de l'appareil, posé au même endroit, le cacherait */
   wps.forEach((q, i) => {
@@ -2374,9 +2397,15 @@ function importMission(m, f, base){
   toast(tr('Mission importée : {0}', [
           wps.length > 1 ? tr('{0} points de route', wps.length) : tr('1 point de route'),
           tr(m.threats.length > 1 ? '{0} menaces' : '{0} menace', m.threats.length),
+          grd.length && tr(grd.length > 1 ? '{0} groupes au sol' : '{0} groupe au sol', grd.length),
           be && tr('bullseye'),
           nT && (nT > 1 ? tr('{0} ravitailleurs', nT) : tr('1 ravitailleur')),
-          nA && tr('{0} AWACS', nA)].filter(Boolean).join(', '))
+          nA && tr('{0} AWACS', nA),
+          m.hiddenUnits && tr(m.hiddenUnits > 1 ? '{0} unités cachées sur la carte F10, non posées' : '1 unité cachée sur la carte F10, non posée', m.hiddenUnits),
+          m.unknownUnits && tr(m.unknownUnits > 1 ? '{0} unités au symbole de leur catégorie, type inconnu du tableau : {1}'
+                                                  : '1 unité au symbole de sa catégorie, type inconnu du tableau : {1}',
+                               m.unknownUnits, m.unknownTypes.slice(0, 4).join(', ') + (m.unknownTypes.length > 4 ? '…' : ''))
+        ].filter(Boolean).join(', '))
         + (onMap ? '' : tr(' — théâtre sans projection mesurée : planche sans carte, nord de la grille en haut')));
 }
 $('miz').onclick = () => $('mizfile').click();
@@ -2656,7 +2685,7 @@ function commit(){
   try {
     stash();
     if (DEMO) return;                        // la démo ne touche pas au tableau du visiteur
-    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, lib, palTab, palMod, boards: boardsRecord() }));
+    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, lib, palTab, palMod, designer, boards: boardsRecord() }));
   } catch(_){}
 }
 
@@ -2825,6 +2854,7 @@ $('movingsave').onclick = () => {
   if (data && data.headRef === 'mag') headRef = 'mag';
   if (data && data.lib === 'nato' && !DEMO) setLib('nato');
   if (data && data.palTab) setPal(data.palTab, data.palMod);
+  if (data && data.designer) setDesigner(true);
   if (DEMO){
     boards = demoBoards(); split = true; showAF = true;
     document.body.classList.add('demo');

@@ -682,7 +682,7 @@ test('Mission .miz déposée : choix du vol, puis route, altitudes, bullseye et 
   ok(a.s('mapCfg && mapCfg.theatre') === 'Caucasus' && a.s('!!cam'), `carte : ${a.s('JSON.stringify(mapCfg)')}`);
   const wps = JSON.parse(a.s('JSON.stringify(objs.filter(o => o.k === "wp").map(o => [o.n, o.alt, o.lbl || ""]))'));
   ok(JSON.stringify(wps) === JSON.stringify([[1, 40, 'COLT 2'], [2, 25000, 'IP'], [3, 490, LANG === 'en' ? 'CIBLE · AGL' : 'CIBLE · alt. sol']]), `waypoints : ${JSON.stringify(wps)}`);
-  ok(a.s('objs.some(o => o.k === "bullseye")') && a.s('objs.some(o => o.k === "sam" && o.lbl === "SA-11 Kutaïssi")'), 'bullseye ou SAM absent');
+  ok(a.s('objs.some(o => o.k === "bullseye")') && a.s('objs.some(o => o.k === "sam" && /^SA-11 Kutaïssi · SA-11 Buk LN 9A310M1$/.test(o.lbl))'), 'bullseye ou SAM absent');
   ok(a.s('split && prof.linked'), 'route liée non ouverte');
   ok(a.s('route.pts.length') === 3, `route liée : ${a.s('route.pts.length')} points`);
 });
@@ -1637,6 +1637,51 @@ test('Écrans de bord : le F-16C a le cadre de la figure p. 394 — échelle d\'
   ok(line === 0, `trait continu de l'échelle d'élévation : ${line} pixels`);
   const inv = a.s(INK(485, 462, 4, 'R > 200 && G > 200 && B > 200'));
   ok(inv >= 24, `FCR en vidéo inverse : ${inv}/64 pixels blancs (lettres noires dans un pavé blanc)`);
+});
+
+/* ---------- lot 21 : chaque unité à son symbole DCS, ce que la carte cache reste caché ---------- */
+const SOL = `mission =
+{
+  ["theatre"] = "Caucasus",
+  ["coalition"] = { ["red"] = { ["bullseye"] = { ["x"] = -250000, ["y"] = 700000, },
+    ["country"] = { [1] = { ["name"] = "Russia", ["vehicle"] = { ["group"] = {
+      [1] = { ["name"] = "Batterie", ["x"] = -280000, ["y"] = 680000,
+              ["units"] = { [1] = { ["type"] = "CH_2S1", }, [2] = { ["type"] = "CH_2S1", }, }, },
+      [2] = { ["name"] = "Chars", ["x"] = -284000, ["y"] = 690000,
+              ["units"] = { [1] = { ["type"] = "T62M", }, [2] = { ["type"] = "Ural-375", }, [3] = { ["type"] = "T62M", }, }, },
+      [3] = { ["name"] = "SA-11 caché", ["x"] = -290000, ["y"] = 700000, ["hidden"] = true,
+              ["units"] = { [1] = { ["type"] = "SA-11 Buk LN 9A310M1", }, [2] = { ["type"] = "SA-11 Buk SR 9S18M1", }, }, },
+    }, }, }, }, }, },
+}`;
+const HIDDEN_WORD = () => LANG === 'en' ? 'hidden' : 'caché';
+
+test("Import : chaque groupe au sol à son symbole DCS, le site caché n'est pas posé, le bilan compte", async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Colchide.miz', [['mission', SOL]])); await pause(400);
+  const k = JSON.parse(a.s('JSON.stringify(objs.filter(o => o.t === "sym" && o.k !== "bullseye").map(o => o.k))'));
+  ok(JSON.stringify(k) === JSON.stringify(['artillery', 'tank']), `symboles posés : ${k.join(', ')}`);
+  const chars = a.s('(objs.find(o => o.k === "tank") || {}).lbl') || '';
+  ok(chars === 'Chars · 2× T62M, Ural-375', `étiquette des chars : « ${chars} »`);
+  const t = a.toast();
+  ok(/2 groupes au sol|2 ground groups/.test(t), `bilan, groupes au sol : « ${t} »`);
+  ok(/2 unités cachées|2 hidden units/.test(t), `bilan, unités cachées : « ${t} »`);
+  ok(/1 unité.*catégorie|1 unit.*category/.test(t), `bilan, type inconnu : « ${t} »`);
+  ok(!a.s('objs.some(o => /SA-11/.test(o.lbl || ""))'), 'le SAM caché est sur la planche');
+});
+
+test('Import : la vue du concepteur pose les cachés, marqués, et le réglage se garde', async (ok) => {
+  let a = await open();
+  const b = a.d.getElementById('mizview');
+  ok(!!b, 'pas de réglage Vue du concepteur');
+  if (!b) return;
+  a.button('#mizview');
+  a = await reload();
+  ok(/concepteur|designer/i.test(a.d.getElementById('mizview').textContent), `réglage après réouverture : « ${a.d.getElementById('mizview').textContent} »`);
+  a.drop(a.miz('Colchide.miz', [['mission', SOL]])); await pause(400);
+  const sam = a.s('(objs.find(o => o.k === "sam") || {}).lbl') || '';
+  ok(sam.startsWith(HIDDEN_WORD() + ' · SA-11 caché'), `SAM caché en vue du concepteur : « ${sam} »`);
+  ok(!/cachées|hidden units/.test(a.toast()), `bilan : « ${a.toast()} »`);
+  ok(!a.s('objs.filter(o => o.k === "tank").some(o => /^(caché|hidden)/.test(o.lbl))'), 'un groupe visible marqué caché');
 });
 
 (async () => {

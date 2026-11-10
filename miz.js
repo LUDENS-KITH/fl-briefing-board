@@ -196,6 +196,30 @@ const MIZ = (() => {
   /* défense aérienne et radars d'alerte, reconnus au type DCS de leurs unités */
   const AIR_DEF = /\bSA-\d|S-300|S-125|S-75|S-200|Buk|Kub|\bTor\b|Osa|Strela|Igla|Stinger|Hawk|Patriot|NASAMS|rapier|Roland|HQ-7|Tunguska|2S6|Shilka|ZSU|ZU-23|Gepard|Vulcan|Avenger|Chaparral|Pantsir|EWR|1L13|55G6|p-19|Dog Ear|SNR|RLS|flak|bofors|KS-19|S-60|SON_9/i;
   const EWR = /EWR|1L13|55G6|Dog Ear/i;
+  /* lot 21 : la famille de chaque unité. D'abord la table relevée dans l'installation de DCS
+     (mapclass.js, tools/build_mapclass.py) ; à défaut — les véhicules et navires de base de
+     DCS n'y sont pas, leur base est chiffrée — le nom du type quand il dit le système, comme
+     pour les défenses aériennes depuis le lot 6 ; sinon la famille de la catégorie, comptée
+     au bilan de l'import. */
+  const TABLE = typeof MAPCLASS !== 'undefined' ? MAPCLASS
+              : typeof require === 'function' ? require('./mapclass.js') : {};
+  const AAA = /Shilka|ZSU|ZU-23|Gepard|Vulcan|flak|bofors|KS-19|S-60/i;
+  const INFANTRY = /^(Soldier|Infantry|Paratrooper)\b/i;
+  const AD_FAM = new Set(['sam', 'sam_short', 'sam_med', 'sam_long', 'radar', 'aaa', 'ew']);
+  function familyOf(type, cat){
+    const row = TABLE[type];
+    if (row && row[1]) return { k: row[1] };
+    if (AIR_DEF.test(type)) return { k: EWR.test(type) ? 'radar' : AAA.test(type) ? 'aaa' : 'sam' };
+    if (cat === 'ship') return CARRIER.test(type) ? { k: 'carrier' } : { k: 'ship', guess: true };
+    if (INFANTRY.test(type)) return { k: 'infantry' };
+    return { k: 'ground', guess: true };
+  }
+  /* la famille du groupe : celle qui revient le plus, la première en cas d'égalité */
+  function mainFamily(fams){
+    const n = new Map();
+    for (const f of fams) n.set(f, (n.get(f) || 0) + 1);
+    return [...n].reduce((a, b) => b[1] > a[1] ? b : a)[0];
+  }
   const CARRIER = /CVN|Stennis|Vinson|Roosevelt|Lincoln|Washington|Truman|Forrestal|KUZNECOW|Kuznetsov|LHA|Tarawa|Invincible|Hermes/i;
   const PLAYER = u => u && (u.skill === 'Client' || u.skill === 'Player');
   /* appareils de soutien de l'IA, reconnus à la tâche de leur groupe (lot 12) */
@@ -230,9 +254,24 @@ const MIZ = (() => {
              freq: mhz };
   }
 
-  function content(m, dict){
+  function content(m, dict, opts = {}){
     const say = s => typeof s === 'string' && s.startsWith('DictKey_') ? String(dict[s] ?? '') : String(s ?? '');
-    const out = { theatre: String(m.theatre || ''), bullseye: {}, flights: [], threats: [], support: [] };
+    const out = { theatre: String(m.theatre || ''), bullseye: {}, flights: [], threats: [], support: [], ground: [],
+                  hiddenGroups: 0, hiddenUnits: 0, unknownUnits: 0, unknownTypes: [] };
+    const unknown = new Set();
+    /* un groupe caché sur la carte F10 (« hidden ») n'est pas posé, sauf en vue du concepteur,
+       où il l'est marqué comme tel ; le bilan dit combien d'unités sont restées cachées */
+    const shown = (g, units) => {
+      if (g.hidden !== true) return true;
+      if (opts.designer) return true;
+      out.hiddenGroups++; out.hiddenUnits += units.length;
+      return false;
+    };
+    const famsOf = (types, cat) => types.map(t => {
+      const f = familyOf(t, cat);
+      if (f.guess){ out.unknownUnits++; unknown.add(t); }
+      return f.k;
+    });
     const at = (g, units) => ({ x: +(g.x ?? (units[0] || {}).x), y: +(g.y ?? (units[0] || {}).y) });
     for (const side of ['blue', 'red', 'neutrals']){
       const c = (m.coalition || {})[side];
@@ -258,26 +297,33 @@ const MIZ = (() => {
                                                                agl: p.alt_type === 'RADIO', name: say(p.name) })) });
           }
         for (const g of list((country.vehicle || {}).group)){
-          const units = list(g.units), types = units.map(u => String(u.type || '')), ad = types.filter(t => AIR_DEF.test(t));
-          if (!ad.length) continue;
-          out.threats.push({ name: say(g.name), side, ...at(g, units), types, kind: ad.every(t => EWR.test(t)) ? 'radar' : 'sam' });
+          const units = list(g.units), types = units.map(u => String(u.type || ''));
+          if (!units.length || !shown(g, units)) continue;
+          const fams = famsOf(types, 'vehicle'), ad = fams.filter(f => AD_FAM.has(f));
+          const base = { name: say(g.name), side, ...at(g, units), types, ...(g.hidden === true && { hidden: true }) };
+          if (ad.length)                          // défense aérienne : une menace, comme depuis le lot 6
+            out.threats.push({ ...base, k: mainFamily(ad), kind: ad.every(f => f === 'radar') ? 'radar' : 'sam' });
+          else out.ground.push({ ...base, k: mainFamily(fams) });
         }
         for (const g of list((country.ship || {}).group)){
           const units = list(g.units), types = units.map(u => String(u.type || ''));
-          out.threats.push({ name: say(g.name), side, ...at(g, units), types,
-                             kind: types.some(t => CARRIER.test(t)) ? 'carrier' : 'ship' });
+          if (!units.length || !shown(g, units)) continue;
+          const fams = famsOf(types, 'ship'), carrier = fams.includes('carrier');
+          out.threats.push({ name: say(g.name), side, ...at(g, units), types, ...(g.hidden === true && { hidden: true }),
+                             k: carrier ? 'carrier' : mainFamily(fams), kind: carrier ? 'carrier' : 'ship' });
         }
       }
     }
+    out.unknownTypes = [...unknown].sort();
     return out;
   }
 
-  async function readMiz(bytes){
+  async function readMiz(bytes, opts){
     const get = await unzip(bytes);
     const text = await get('mission');
     if (!text) throw new Error('pas de fichier « mission » dans l\'archive : ce n\'est pas une mission DCS');
     const dict = await get('l10n/DEFAULT/dictionary');
-    return content(parseLua(text), dict ? parseLua(dict) : {});
+    return content(parseLua(text), dict ? parseLua(dict) : {}, opts);
   }
 
   /* ---------- écrire la route dans la DTC du F/A-18C (lot 9) ----------

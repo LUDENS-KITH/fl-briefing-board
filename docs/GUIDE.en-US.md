@@ -110,17 +110,26 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
 - If there are several **playable flights** (groups with a "Client" or "Player"
   aircraft), pick yours in the list.
 - The board carries its **route** — numbered waypoints with their name and altitude,
-  the flight name on the first —, its coalition's **bullseye**, the **air defences**
-  (SAM, AAA, early-warning radars) and the **ships** of both sides, in their side's color
-  and under their group name.
+  the flight name on the first —, its coalition's **bullseye**, and **every ground and
+  naval group** of both sides (air defences, tanks, artillery, infantry, trucks, ships),
+  in their side's color. Each group takes the family of its main unit, the one the F10
+  map gives it; its label carries its name and its types — "Chars · 2× T62M, Ural-375".
+  With **NATO symbols**, these are the F10 map's symbols.
 - The profile opens with the linked route: the flight profile reads at once. A ground
   altitude (AGL in the editor) is flagged "AGL".
 - On theatres whose projection is measured — Caucasus, Syria, Persian Gulf, Sinai,
   Afghanistan, Marianas, Kola —, everything lands **on the map**, to the metre. Elsewhere,
   on a **board without a map** at exact scale, DCS grid north up; its headings then carry
   a "G" (grid).
-- Ground units are recognized as air defence by their DCS type; others (tanks,
-  trucks…) are not imported.
+- **What the F10 map hides stays hidden**: a group hidden in the editor is not placed,
+  and the import summary says how many units stayed hidden. To prepare the mission,
+  **Pilot view** in the toolbar switches to **Designer view**: hidden groups are placed
+  too, marked "hidden" at the start of their label. The setting is remembered.
+- Each type's symbol comes from the DCS installation: types from asset packs and mods
+  declare it in plain files. DCS's base vehicles and ships (T-72B, M-2 Bradley…) declare
+  it nowhere in plain files: they take their category's symbol — **Ground unit**, an empty
+  frame, or ship —, and the import summary counts and names them. Air defences are still
+  recognized by their type, as before.
 - AI **tankers** and **AWACS**, recognized by their group's task in the editor
   ("Refueling", "AWACS"), come along too, from both sides: their **route** dashed, their
   **orbit** as a racetrack symbol, and the aircraft attached to it, labelled — "Texaco 11

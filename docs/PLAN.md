@@ -44,7 +44,7 @@ engagés.
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
 | 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | v1.19 | en ligne le 2026-11-10 |
 | 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
-| 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | — | proposé le 2026-11-10 |
+| 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | v1.21 | fait le 2026-11-10 |
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | — | proposé le 2026-11-10 |
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | — | proposé le 2026-11-10 |
@@ -933,6 +933,22 @@ un de chars, un SAM caché, un type inconnu ; seul le caché manque, sauf en vue
 concepteur ; le type inconnu prend sa famille de catégorie et figure au bilan. Sur la
 Sandbox Colchide dans Brave : les sites cachés ne paraissent plus (défaut relevé lors du
 travail sur cette mission : le tableau les dévoilait).
+
+**Fait le 2026-11-10 (v1.21).** Tous les groupes au sol et en mer posés, chacun à la
+famille de son unité principale ; les cachés restent cachés, sauf en **Vue du concepteur**
+où ils sont marqués ; le bilan compte les unités cachées et celles rangées à leur catégorie.
+Sur la Sandbox Colchide : 41 groupes cachés (211 unités) ne paraissent plus. **Inconnue
+levée** : les fichiers de l'éditeur ne s'ouvrent pas par `luae.exe` — la base des unités de
+DCS (`Scripts/Database.edce`) est chiffrée, et le projet ne la déchiffre pas. La table est
+faite des définitions lisibles (packs ED et mods : 900 types), que `luae.exe` exécute dans
+un bac à sable (`tools/mapclass_probe.lua`) : une lecture au texte prenait un `Name`
+imbriqué pour le type. **Écarts au plan** : la table est publiée en `mapclass.js` et non en
+`.json`, chargée comme `theatres.js` (le tableau s'ouvre aussi hors ligne) ; deux familles
+ajoutées, **Infanterie** (icône 0201, que DCS donne aux fantassins) et **Unité terrestre**
+(cadre nu, pour le type inconnu) ; les icônes « POINT 2xx » sans titre de `classifier.lua`
+sont rangées d'après leur image et les types qui les portent ; les véhicules et navires de
+base de DCS (T-72B, M-2 Bradley…) restent à leur catégorie. Pour les avoir, il faudrait
+un export de `db.Units` depuis DCS en marche, qui attend l'accord de Vince pour lancer DCS.
 
 #### Lot 22 — Les dessins de la carte F10
 
