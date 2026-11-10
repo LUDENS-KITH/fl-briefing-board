@@ -16,7 +16,8 @@ Les lots 1 à 3 répondent à la demande de Vince du 2026-09-30. Les lots 4 à 8
 propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répond à la
 demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lot 13 à celle du 2026-10-08. Les lots 14 à 17
 forment le chantier **Visibilité** ([VISIBILITE.md](VISIBILITE.md)), demandé le 2026-10-08 :
-proposés, non engagés.
+proposés, non engagés. Les lots 19 à 26 forment le chantier **Symbologie DCS et écrans de
+bord**, demandé le 2026-11-10 : plan écrit à sa demande, lots non engagés.
 
 ## 2. Vue d'ensemble
 
@@ -40,6 +41,14 @@ proposés, non engagés.
 | 16 | Interface en anglais | demande | M-L | — | v1.17, v1.18 | fait le 2026-10-09 (livraisons 1 et 2) |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
+| 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | — | proposé le 2026-11-10 |
+| 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
+| 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | — | proposé le 2026-11-10 |
+| 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | — | proposé le 2026-11-10 |
+| 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | — | proposé le 2026-11-10 |
+| 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | — | proposé le 2026-11-10 |
+| 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | proposé le 2026-11-10 |
+| 26 | Recherche dans la palette | proposition | S | lot 19 | — | proposé le 2026-11-10 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -792,6 +801,190 @@ réglé pour l'exemption de consentement de la CNIL, sans cookie, déclaré dans
 visite de test vue dans son tableau de bord, et aucun cookie posé (vérifié dans le
 navigateur).
 
+### Chantier Symbologie DCS et écrans de bord — lots 19 à 26
+
+Demandé par Vince le 2026-11-10 : « l'outil utilise des symboles qui ne sont pas ceux
+utilisés par DCS » ; « les écrans MFD des différents modules ne sont pas corrects et
+devraient être classés dans des bibliothèques ». Les lots 22, 25 et 26 sont des
+propositions faites dans la même réponse.
+
+**Constat**, lu le 2026-11-10 dans le code et dans l'installation de DCS du poste :
+
+- **DCS ne dessine aucune silhouette sur sa carte.** L'éditeur et la carte F10 affichent
+  des symboles militaires normalisés, en deux thèmes au choix du joueur :
+  `MissionEditor/data/NewMap/images/nato/` (`theme.lua` : « NATO », « OTAN ») et
+  `.../russian/`, une centaine d'icônes chacun, dessinées en noir et teintées à la couleur
+  de la coalition. Chaque type d'unité désigne son icône par une clé `mapclasskey`
+  (« P0091000024 » → `nato/P91000024.png`, commentaire d'ED dans le fichier du Bf 109) ;
+  `MissionEditor/data/NewMap/classifier.lua` déclare chaque clé et son libellé (char,
+  véhicule de combat, SAM courte et longue portée, avion d'attaque, hélicoptère ASM…).
+  Exemples relevés : avion d'attaque = dôme et lettre « A » ; char = rectangle et ovale ;
+  SAM longue portée = rectangle et rampe, dessin différent dans le thème russe.
+- **Le tableau dessine ses propres silhouettes** (`symbols.js`, groupes Aéronefs,
+  Armement / Effets, Sol / Mer, Tactique) : lisibles, avec une vue de profil, mais pas ce
+  que le pilote voit dans DCS.
+- **Les écrans de bord** se limitent au radar air-air du F/A-18C (RWS, TWS, STT) et du
+  F-16C (FCR RWS, TWS), rangés dans la même palette que les formes génériques
+  (groupes « Radar F/A-18C », « Radar F-16C »). Ils ont été **allégés à dessein** de tout
+  ce que le texte du manuel ne chiffre pas (RADAR.md, « Laissé de côté ») : graduations
+  d'azimut, champs de données, steerpoint, moitié basse du HAFU, échelle d'azimut
+  d'antenne du F-16C. À l'œil, un écran amputé de ces repères ne ressemble pas au jeu.
+- **L'import `.miz`** (`miz.js`, `content`) ne lit au sol que la défense aérienne et les
+  navires, place une seule forme générique par groupe, et ne regarde ni `hidden` (325
+  unités ou groupes cachés sur la Sandbox Colchide) ni les dessins de la mission.
+- **Les missions de Vince portent des dessins F10** (primitives et modes confirmés dans
+  `MissionEditor/modules/me_draw_panel.lua`) : `mission.drawings.layers` (Red,
+  Blue, Neutral, Common, Author), chaque objet avec `primitiveType` (`Line`, `Polygon`,
+  `TextBox`, `Icon`), `lineMode` (`segment`, `segments`, `free`), `polygonMode`
+  (`circle`, `rect`, `oval`, `arrow`, `free`), `mapX`/`mapY`, `points`, `radius`,
+  `width`/`height`, `angle`, `colorString`/`fillColorString` (« 0xff000080 », RGBA),
+  `thickness`, `style`, `text`, `fontSize`, `visible` ; et `drawings.options.hiddenOnF10Map`,
+  par rôle (Pilot, Instructor, Observer, ForwardObserver, ArtilleryCommander, Spectrator)
+  et par coalition. Sandbox Colchide (champ de tir) : 11 traits, 45 textes, 14 zones,
+  tous dans le calque Common ; Registan : 1 trait, 5 textes, 3 zones.
+
+**Règles du chantier** (en plus du §3) :
+
+- **Aucune image de DCS dans le dépôt.** Les icônes d'ED servent de **référence
+  visuelle**, comme les figures des manuels pour le kit radar ; le dépôt publie des
+  symboles dessinés par le projet ou par une bibliothèque libre, et des tables de
+  correspondance (type DCS → clé → symbole), qui sont des faits.
+- **Chaque symbole cite sa référence** dans un nouveau `docs/SYMBOLES.md` : code
+  normalisé (SIDC) pour l'OTAN, clé DCS et libellé de `classifier.lua` pour les deux
+  thèmes. Un symbole sans référence n'entre pas.
+- **Le briefing ne change pas de sens en changeant de bibliothèque** : un objet garde
+  son identité (`k`) ; la bibliothèque décide seulement du dessin.
+
+#### Lot 19 — Bibliothèque OTAN, comme DCS
+
+**Objectif :** que le meneur pose les symboles que ses pilotes lisent sur la carte F10.
+
+| | |
+|---|---|
+| Moteur de dessin | [milsymbol](https://github.com/spatialillusions/milsymbol) (MIT, sans dépendance), qui dessine MIL-STD-2525 et APP-6 en vecteurs. Version figée **3.0.4** (2026-03-10), **copiée dans le dépôt** comme les autres scripts, licence citée dans MARQUES-ET-CREDITS : pas d'appel à un CDN, le tableau marche hors ligne. La 3.0.5 (2026-10-27) attend deux semaines d'ancienneté |
+| Choix | un réglage **Symboles : Silhouettes · OTAN** dans la barre ; il vaut pour le briefing entier, s'enregistre dans le fichier de briefing, et les nouveaux briefings prennent le dernier choix. Les ouverts sans réglage restent en silhouettes |
+| Correspondance | chaque forme existante reçoit son code (SIDC) : chasseur, bombardier, ravitailleur, AWACS, hélicoptère, drone, civil ; char, radar, SAM, navire, porte-avions, aéroport, FARP. Ami / hostile / inconnu deviennent l'**affiliation** du cadre (rectangle, losange, carré à coins), au lieu de trois formes à part |
+| Formes nouvelles | les familles de DCS absentes du tableau, celles que l'import du lot 21 produit : artillerie, infanterie, véhicule de combat, AAA, radar d'alerte, poste de commandement, camion, avion d'attaque, hélicoptère d'attaque… Liste fermée relevée dans `classifier.lua` à l'ouverture du lot |
+| Couleur | celle de la coalition, bleu et rouge comme sur la carte DCS ; l'encre choisie à la main l'emporte, comme aujourd'hui |
+| Cap | un symbole OTAN reste droit ; le cap se lit sur l'indicateur de direction de la norme (tige fléchée), que le geste de pose oriente — même geste que la tige d'un HAFU |
+| Ce qui ne change pas | marqueurs tactiques (waypoint, bullseye, IP, orbite, objectif), armement et effets, vue de profil : la norme ne les dessine pas comme le tableau en a besoin ; ils gardent leur dessin dans les deux bibliothèques |
+| Dessin | `paintSym` dessine le symbole de milsymbol à la taille de l'objet, dans les exports PNG et kneeboard compris ; mise en cache par code, taille et couleur |
+
+**Fait quand** — tests rouges avant le code : au banc, le réglage bascule tout le
+briefing, garde la sélection et l'historique, survit à l'enregistrement et à la
+réouverture ; un objet posé en silhouette s'affiche en OTAN et inversement ; un hostile
+posé en OTAN est un losange rouge ; le cap se règle au geste. `node tools/test_symboles.js` :
+chaque forme a un SIDC valide pour milsymbol et une ligne dans SYMBOLES.md. Rendu relu
+en image, grossi, à côté des icônes `nato/` de DCS (relevé hors dépôt). Démo : une
+planche en OTAN.
+
+#### Lot 20 — Bibliothèque russe, comme DCS
+
+**Objectif :** la même chose pour les escadrilles qui jouent DCS en thème russe.
+
+Aucune bibliothèque libre connue ne dessine la symbologie soviétique : **dessinée par le
+projet**, en vecteurs, pour chaque famille du lot 19, avec le thème `russian/` de DCS
+comme référence visuelle et la clé citée dans SYMBOLES.md. Troisième valeur du réglage :
+**Silhouettes · OTAN · Russe**.
+
+**Fait quand** : chaque famille du lot 19 a son dessin russe ; banc et `test_symboles`
+étendus ; rendu relu à côté du thème `russian/`.
+
+#### Lot 21 — Import : chaque unité à son symbole DCS
+
+**Objectif :** qu'une mission importée ressemble à sa carte F10, et ne montre au pilote
+rien de ce que la carte lui cache.
+
+| | |
+|---|---|
+| Table type → clé | `tools/` : un outil du poste lit les `mapclasskey` des types d'unités dans l'installation de DCS et écrit `mapclass.json` (type DCS → clé → famille du lot 19). Seule la table est publiée |
+| **Inconnue à lever d'abord** | les avions WWII et les objets des mods techniques déclarent leur clé en Lua lisible (`CoreMods/WWII Units/…`, `CoreMods/tech/…`) ; **les véhicules et navires de base n'ont pas été trouvés en Lua lisible** le 2026-11-10. Pistes, dans l'ordre : les fichiers de l'éditeur relus par `bin/luae.exe` (déjà utilisé au lot 9) ; à défaut, un export de `db.Units` depuis DCS en marche, **seulement avec l'accord de Vince** pour lancer DCS. Sans table complète, un type inconnu prend la famille de sa catégorie DCS (`vehicle`, `ship`, `plane`, `helicopter`), et le bilan de l'import les compte |
+| Ce qui est importé | en plus d'aujourd'hui, **tous les groupes au sol et en mer**, un symbole par groupe à la famille de son unité principale, le détail des types dans l'étiquette. Les vols de l'IA autres que le soutien (lot 12) restent à part : ce serait un lot |
+| Caché reste caché | un groupe `hidden` n'est pas posé, par défaut. Un réglage d'import **Vue du concepteur** le pose quand même, marqué comme caché, pour celui qui prépare la mission. Le bilan de l'import dit combien d'unités sont restées cachées |
+| Bibliothèque | l'import pose en OTAN ou en russe selon le réglage ; en silhouettes, comme aujourd'hui |
+
+**Fait quand** — `node tools/test_miz.js` sur une mission fabriquée : un groupe d'artillerie,
+un de chars, un SAM caché, un type inconnu ; seul le caché manque, sauf en vue du
+concepteur ; le type inconnu prend sa famille de catégorie et figure au bilan. Sur la
+Sandbox Colchide dans Brave : les sites cachés ne paraissent plus (défaut relevé lors du
+travail sur cette mission : le tableau les dévoilait).
+
+#### Lot 22 — Les dessins de la carte F10
+
+**Objectif :** que le briefing reprenne ce que l'auteur a tracé sur la carte de sa
+mission : zones de tir, couloirs, consignes écrites.
+
+| | |
+|---|---|
+| Correspondance | `Line` → trait (segments ou main levée) ; `Polygon` → cercle, rectangle, ovale, flèche ou zone libre ; `TextBox` → texte ; `Icon` → symbole de la famille la plus proche, sinon un repère et le nom de l'icône en étiquette |
+| Style | couleurs `colorString` et `fillColorString` (RGBA), épaisseur, trait plein ou tireté ; ce que le tableau ne sait pas dessiner (motifs de bordure de `images/draw/`) prend le trait le plus proche, sans le dire faux |
+| Calques | Common et Author toujours ; Red, Blue, Neutral selon la coalition choisie à l'import ; un objet `visible = false` n'est pas posé. `hiddenOnF10Map` du rôle Pilot est respecté, comme au lot 21 |
+| Où | dans la planche de la mission, sous les symboles, ancrés (lot 1) pour ne pas être bousculés |
+
+**Fait quand** : `test_miz` sur une mission fabriquée qui porte un objet de chaque
+primitive et de chaque mode, sur deux calques ; banc : formes posées, ancrées, à leur
+couleur ; Sandbox Colchide et Registan dans Brave : traits, zones et textes à leur place
+sur la carte du théâtre, relus à côté de la carte de l'éditeur.
+
+#### Lot 23 — Écrans de bord : une bibliothèque par module, et des écrans justes
+
+**Objectif :** des écrans que le pilote reconnaît au premier coup d'œil, rangés par
+module.
+
+| | |
+|---|---|
+| Palette | un onglet **Écrans de bord** à part des formes, puis un sous-onglet par module (F/A-18C, F-16C, puis ceux des lots suivants), et dans chacun ses pages et leurs symboles. Le module choisi se garde |
+| Relevé des écarts | chaque écran rendu en grand, **à côté de la figure du manuel** (page du PDF rendue sur le poste, jamais dans le dépôt) ; chaque écart noté dans RADAR.md : présent sur la figure et absent du kit, mal placé, mal proportionné, mauvais libellé |
+| Règle assouplie | un élément **visible sur une figure** du manuel entre, avec la figure pour source, même si le texte n'en donne pas la valeur : placé et espacé **mesuré sur la figure**, et noté comme tel. Ce qui change à chaque vol (cap, vitesse, altitude, arme) reste une donnée d'étiquette, mais sa **place** sur l'écran est dessinée avec un texte d'exemple pour que l'écran ait l'air du vrai |
+| Correction | tous les écarts relevés, F/A-18C puis F-16C |
+
+**Fait quand** : la table des écarts de RADAR.md est vide pour les cinq pages ; chaque
+écran relu en image, grossi, à côté de sa figure ; banc vert, aucune régression de la vue
+radar liée (lot 3) ; démo et exports refaits.
+
+#### Lot 24 — Écrans de bord : A-10C II
+
+**Objectif :** le module de l'escadrille Sucellus, en premier des nouveaux.
+
+Source : *DCS A-10C II Flight Manual*, installé avec le module (EN et FR). Pages à
+dessiner : **TAD** (situation tactique, avec ses symboles et le bullseye), **TGP** (pod
+de désignation, réticule et données de visée), **DSMS** (état de l'armement). Mêmes règles
+que le kit radar : un module relu pour lui-même, chaque symbole et chaque libellé avec sa
+page dans RADAR.md (qui devient la table des sources de tous les écrans). Les pages exactes
+et leurs symboles se relèvent à l'ouverture du lot.
+
+Ensuite, un module à la fois, comme prévu au §5.1 : page SA du Hornet, HSD du Viper,
+F-15E, AH-64D, F-14, Mirage 2000C.
+
+**Fait quand** : comme le lot 2 (§5.4), plus la table des écarts du lot 23 vide pour
+chaque page.
+
+#### Lot 25 — Cercles de menace au rayon du système
+
+**Objectif :** que le cercle d'un SAM dise sa vraie portée, et pas une taille par défaut.
+
+**Inconnue à lever d'abord** : où DCS écrit la portée d'engagement de chaque système
+(lanceur, missile, radar de conduite) dans des fichiers lisibles. Rien n'est repris d'un
+site ou d'un wiki : seules les données du jeu font foi. Si elles ne se lisent pas, le
+lot s'arrête là et le cercle reste un symbole.
+
+Si elles se lisent : une table publiée (type → portée maximale d'engagement, et altitude
+maximale si elle existe), le cercle posé au rayon réel sur une carte, l'étiquette dit
+« portée max. DCS » — **une enveloppe, pas une zone de destruction**, comme la vue radar
+qui montre la géométrie sans simuler la détection.
+
+#### Lot 26 — Recherche dans la palette
+
+Un champ en tête de palette : taper « SA-11 », « ravitailleur » ou « TWS » ne laisse que
+les formes et les écrans dont le nom, la famille ou le type DCS correspond ; `Échap` vide
+le champ. Utile dès que les bibliothèques et les modules s'ajoutent.
+
+**Fait quand** : au banc, rouges avant le code : filtre, sans résultat, `Échap`, dans les
+deux langues.
+
+**Ordre proposé** : 19, puis 23 (les deux constats de Vince), puis 21 et 22 (l'import qui
+en profite), 24, puis 20, 26 et 25. Chaque lot attend son « GO ».
+
 ## 8. Hors plan
 
 - **Débriefing sur trace Tacview** (ETAT §8) : l'angle le plus différenciant à terme,
@@ -833,6 +1026,11 @@ avis contraire :
 | Nouveau briefing : préférences d'affichage gardées, pas de raccourci | ce sont des réglages du poste, pas le briefing ; `Ctrl+N` ouvre une fenêtre du navigateur |
 | La copie d'un objet accroché reste accrochée ; touche `J` pour accrocher | deux ravitailleurs sur une orbite ; `J` est libre, `A` est la flèche |
 | Une marque de piste posée hors d'une piste désigne un écho (piste inconnue du F/A-18C, piste système du F-16C) au lieu d'être refusée | comme au cockpit (F/A-18C p. 176, F-16C p. 416) ; le refus passait pour une panne, signalée par Vince |
+| Symboles : trois bibliothèques au choix (silhouettes, OTAN, russe), réglées pour le briefing entier ; les silhouettes restent | elles seules ont une vue de profil et servent à expliquer une manœuvre ; changer de dessin ne change pas le sens du briefing |
+| OTAN dessiné par milsymbol, version figée et copiée dans le dépôt ; aucune icône de DCS publiée | bibliothèque libre (MIT) de la norme que DCS imite ; hors ligne ; les images d'ED leur appartiennent |
+| Import : ce que la carte F10 cache n'est pas posé, sauf en vue du concepteur | un briefing ne doit pas dévoiler au pilote ce que la mission lui cache |
+| Écrans de bord : un élément visible sur une figure du manuel entre, mesuré sur la figure | les écrans amputés de ce que le texte ne chiffrait pas ne ressemblaient pas au jeu ; la figure est déjà une capture du jeu (§5.3) |
+| Portées de menace : données du jeu seules, sinon pas de cercle au rayon | un rayon faux est pire qu'un symbole |
 
 **Décidé par Vince :**
 
@@ -866,3 +1064,4 @@ avis contraire :
 | 2026-10-09 | « GO » de Vince : lot 16 en deux livraisons ; livraison 1 (l'écran en anglais, v1.17) faite, fusion à valider |
 | 2026-10-09 | Fusion de la livraison 1 (#25) : v1.17 en ligne, vérifiée sur l'adresse publique ; livraison 2 (guides, exports, v1.18) faite |
 | 2026-10-10 | Fusion de la livraison 2 (#26) : v1.18 en ligne, palette FCR et guide anglais vérifiés sur l'adresse publique ; lot 16 clos |
+| 2026-11-10 | Chantier Symbologie DCS et écrans de bord : plan écrit à sa demande (lots 19 à 26), aucun lot engagé |
