@@ -87,6 +87,10 @@ require('vm').runInContext(symbols + ';this.__S = SHAPES; this.__G = GROUPS;', s
 const labels = Object.values(sandbox.__S).map(s => s.label);
 ok(labels.length >= 40, `seulement ${labels.length} noms de formes lus`);
 for (const s of labels) ok(own(s), `forme sans traduction : « ${s} »`);
+/* le repère d'une famille DCS vue en silhouettes (lot 19) s'affiche lui aussi */
+const silTags = Object.values(sandbox.__S).map(s => s.silTag).filter(Boolean);
+ok(silTags.length >= 15, `seulement ${silTags.length} repères de familles DCS lus`);
+for (const s of silTags) ok(own(s), `repère sans traduction : « ${s} »`);
 const groups = sandbox.__G.map(g => g[1]);
 ok(groups.length >= 6, `seulement ${groups.length} groupes lus`);
 for (const s of groups) ok(own(s), `groupe sans traduction : « ${s} »`);
@@ -150,7 +154,7 @@ for (const [k, v] of Object.entries(EN)){
 }
 /* une clé que plus rien n'affiche est du poids mort : elle doit apparaître dans un source */
 const sources = ['index.html', 'board.js', 'symbols.js', 'theatres.js', 'miz.js'].map(read).join('\n');
-const shown = new Set([...pageStrings.map(p => p[0]), title, ...trKeys, ...labels, ...groups, ...theatres.map(t => t.name), ...mizErrors]);
+const shown = new Set([...pageStrings.map(p => p[0]), title, ...trKeys, ...labels, ...silTags, ...groups, ...theatres.map(t => t.name), ...mizErrors]);
 for (const k of Object.keys(EN)){
   if (k.startsWith('html:')) ok(i18nBlocks.includes(k.slice(5)), `clé ${k} sans bloc data-i18n dans la page`);
   else if (!/^[a-zàâçéèêîôû]+:/.test(k)) ok(shown.has(k) || sources.includes(k), `clé morte : « ${k} »`);

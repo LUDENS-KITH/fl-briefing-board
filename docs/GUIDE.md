@@ -24,6 +24,37 @@ Rien n'est une image : chaque forme est **paramétrique**. C'est ce qui la rend
 orientable, redimensionnable et **recolorable sans perte**. Pour en ajouter une :
 [docs/MODELE.md §8](MODELE.md).
 
+## Symboles OTAN, comme la carte F10
+
+Le bouton **Silhouettes** de la barre passe tout le briefing aux **Symboles OTAN**, ceux
+que DCS dessine sur la carte F10 et dans l'éditeur de mission (norme MIL-STD-2525,
+APP-6) ; un second clic revient aux silhouettes. Rien n'est perdu : chaque objet garde sa
+place, son cap, sa taille, sa couleur et son nom.
+
+- **Comme dans DCS** : un seul cadre pour les deux camps, rempli de la couleur de l'objet,
+  le trait et le signe en noir. Un hostile n'y est donc pas un losange : c'est sa
+  couleur qui dit son camp, comme sur la carte du jeu.
+- **Le cap** : le symbole reste droit, et la flèche de direction de la norme montre le cap
+  posé d'un geste. Un symbole posé d'un clic n'en a pas ; un SAM, un radar ou des canons
+  antiaériens non plus.
+- **15 familles de plus**, celles que DCS distingue sur sa carte, dans la palette en
+  symboles OTAN seulement : avion d'attaque, de transport, de reconnaissance, hélicoptère
+  d'attaque, véhicule de combat, artillerie automotrice, lance-roquettes, véhicule à roues,
+  canons antiaériens, SAM courte, moyenne et longue portée, poste de commandement, guerre
+  électronique, sous-marin. Revenu aux silhouettes, chacune prend le dessin le plus proche
+  et un repère écrit dessous (« A », « VCI », « SAM-LP »…).
+- **Ce qui ne change pas** : les marqueurs tactiques (ami, hostile, waypoint, objectif…),
+  l'armement et les effets, l'aéroport, le kit radar et la coupe gardent leur dessin. La
+  norme n'a pas de symbole pour ces repères de briefing, ni de vue de profil.
+- **Le réglage suit le briefing** : il est gardé dans le navigateur et dans le fichier de
+  briefing (⇩ Briefing), et ✚ Nouveau le garde. Un ancien fichier s'ouvre en silhouettes.
+  Les exports (PNG, kneeboard) et la présentation dessinent ce qui est à l'écran.
+- **Sur fond sombre**, un liseré clair entoure le symbole, pour que le trait noir reste
+  visible. La carte F10 du jeu est claire et n'en a pas besoin.
+
+La démo a une planche **Ordre de bataille** pour essayer. Le code de chaque symbole et
+l'icône DCS qu'il reproduit : [docs/SYMBOLES.md](SYMBOLES.md).
+
 ## Kit radar — F/A-18C et F-16C
 
 Deux groupes de la palette, **Radar F/A-18C** et **Radar F-16C**, pour expliquer la

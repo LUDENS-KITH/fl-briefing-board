@@ -31,6 +31,10 @@
   Posées et orientées d'un seul geste, recolorables, étiquetées (« UZI 1-1 · FL250 »),
   ancrées pour poser par-dessus sans les bousculer, accrochées l'une à l'autre — le
   ravitailleur reste sur la branche de son hippodrome à tout zoom de la carte.
+- **Les symboles OTAN de la carte F10** — un clic passe tout le briefing des silhouettes
+  aux symboles que DCS dessine sur sa carte et dans l'éditeur de mission, avec les
+  familles qu'il distingue : avion d'attaque, artillerie, SAM courte, moyenne et longue
+  portée, poste de commandement…
 - **Les cartes des 14 théâtres DCS** — topographique, satellite ou plan routier, cadrées
   sur chaque théâtre. La carte est vivante : on zoome, on se déplace, tout suit le
   terrain. **Distances et caps exacts, sans étalonnage.**
@@ -107,7 +111,8 @@ Le lien Discord permanent à partager dans les posts, hors image, est :
 
 ## Pour les développeurs
 
-Zéro dépendance, zéro build : HTML, JavaScript et Canvas. Le projet documente ce qu'il
+Zéro build, une seule bibliothèque, copiée dans le dépôt (milsymbol, pour les symboles
+OTAN) : HTML, JavaScript et Canvas. Le projet documente ce qu'il
 sait **et ce qu'il n'a pas vérifié** :
 
 | | |

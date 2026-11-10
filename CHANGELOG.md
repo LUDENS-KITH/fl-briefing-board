@@ -3,6 +3,40 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.19 — 2026-11-10
+
+Lot 19 du [plan d'action](docs/PLAN.md) : **les symboles OTAN, comme la carte F10 de DCS**.
+
+### Ajouté
+- **Réglage Silhouettes / Symboles OTAN** dans la barre : tout le briefing passe aux
+  symboles que DCS dessine sur la carte F10 et dans l'éditeur de mission (MIL-STD-2525,
+  APP-6), et revient aux silhouettes d'un clic. Comme dans le jeu : un seul cadre pour les
+  deux camps, rempli de la couleur de l'objet, trait et signe noirs. La flèche de
+  direction de la norme montre le cap posé d'un geste ; un liseré clair détache le
+  symbole d'un fond sombre.
+- **15 familles de la carte DCS** dans la palette, en symboles OTAN : avion d'attaque, de
+  transport, de reconnaissance, hélicoptère d'attaque, véhicule de combat, artillerie,
+  lance-roquettes, véhicule à roues, canons antiaériens, SAM courte, moyenne et longue
+  portée, poste de commandement, guerre électronique, sous-marin. En silhouettes, elles
+  prennent le dessin le plus proche et un repère écrit.
+- Le réglage est gardé dans le navigateur et dans le fichier de briefing ; un fichier
+  d'avant la v1.19 s'ouvre en silhouettes. Kneeboard, PNG et présentation le suivent.
+- Démo : une planche **Ordre de bataille**, à voir en symboles OTAN.
+- [docs/SYMBOLES.md](docs/SYMBOLES.md) : le code de chaque symbole et l'icône DCS qu'il
+  reproduit. Les symboles sont dessinés par [milsymbol](https://github.com/spatialillusions/milsymbol)
+  (licence MIT) ; aucune image de DCS n'est publiée.
+
+### Inchangé
+- Marqueurs tactiques, armement et effets, aéroport, kit radar et coupe gardent leur
+  dessin : la norme n'a pas de symbole pour ces repères, ni de vue de profil.
+
+### Vérifié en exécutant
+`test_symboles` 285/285, nouveau, rouge sur la v1.18 (29 échecs) · banc 90/90 en français
+et 90/90 en anglais, les 7 scénarios nouveaux rouges sur la v1.18 · `test_i18n`
+2 115/2 115 · `test_miz` 91/91 · `test_radar` 26/26 · `test_seo` 135/135 ·
+`test_magnetic` 100/100. Les 28 symboles codés comparés aux icônes de l'installation DCS ;
+le rendu n'a pas été vu sur la carte F10 en jeu.
+
 ## v1.18 — 2026-10-09
 
 Lot 16 du [plan d'action](docs/PLAN.md), livraison 2 : **les guides et les exports suivent la langue**.

@@ -17,7 +17,8 @@ propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répo
 demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lot 13 à celle du 2026-10-08. Les lots 14 à 17
 forment le chantier **Visibilité** ([VISIBILITE.md](VISIBILITE.md)), demandé le 2026-10-08 :
 proposés, non engagés. Les lots 19 à 26 forment le chantier **Symbologie DCS et écrans de
-bord**, demandé le 2026-11-10 : plan écrit à sa demande, lots non engagés.
+bord**, demandé le 2026-11-10 : plan écrit à sa demande ; lot 19 livré (v1.19), les autres non
+engagés.
 
 ## 2. Vue d'ensemble
 
@@ -41,7 +42,7 @@ bord**, demandé le 2026-11-10 : plan écrit à sa demande, lots non engagés.
 | 16 | Interface en anglais | demande | M-L | — | v1.17, v1.18 | fait le 2026-10-09 (livraisons 1 et 2) |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
-| 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | — | proposé le 2026-11-10 |
+| 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | v1.19 | fait le 2026-11-10, fusion à valider |
 | 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
 | 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | — | proposé le 2026-11-10 |
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | — | proposé le 2026-11-10 |
@@ -878,6 +879,30 @@ chaque forme a un SIDC valide pour milsymbol et une ligne dans SYMBOLES.md. Rend
 en image, grossi, à côté des icônes `nato/` de DCS (relevé hors dépôt). Démo : une
 planche en OTAN.
 
+**Fait le 2026-11-10 (v1.19)**, fusion à valider. 13 formes codées et 15 familles de la
+carte DCS ([SYMBOLES.md](SYMBOLES.md)) ; `test_symboles` 285/285 et 7 scénarios au banc,
+rouges sur la v1.18 ; banc 90/90 dans les deux langues. **Écarts au plan**, tous
+relevés dans l'installation de DCS à l'ouverture du lot :
+
+- **Pas d'affiliation** : DCS n'a qu'une icône par clé, au cadre « ami », pour les deux
+  camps, teinte à la couleur de la coalition. Un hostile posé en OTAN est donc le cadre
+  rempli de rouge, pas un losange ; le critère « losange rouge » tombe. Ami, hostile et
+  inconnu restent des marqueurs tactiques, inchangés.
+- **Couleur** : celle de l'objet, puisqu'un objet posé à la main n'a pas de coalition ;
+  bleu et rouge restent les couleurs de la palette.
+- **Aéroport sans code** : la carte DCS dessine les aérodromes elle-même, sans icône du
+  thème OTAN. Le FARP, icône hors norme de DCS, est dessiné par le projet.
+- **Infanterie absente** : `classifier.lua` ne déclare aucune icône d'infanterie ; le
+  lot 21 lira celle que DCS donne aux fantassins. Le « camion » est le véhicule à roues
+  de DCS (0005).
+- **Démo** : le réglage vaut pour tout le briefing, une planche seule ne peut pas être en
+  OTAN. La démo reste en silhouettes et gagne la planche « Ordre de bataille », qu'un clic
+  sur le réglage montre en OTAN.
+- **Pas de flèche** sur un symbole posé d'un clic (cap nul) ni sur les sites
+  fixes (SAM, radar, canons antiaériens, poste de commandement).
+- **Fond sombre** : liseré clair autour du symbole, absent de DCS dont la carte est claire.
+- Le réglage n'entre pas dans l'historique : un second clic le défait.
+
 #### Lot 20 — Bibliothèque russe, comme DCS
 
 **Objectif :** la même chose pour les escadrilles qui jouent DCS en thème russe.
@@ -1065,3 +1090,4 @@ avis contraire :
 | 2026-10-09 | Fusion de la livraison 1 (#25) : v1.17 en ligne, vérifiée sur l'adresse publique ; livraison 2 (guides, exports, v1.18) faite |
 | 2026-10-10 | Fusion de la livraison 2 (#26) : v1.18 en ligne, palette FCR et guide anglais vérifiés sur l'adresse publique ; lot 16 clos |
 | 2026-11-10 | Chantier Symbologie DCS et écrans de bord : plan écrit à sa demande (lots 19 à 26), aucun lot engagé |
+| 2026-11-10 | « Oui, lance le lot 19 » : bibliothèque OTAN livrée en v1.19, fusion à valider ; écarts au plan notés au lot |

@@ -24,6 +24,37 @@ has a T-tail, and the bomber has four engines.
 Nothing is a bitmap. Every shape is parametric, so it can be rotated, resized and
 recolored without quality loss. To add a shape, see [docs/MODELE.md §8](MODELE.md).
 
+## NATO Symbols, Like the F10 Map
+
+The **Silhouettes** button in the toolbar switches the whole briefing to **NATO symbols**,
+the ones DCS draws on the F10 map and in the mission editor (MIL-STD-2525, APP-6). Click
+it again to go back to silhouettes. Nothing is lost: every object keeps its position,
+heading, size, color and name.
+
+- **As in DCS**: one frame for both sides, filled with the object's color, with the frame
+  and the icon in black. A hostile is not a diamond: its color tells its side, as on the
+  game's map.
+- **Heading**: the symbol stays upright, and the standard's direction arrow shows a
+  heading set with a drag. A symbol placed with a single click has none, and neither does
+  a SAM, a radar or anti-aircraft guns.
+- **15 more families**, the ones DCS tells apart on its map, in the palette in NATO
+  symbols only: attack, transport and reconnaissance aircraft, attack helicopter, combat
+  vehicle, self-propelled artillery, rocket launcher, wheeled vehicle, anti-aircraft guns,
+  short-, medium- and long-range SAM, command post, electronic warfare, submarine. Back
+  in silhouettes, each one takes the closest drawing with a written tag under it ("A",
+  "IFV", "SAM-LR"…).
+- **What does not change**: tactical markers (friendly, hostile, waypoint, objective…),
+  weapons and effects, the airfield, the radar kit and the profile view keep their
+  drawing. The standard has no symbol for these briefing markers, and no side view.
+- **The setting belongs to the briefing**: it is kept in the browser and in the briefing
+  file (⇩ Briefing), and ✚ New keeps it. An older file opens in silhouettes. Exports
+  (PNG, kneeboard) and presentation mode draw what is on screen.
+- **On a dark background**, a light outline surrounds the symbol so that the black lines
+  stay visible. The game's F10 map is light and does not need one.
+
+The demo has an **Order of battle** board to try it. Each symbol's code and the DCS icon
+it reproduces: [docs/SYMBOLES.md](SYMBOLES.md) (in French).
+
 ## Radar Kit — F/A-18C and F-16C
 
 Two palette groups, **Radar F/A-18C** and **Radar F-16C**, explain each aircraft's

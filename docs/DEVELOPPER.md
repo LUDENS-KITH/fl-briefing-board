@@ -1,20 +1,23 @@
 # Développer — FL Briefing Board
 
-Zéro dépendance, zéro build : on modifie, on recharge la page. Le contrat du moteur est dans [MODELE.md](MODELE.md), l'état vérifié dans [ETAT.md](ETAT.md).
+Zéro build : on modifie, on recharge la page. Une seule bibliothèque, milsymbol (MIT),
+pour les symboles OTAN, copiée dans `vendor/` et jamais appelée sur un CDN : le tableau
+marche hors ligne. Le contrat du moteur est dans [MODELE.md](MODELE.md), l'état vérifié dans [ETAT.md](ETAT.md).
 
 ## Structure du projet
 
 ```
 FL Briefing Board/
-├─ index.html        coquille : barre d'outils, palette, styles          (329 l.)
-├─ symbols.js        les 28 formes, vues de profil, kit radar           (724 l.)
+├─ index.html        coquille : barre d'outils, palette, styles          (381 l.)
+├─ symbols.js        les formes et leurs codes OTAN, profils, kit radar (796 l.)
 ├─ i18n.js           langue de l'interface : dictionnaire FR → EN-US, tr(), traduction de la page
-├─ board.js          le moteur : planches, carte, coupe, route, exports (2 467 l.)
+├─ board.js          le moteur : planches, carte, coupe, route, exports (2 810 l.)
 ├─ theatres.js       14 théâtres DCS et 791 aérodromes (généré, ne pas retoucher)
 ├─ magnetic.js       modèle magnétique WMM2025 (généré, ne pas retoucher)
 ├─ radar.js          vue radar liée : géométrie du B-scope, fonctions pures
 ├─ miz.js            lire une mission .miz : zip, table Lua, projection ; fonctions pures
 ├─ projections.js    projection de chaque théâtre DCS (généré, ne pas retoucher)
+├─ vendor/           milsymbol 3.0.4 et sa licence MIT, copiés sans modification
 ├─ assets/           exports du logo (écusson, icône, .ico du raccourci) — ne pas retoucher ;
 │                    assets/site/ : feuille de style et captures des pages de présentation
 ├─ fr/, en/          pages de présentation, statiques (lot 15) ; la base des adresses absolues
@@ -32,6 +35,7 @@ FL Briefing Board/
 │  ├─ test_miz.js       vérifie la projection (contre pyproj), la table Lua et une .miz
 │  ├─ test_i18n.js      vérifie que chaque texte affiché a sa traduction anglaise, et que
 │  │                    les guides citent les boutons de leur langue
+│  ├─ test_symboles.js  vérifie chaque code OTAN (milsymbol), sa source DCS et SYMBOLES.md
 │  ├─ test_seo.js       vérifie ce que lit un moteur : balises, aperçu, hreflang, plan du site ;
 │  │                    avec une adresse en argument, les pages servies
 │  ├─ build_projections.py mesure la projection des théâtres sur les balises du jeu (pyproj, numpy)
@@ -50,6 +54,7 @@ FL Briefing Board/
    ├─ PLAN.md        ce qui vient ensuite : lots, ordre, critères de fin
    ├─ VISIBILITE.md  comment l'outil se fait trouver : constat, ordre, diffusion, mesure
    ├─ RADAR.md       kit radar : la source de chaque libellé et de chaque symbole
+   ├─ SYMBOLES.md    symboles OTAN : le code de chaque forme et l'icône DCS reproduite
    ├─ MODELE.md      contrat interne : objets, interaction, persistance, ajout d'une forme
    └─ SOUTENIR.md    Ko-Fi, invitations Discord, crédits des soutiens
 ```
@@ -72,6 +77,7 @@ node tools/test_magnetic.js
 node tools/test_radar.js
 node tools/test_miz.js
 node tools/test_i18n.js
+node tools/test_symboles.js
 ```
 
 Le premier vérifie la déclinaison magnétique contre les 100 valeurs de test officielles
@@ -86,6 +92,10 @@ Le quatrième, `test_i18n.js`, garde l'interface anglaise : tout texte affiché 
 c'est changer sa clé. Les noms DCS ne se traduisent pas. Un bouton cité dans un guide
 avec son pictogramme (« ⇧ Ouvrir », « ⇧ Open ») doit exister tel quel dans la langue de
 ce guide.
+
+Le cinquième, `test_symboles.js`, garde la bibliothèque OTAN : chaque forme qui porte un
+code (`nato`) le voit dessiné par milsymbol, cite la clé de l'icône DCS qu'elle reproduit
+(`dcs`) et a sa ligne dans [SYMBOLES.md](SYMBOLES.md).
 
 ```bash
 python -m http.server 8765

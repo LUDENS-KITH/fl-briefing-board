@@ -37,6 +37,8 @@ pas d'identifiant Discord complet et pas de montant versé sans accord explicite
 | Satellite | Esri World Imagery — Esri, Maxar, Earthstar Geographics | conditions d'Esri, attribution affichée |
 | Déclinaison magnétique | Modèle magnétique mondial [WMM2025](https://www.ncei.noaa.gov/products/world-magnetic-model), NOAA | domaine public |
 | Projection des théâtres (`projections.js`) | quatre valeurs par théâtre, **mesurées** par `tools/build_projections.py` sur les balises d'une installation de DCS World, qui portent leur position DCS et leur latitude/longitude ; le fichier du jeu qui déclare la projection est chiffré et n'est pas lu | mesures ; aucune position de balise n'est publiée |
+| Symboles OTAN (`vendor/milsymbol-3.0.4.js`) | [milsymbol](https://github.com/spatialillusions/milsymbol) 3.0.4, © Måns Beckman, copié sans modification | licence MIT, texte dans `vendor/milsymbol-LICENSE.txt` |
+| Icônes de la carte DCS | thème « OTAN » de l'éditeur de mission (`MissionEditor/data/NewMap/images/nato/`), regardé pour choisir les codes ([docs/SYMBOLES.md](docs/SYMBOLES.md)) | propriété d'Eagle Dynamics ; **aucune n'est publiée** : le tableau dessine la norme, et le FARP d'après l'icône |
 | Emprise des théâtres (`theatres.js`) | quatre coordonnées par théâtre, calculées depuis les positions d'aérodromes du projet [DCS Web Viewer](https://github.com/DCS-Web-Editor/dcs-web-viewer-deploy) | bornes géographiques seulement ; **aucune donnée d'aérodrome n'est publiée** |
 
 Les tuiles de carte sont chargées depuis ces services au moment de l'affichage ; aucune

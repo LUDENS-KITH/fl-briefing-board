@@ -1464,8 +1464,131 @@ test('Langue : le bouton de langue bascule l\'interface, garde le choix et le tr
   ok(app(g).d.documentElement.lang === 'fr' && localStorage.getItem(LANG_KEY) === 'fr', 'le retour au français ne prend pas');
 });
 
+/* ---------- lot 19 : symboles OTAN, comme la carte F10 de DCS ---------- */
+
+/* pixels du tableau autour d'un point, d'une couleur à 14 près par canal */
+const PX = (x, y, r, rgb) => `(() => { drawFrame(); const g = cv.getContext('2d'), k = cv.width / cv.clientWidth;
+  const d = g.getImageData((${x} - ${r}) * k, (${y} - ${r}) * k, ${2 * r} * k, ${2 * r} * k).data; let n = 0;
+  for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - ${rgb[0]}) < 14 && Math.abs(d[i + 1] - ${rgb[1]}) < 14
+    && Math.abs(d[i + 2] - ${rgb[2]}) < 14 && d[i + 3] > 240) n++; return n; })()`;
+const symLib = a => a.s('lib');
+
+test('Symboles : le réglage passe tout le briefing de Silhouettes à OTAN, garde la sélection et l\'historique', async (ok) => {
+  const a = await open();
+  const btn = a.d.getElementById('lib');
+  ok(!!btn, 'pas de réglage Symboles dans la barre');
+  if (!btn) return;
+  ok(symLib(a) === 'sil', `réglage à l'ouverture : ${symLib(a)}`);
+  a.tile('fighter'); a.click(400, 300);
+  a.button('.tab.add'); a.tile('sam'); a.click(300, 200);
+  a.key('v'); a.click(300, 200);
+  const past = a.s('past.length'), selK = a.s('sel && sel.k');
+  a.button('#lib');
+  ok(symLib(a) === 'nato', `réglage après un clic : ${symLib(a)}`);
+  ok(/OTAN|NATO/.test(btn.textContent), `libellé du bouton : ${btn.textContent}`);
+  ok(a.s('past.length') === past && a.s('sel && sel.k') === selK, 'la sélection ou l\'historique ont bougé');
+  ok(a.s('natoSpec(objs.find(o => o.k === "sam")).sidc') === 'SFGPUCDM-------', `code du SAM : ${a.s('JSON.stringify(natoSpec(sel))')}`);
+  a.button('.tab:not(.add)');
+  ok(a.s('natoSpec(objs.find(o => o.k === "fighter")).sidc') === 'SFAPMFF--------', 'la première planche n\'a pas suivi');
+  a.button('#lib');
+  ok(symLib(a) === 'sil' && a.s('natoSpec(objs[0])') === null, 'le retour aux silhouettes ne prend pas');
+});
+
+test("Symboles : le choix survit à la réouverture et au fichier de briefing ; un fichier sans réglage s'ouvre en silhouettes", async (ok) => {
+  let a = await open();
+  if (!a.d.getElementById('lib')){ ok(false, 'pas de réglage Symboles'); return; }
+  a.tile('fighter'); a.click(400, 300);
+  a.button('#lib');
+  a = await reload();
+  ok(symLib(a) === 'nato', `après réouverture : ${symLib(a)}`);
+  const f = await a.saved();
+  ok(f && JSON.parse(f.text).lib === 'nato', 'le réglage n\'est pas dans le fichier');
+  const b = await open();
+  b.openFile(new b.w.File([f.text], f.name, { type:'application/json' })); await pause(400);
+  ok(symLib(b) === 'nato', `fichier rouvert sur un poste vierge : ${symLib(b)}`);
+  const old = JSON.parse(f.text); delete old.lib;
+  b.w.confirm = () => true;
+  b.openFile(b.json(old)); await pause(400);
+  ok(symLib(b) === 'sil', `fichier sans réglage : ${symLib(b)}`);
+});
+
+test('Symboles OTAN : un chasseur se dessine comme sur la carte F10 — cadre et lettre noirs, rempli de sa couleur', async (ok) => {
+  const a = await open();
+  a.button('#theme');                                       // fond clair : le noir s'y voit
+  a.tile('fighter'); a.click(400, 300);
+  /* un carré de 6 px dans le dôme, sous la lettre : plein de bleu seulement s'il est rempli */
+  const noirSil = a.s(PX(400, 300, 40, [0, 0, 0])), bleuSil = a.s(PX(390, 312, 3, [47, 140, 255]));
+  if (!a.d.getElementById('lib')){ ok(false, 'pas de réglage Symboles'); return; }
+  a.button('#lib');
+  const noir = a.s(PX(400, 300, 40, [0, 0, 0])), bleu = a.s(PX(390, 312, 3, [47, 140, 255]));
+  ok(noirSil === 0, `silhouette : ${noirSil} pixels noirs`);
+  ok(noir > 40, `OTAN : ${noir} pixels noirs (cadre et lettre F)`);
+  ok(bleu === 36 && bleuSil < 36, `intérieur du dôme : ${bleu}/36 pixels pleins de bleu en OTAN, ${bleuSil}/36 en silhouette`);
+});
+
+test('Symboles OTAN : les familles DCS sont dans la palette en OTAN seulement ; posées, elles gardent un dessin en silhouettes', async (ok) => {
+  const a = await open();
+  ok(!a.d.querySelector('.tile[data-k="sam_long"]'), 'SAM longue portée déjà dans la palette des silhouettes');
+  if (!a.d.getElementById('lib')){ ok(false, 'pas de réglage Symboles'); return; }
+  a.button('#lib');
+  const fam = ['attack', 'cargo', 'recon', 'attack_helo', 'ifv', 'artillery', 'mlrs', 'truck', 'aaa',
+               'sam_short', 'sam_med', 'sam_long', 'cp', 'ew', 'sub'];
+  const absent = fam.filter(k => !a.d.querySelector(`.tile[data-k="${k}"]`));
+  ok(!absent.length, `absentes de la palette OTAN : ${absent.join(', ')}`);
+  a.tile('mlrs'); a.click(400, 300);
+  ok(a.s('natoSpec(objs[0]).sidc') === 'SFGPUCFRMS-----', `code du lance-roquettes : ${a.s('JSON.stringify(natoSpec(objs[0]))')}`);
+  a.button('#lib');
+  ok(!a.d.querySelector('.tile[data-k="mlrs"]'), 'les familles DCS restent dans la palette des silhouettes');
+  ok(a.s('tool') === 'select', `outil après le retour : ${a.s('tool')}`);
+  ok(a.s(PX(400, 300, 30, [47, 140, 255])) > 0, 'le lance-roquettes posé ne se dessine plus en silhouettes');
+});
+
+test("Symboles OTAN : le geste de pose oriente la flèche de direction ; posé d'un clic, pas de flèche ; un SAM n'en a pas", async (ok) => {
+  const a = await open();
+  if (!a.d.getElementById('lib')){ ok(false, 'pas de réglage Symboles'); return; }
+  a.button('#lib');
+  a.tile('fighter'); a.drag(400, 300, 490, 300);
+  ok(Math.abs(a.s('natoSpec(objs[0]).direction') - 90) < 3, `direction : ${a.s('JSON.stringify(natoSpec(objs[0]))')}`);
+  a.tile('tank'); a.click(250, 300);
+  ok(a.s('natoSpec(objs[1]).direction') === null, `posé d'un clic : ${a.s('JSON.stringify(natoSpec(objs[1]))')}`);
+  a.tile('sam'); a.drag(250, 450, 330, 450);
+  ok(a.s('natoSpec(objs[2]).direction') === null, `SAM : ${a.s('JSON.stringify(natoSpec(objs[2]))')}`);
+});
+
+test('Symboles OTAN : le kneeboard dessine les symboles OTAN', async (ok) => {
+  const a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  const black = c => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i] < 14 && d[i + 1] < 14 && d[i + 2] < 14 && d[i + 3] > 240) n++; return n; };
+  const blue = c => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0;
+    for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 47) < 14 && Math.abs(d[i + 1] - 140) < 14 && Math.abs(d[i + 2] - 255) < 14 && d[i + 3] > 240) n++; return n; };
+  const sil = await a.w.kneeboardCanvas();
+  if (!a.d.getElementById('lib')){ ok(false, 'pas de réglage Symboles'); return; }
+  a.button('#lib');
+  const nato = await a.w.kneeboardCanvas();
+  ok(blue(nato) > 1.5 * blue(sil), `pixels bleus pleins : ${blue(nato)} en OTAN, ${blue(sil)} en silhouettes`);
+  ok(black(nato) > black(sil) + 50, `pixels noirs (cadre, lettre) : ${black(nato)} en OTAN, ${black(sil)} en silhouettes`);
+});
+
+test('Symboles : ✚ Nouveau garde le réglage ; la mission importée en OTAN prend les codes de ses menaces', async (ok) => {
+  const a = await open();
+  if (!a.d.getElementById('lib')){ ok(false, 'pas de réglage Symboles'); return; }
+  a.button('#lib');
+  a.tile('fighter'); a.click(400, 300);
+  a.w.confirm = () => true; a.button('#new');
+  ok(symLib(a) === 'nato', `après ✚ Nouveau : ${symLib(a)}`);
+  a.drop(a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]])); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(200);
+  ok(a.s('natoSpec(objs.find(o => o.k === "sam")).sidc') === 'SFGPUCDM-------', 'le SAM importé n\'a pas son code OTAN');
+  ok(a.s('natoSpec(objs.find(o => o.k === "fighter")).sidc') === 'SFAPMFF--------', 'le vol importé n\'a pas son code OTAN');
+  ok(a.s('natoSpec(objs.find(o => o.k === "wp"))') === null, 'un waypoint a changé de dessin');
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
+  /* ?grep=… ne joue que les scénarios dont le nom contient ce texte */
+  const ONLY = new URLSearchParams(location.search).get('grep');
+  if (ONLY) T.splice(0, T.length, ...T.filter(t => t.nom.includes(ONLY)));
   /* le cache HTTP servirait au cadre la version d'avant la modification : le banc
      aurait alors jugé l'ancien code. On recharge la page et chaque script à l'adresse
      exacte qu'elle cite, paramètre de version compris (board.js?v=…). */
