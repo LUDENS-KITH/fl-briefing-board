@@ -57,10 +57,15 @@ l'icône DCS qu'il reproduit : [docs/SYMBOLES.md](SYMBOLES.md).
 
 ## Kit radar — F/A-18C et F-16C
 
-Deux groupes de la palette, **Radar F/A-18C** et **Radar F-16C**, pour expliquer la
-page radar air-air de chaque appareil. Tout est dessiné d'après le manuel ED du module,
-et chaque élément cite sa page : [RADAR.md](RADAR.md). Les deux symbologies ne se
-mélangent pas : une marque ne se pose que sur une piste de son appareil.
+Les écrans ont leur onglet dans la palette : **Écrans de bord**, à côté de **Formes**.
+Dedans, un bouton par module (**F/A-18C**, **F-16C**), et pour chacun ses pages radar
+air-air et leurs symboles. L'onglet et le module choisis se gardent. Tout est dessiné
+d'après le manuel ED du module, et chaque élément cite sa page : [RADAR.md](RADAR.md).
+Chaque écran reprend ce que montre la figure du manuel : verre, graduations, libellés à
+leur place (en colonne ou encadrés comme dans le cockpit), et les champs de données (cap,
+vitesse, altitude, arme…) à leur place avec le texte d'exemple de la figure ; les vraies
+valeurs de votre vol vont dans l'étiquette. Les deux symbologies ne se mélangent pas :
+une marque ne se pose que sur une piste de son appareil.
 
 **F/A-18C — page RDR ATTK**
 

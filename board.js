@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.19', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.20', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -1331,7 +1331,7 @@ function backToSelect(){
    vignette `keep` (la L&S) ne se retire pas en silence : refus. */
 const radarGroup = g => Object.values(SHAPES).some(k => k.g === g && k.mark);
 function markTrack(x, y, mk){
-  const sh = SHAPES[symKey], name = g => (GROUPS.find(([k]) => k === g) || [])[1];
+  const sh = SHAPES[symKey], name = g => { const r = GROUPS.find(([k]) => k === g) || []; return r[2] || r[1]; };   // le module, s'il y en a un (lot 23)
   const kind = o => o.t === 'sym' && SHAPES[o.k] || {};
   const mine = o => kind(o).g === sh.g, other = o => kind(o).g !== sh.g && radarGroup(kind(o).g);
   let t = topmost(x, y, o => kind(o).track && mine(o)), raw = null;
@@ -1767,13 +1767,33 @@ addEventListener('paste', e => {
 
 /* ---------- palette de formes ----------
    Refaite quand la bibliothèque change : ses vignettes dessinent la bibliothèque choisie,
-   et les familles DCS sans silhouette n'y sont qu'en OTAN (lot 19). */
+   et les familles DCS sans silhouette n'y sont qu'en OTAN (lot 19).
+   Deux onglets (lot 23) : les formes, et les écrans de bord, rangés par module. Un groupe
+   d'écrans porte son module en troisième champ de GROUPS. Toutes les vignettes restent
+   dans la page ; l'onglet et le module choisis décident lesquelles se voient. */
+let palTab = 'formes', palMod = null;
+const MODULES = [...new Set(GROUPS.map(g => g[2]).filter(Boolean))];
 function buildPalette(){
 pal.textContent = '';
-for (const [g, titre] of GROUPS){
-  const h = document.createElement('div'); h.className = 'grp'; h.textContent = titre;
+const tabs = document.createElement('div'); tabs.id = 'paltabs';
+for (const [v, t] of [['formes', 'Formes'], ['ecrans', 'Écrans de bord']]){
+  const b = document.createElement('button'); b.dataset.pal = v; b.textContent = tr(t);
+  b.className = palTab === v ? 'on' : '';
+  tabs.appendChild(b);
+}
+pal.appendChild(tabs);
+const mods = document.createElement('div'); mods.id = 'palmods'; mods.hidden = palTab !== 'ecrans';
+for (const m of MODULES){
+  const b = document.createElement('button'); b.dataset.mod = m; b.textContent = m;
+  b.className = m === palMod ? 'on' : '';
+  mods.appendChild(b);
+}
+pal.appendChild(mods);
+for (const [g, titre, mod] of GROUPS){
+  const off = mod ? palTab !== 'ecrans' || mod !== palMod : palTab !== 'formes';
+  const h = document.createElement('div'); h.className = 'grp'; h.textContent = titre; h.hidden = off;
   pal.appendChild(h);
-  const grid = document.createElement('div'); grid.className = 'grid';
+  const grid = document.createElement('div'); grid.className = 'grid'; grid.hidden = off;
   pal.appendChild(grid);
 
   for (const k in SHAPES){
@@ -1796,7 +1816,13 @@ for (const [g, titre] of GROUPS){
   }
 }
 }
+palMod = MODULES[0];
 buildPalette();
+function setPal(tab, mod){
+  palTab = tab === 'ecrans' ? 'ecrans' : 'formes';
+  if (MODULES.includes(mod)) palMod = mod;
+  buildPalette();
+}
 function setLib(v){
   lib = v === 'nato' ? 'nato' : 'sil';
   /* une famille DCS choisie n'a plus de vignette en silhouettes : retour à la sélection */
@@ -1805,6 +1831,8 @@ function setLib(v){
   if (lost) setTool('select');
 }
 pal.addEventListener('click', e => {
+  const t = e.target.closest('#paltabs button, #palmods button');
+  if (t){ setPal(t.dataset.pal || palTab, t.dataset.mod); commit(); return; }
   const b = e.target.closest('.tile'); if (!b) return;
   finishZone();
   symKey = b.dataset.k; tool = 'sym'; sel = null; hooking = null; draw();
@@ -2628,7 +2656,7 @@ function commit(){
   try {
     stash();
     if (DEMO) return;                        // la démo ne touche pas au tableau du visiteur
-    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, lib, boards: boardsRecord() }));
+    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, lib, palTab, palMod, boards: boardsRecord() }));
   } catch(_){}
 }
 
@@ -2709,12 +2737,12 @@ function demoBoards(){
   const GR = '#34D399', ink = { w:3 };
   const radar = [
     sym('fa18_tws', 380, 200, 0, GR, .8, { locked:true }),
-    sym('fa18_brick', 428, 138, 0, GR, .9),
+    sym('fa18_brick', 428, 168, 0, GR, .9),
     sym('fa18_brick', 362, 250, 0, GR, .9),
     sym('fa18_hafu_h', 402, 162, 2.6, R, .9, { ...ink, mark:'ls' }),
     sym('fa18_hafu_u', 344, 140, 3.5, G, .9, { ...ink, mark:'dt2' }),
     sym('fa18_hafu_f', 334, 236, .2, GR, .9, ink),
-    sym('fa18_tdc', 428, 138, 0, G, .9, ink),                 // le curseur sur un contact brut
+    sym('fa18_tdc', 428, 168, 0, G, .9, ink),                 // le curseur sur un contact brut
     { t:'text', s:tr('F/A-18C · RDR ATTK en TWS'), x:640, y:110, c:Wh, w:4 },
     { t:'text', s:tr('étoile : L&S, piste prioritaire'), x:640, y:140, c:R, w:2 },
     { t:'text', s:tr('losange : DT2, deuxième piste'), x:640, y:164, c:G, w:2 },
@@ -2727,7 +2755,7 @@ function demoBoards(){
     sym('f16_track', 400, 142, 2.4, G, .9, ink),
     sym('f16_systrack', 432, 176, 3.6, WH, .9, { ...ink, mark:'bug' }),
     sym('f16_hot', 352, 238, 0, WH, .9, ink),
-    sym('f16_cold', 330, 128, 0, WH, .9, ink),
+    sym('f16_cold', 335, 165, 0, WH, .9, ink),
     sym('f16_cursor', 352, 238, 0, WH, .9, ink),
     { t:'text', s:tr('F-16C · FCR en TWS'), x:640, y:110, c:Wh, w:4 },
     { t:'text', s:tr('cercle : cible désignée (bugged)'), x:640, y:140, c:WH, w:2 },
@@ -2796,6 +2824,7 @@ $('movingsave').onclick = () => {
   if (data && data.showAF === false) showAF = false;
   if (data && data.headRef === 'mag') headRef = 'mag';
   if (data && data.lib === 'nato' && !DEMO) setLib('nato');
+  if (data && data.palTab) setPal(data.palTab, data.palMod);
   if (DEMO){
     boards = demoBoards(); split = true; showAF = true;
     document.body.classList.add('demo');

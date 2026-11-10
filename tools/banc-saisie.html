@@ -1584,6 +1584,61 @@ test('Symboles : ✚ Nouveau garde le réglage ; la mission importée en OTAN pr
   ok(a.s('natoSpec(objs.find(o => o.k === "wp"))') === null, 'un waypoint a changé de dessin');
 });
 
+/* ---------- lot 23 : écrans de bord, une bibliothèque par module ---------- */
+/* pixels « de l'encre » d'une couleur, lissage compris : un trait fin n'a pas toujours
+   un pixel de sa couleur exacte */
+const INK = (x, y, r, test) => `(() => { drawFrame(); const g = cv.getContext('2d'), k = cv.width / cv.clientWidth;
+  const d = g.getImageData((${x} - ${r}) * k, (${y} - ${r}) * k, ${2 * r} * k, ${2 * r} * k).data; let n = 0;
+  for (let i = 0; i < d.length; i += 4){ const R = d[i], G = d[i + 1], B = d[i + 2]; if (${test}) n++; } return n; })()`;
+const shown = (a, k) => { const t = a.d.querySelector(`.tile[data-k="${k}"]`); return !!(t && t.offsetParent); };
+
+test('Écrans de bord : la palette les range à part, un onglet par module', async (ok) => {
+  const a = await open();
+  const tabs = a.d.querySelectorAll('#paltabs button');
+  ok(tabs.length === 2, `onglets de la palette : ${tabs.length}`);
+  if (tabs.length !== 2) return;
+  ok(shown(a, 'fighter') && !shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'à l\'ouverture, les écrans sont parmi les formes');
+  a.button('#paltabs [data-pal="ecrans"]');
+  const mods = [...a.d.querySelectorAll('#palmods button')].map(b => b.textContent);
+  ok(mods.join() === 'F/A-18C,F-16C', `modules : ${mods.join(', ')}`);
+  ok(!shown(a, 'fighter') && shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'onglet Écrans de bord : pas seulement le F/A-18C');
+  a.button('#palmods button:nth-child(2)');
+  ok(shown(a, 'f16_rws') && shown(a, 'f16_track') && !shown(a, 'fa18_rws'), 'module F-16C : pas seulement ses écrans');
+  a.tile('f16_rws'); a.click(520, 360);
+  ok(a.s('objs.length === 1 && objs[0].k') === 'f16_rws', 'l\'écran choisi dans son onglet ne se pose pas');
+  a.button('#paltabs [data-pal="formes"]');
+  ok(shown(a, 'fighter') && !shown(a, 'f16_rws'), 'retour aux formes');
+});
+
+test("Écrans de bord : l'onglet et le module choisis se gardent à la réouverture", async (ok) => {
+  let a = await open();
+  if (!a.d.querySelector('#paltabs')){ ok(false, 'pas d\'onglets dans la palette'); return; }
+  a.button('#paltabs [data-pal="ecrans"]');
+  a.button('#palmods button:nth-child(2)');
+  a = await reload();
+  ok(shown(a, 'f16_rws') && !shown(a, 'fa18_rws') && !shown(a, 'fighter'), 'la réouverture ne revient pas au module F-16C');
+});
+
+test('Écrans de bord : le F/A-18C a les repères de la figure 82 — verre à sa taille, graduations d\'azimut', async (ok) => {
+  const a = await open();
+  a.tile('fa18_rws'); a.click(520, 360);
+  /* demi-côté 153 px : graduation d'azimut à 30°, sous le bandeau du haut */
+  const tick = a.s(INK(560, 282, 3, 'G > 100 && G > R + 40'));
+  ok(tick > 0, `graduation d'azimut à 30° : ${tick} pixels verts`);
+  /* à 0,83 du centre on est sur le boîtier, pas sur le verre (±0,79 sur la figure) */
+  const bezel = a.s(PX(647, 360, 2, [22, 29, 37]));
+  ok(bezel === 16, `bord du verre : ${bezel}/16 pixels du boîtier`);
+});
+
+test('Écrans de bord : le F-16C a le cadre de la figure p. 394 — échelle d\'élévation en tirets, FCR en vidéo inverse', async (ok) => {
+  const a = await open();
+  a.tile('f16_rws'); a.click(520, 360);
+  const line = a.s(INK(427, 406, 2, 'B > 150 && B > R + 60'));
+  ok(line === 0, `trait continu de l'échelle d'élévation : ${line} pixels`);
+  const inv = a.s(INK(485, 462, 4, 'R > 200 && G > 200 && B > 200'));
+  ok(inv >= 24, `FCR en vidéo inverse : ${inv}/64 pixels blancs (lettres noires dans un pavé blanc)`);
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* ?grep=… ne joue que les scénarios dont le nom contient ce texte */
