@@ -173,6 +173,11 @@ const EN = {
   'Tactique': 'Tactical',
   'Radar F/A-18C': 'Radar F/A-18C',
   'Radar F-16C': 'Radar F-16C',
+  /* palette par module (lot 23) */
+  'Formes': 'Shapes',
+  'Écrans de bord': 'Cockpit displays',
+  'Radar air-air': 'Air-to-air radar',
+  'Radar FCR air-air': 'Air-to-air FCR',
   'Chasseur': 'Fighter',
   'Bombardier': 'Bomber',
   'Ravitailleur': 'Tanker',

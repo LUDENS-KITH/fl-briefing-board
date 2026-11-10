@@ -161,6 +161,7 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 | `headRef` | `true` `mag` | référence des caps affichés ; persistée |
 | `magDec` | nombre ou `null` | déclinaison saisie pour la planche (° Est positif) ; dans l'historique |
 | `split` | booléen | écran partagé plan / coupe ; persisté |
+| `palTab`, `palMod` | `formes` `ecrans` ; module (`F/A-18C`…) | onglet et module de la palette (lot 23) ; persistés, hors fichier de briefing |
 | `lib` | `sil` `nato` | bibliothèque de symboles de tout le briefing : silhouettes du tableau, ou symboles OTAN de la carte F10 (lot 19) ; persistée et écrite dans le fichier de briefing, hors historique ; `setLib()` la change et refait la palette |
 | `prof` | `{ ceil, range, linked, pane, rrng, raz, grid }` | plafond (ft), largeur (NM) et route liée de la planche montée ; vue du panneau du bas (`fa18`, `f16`, absente = coupe), échelle et balayage de la vue radar ; `grid` : mission importée sans carte, caps de grille ; dans l'historique |
 | `view` | `m` `p` | vue du geste en cours, fixée au `pointerdown` et gardée jusqu'au relâché |
@@ -455,7 +456,7 @@ en v0.1 (voir [ETAT.md](ETAT.md) §6).
 | | |
 |---|---|
 | Clé | `fl-briefing-board-v3` |
-| Contenu | `{ cur, unit, split, showAF, headRef, lib, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
+| Contenu | `{ cur, unit, split, showAF, headRef, lib, palTab, palMod, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
 | Images de fond | un objet `img` garde sa place, sa taille et son `id` ; ses octets vivent en **IndexedDB** (base `fl-briefing-board`, magasin `images`, clé = `id`). Au démarrage, `restoreImages()` les relit, retire les images introuvables en le disant, puis n'y garde que les `id` encore cités |
 | Écriture | à chaque `commit()` |
 | Échec | capturé et ignoré — le tableau reste utilisable, il ne se souvient pas |
@@ -496,7 +497,7 @@ maClé: { g:'air', label:'Mon aéronef', s0:1.1, tile:.38, hit:1.25, draw(c){
 
 | Champ | Rôle | Défaut |
 |---|---|---|
-| `g` | groupe : `air`, `sol`, `tac` | requis |
+| `g` | groupe : `air`, `sol`, `tac`, ou un groupe d'écrans ; un groupe d'écrans porte son module en troisième champ de `GROUPS` (`['fa18', 'Radar air-air', 'F/A-18C']`) et va dans l'onglet Écrans de bord | requis |
 | `label` | nom sous la vignette | requis |
 | `draw(c)` | tracé dans le repère `[-1, 1]` | requis |
 | `s0` | échelle à la pose | `1` |
@@ -511,7 +512,7 @@ maClé: { g:'air', label:'Mon aéronef', s0:1.1, tile:.38, hit:1.25, draw(c){
 | `box` | désignation et encombrement carrés, demi-côté en unités du repère | absent |
 | `smax` | échelle maximale au geste et à la poignée | `6` |
 | `col` | couleur donnée à la pose, à la place de la couleur choisie | absent |
-| `scope` | écran : `page`, `rng`, `az`, `ranges`, `azs` proposés au clavier, `pb` libellés des boutons | absent |
+| `scope` | écran : `page`, `rng`, `az`, `ranges`, `azs` proposés au clavier, `pb` libellés des boutons (`^` en colonne, `|` deux colonnes, `[…]` encadré, `#` vidéo inverse), `data` champs de données `[texte, x, y, alignement]` au texte d'exemple de la figure | absent |
 | `track` | une piste : peut porter une marque de son groupe | absent |
 | `tileA` | angle de la vignette, pour une forme qui se reconnaît inclinée | `0` |
 | `mark` | la vignette marque la piste touchée au lieu de poser | absent |

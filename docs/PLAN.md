@@ -46,7 +46,7 @@ engagés.
 | 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
 | 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | — | proposé le 2026-11-10 |
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | — | proposé le 2026-11-10 |
-| 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | — | proposé le 2026-11-10 |
+| 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | — | proposé le 2026-11-10 |
 | 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | proposé le 2026-11-10 |
 | 26 | Recherche dans la palette | proposition | S | lot 19 | — | proposé le 2026-11-10 |
@@ -966,6 +966,14 @@ module.
 **Fait quand** : la table des écarts de RADAR.md est vide pour les cinq pages ; chaque
 écran relu en image, grossi, à côté de sa figure ; banc vert, aucune régression de la vue
 radar liée (lot 3) ; démo et exports refaits.
+
+**Fait le 2026-11-10 (v1.20).** Onglets **Formes** / **Écrans de bord**, un bouton par
+module ; les cinq pages mesurées sur leurs figures quadrillées, 14 écarts au F/A-18C et 9
+au F-16C corrigés ([RADAR.md](RADAR.md)) ; 4 scénarios au banc rouges sur la v1.19, banc
+94/94 dans les deux langues, vue radar liée inchangée (`test_radar` 26/26). Écart au plan :
+le verre des deux appareils, mesuré à ±0,79 du boîtier, était dessiné à ±0,87 ; la zone
+tactique du F/A-18C, elle, était juste et la vue liée n'a pas bougé. Celle du F-16C
+s'agrandit au cadre du format, comme sur la figure.
 
 #### Lot 24 — Écrans de bord : A-10C II
 

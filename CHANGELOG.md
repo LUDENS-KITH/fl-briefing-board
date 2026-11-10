@@ -3,6 +3,33 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.20 — 2026-11-10
+
+Lot 23 du [plan d'action](docs/PLAN.md) : **les écrans de bord rangés par module, et
+remis au plus près des figures du manuel**.
+
+### Ajouté
+- Palette en deux onglets, **Formes** et **Écrans de bord** ; dans les écrans, un bouton
+  par module (F/A-18C, F-16C). L'onglet et le module choisis se gardent.
+
+### Corrigé
+- **F/A-18C, pages RWS, TWS et STT** : verre à sa taille, bandeau et graduations
+  d'azimut, échelle d'élévation, libellés à leur place sur la figure (`SET`, `RSET`,
+  `NCTR` en colonne, `NCTR` encadré, `RDR PRI`, options choisies encadrées), libellés
+  manquants (`RSET` et `NCTR` en STT, `NCTR` en TWS), bouts de l'horizon, chevron de
+  droite, champs de données à leur place avec le texte de la figure, altitudes du curseur.
+- **F-16C, pages FCR RWS et TWS** : cadre du format avec ses libellés posés dessus, `FCR`
+  en vidéo inverse, échelle d'élévation en tirets, échelle d'azimut d'antenne, symbole de
+  référence de l'appareil, champs de données, altitudes du curseur ; la page TWS reprend
+  les libellés du bas de sa propre figure.
+- Le refus d'une marque d'un autre appareil nomme les modules (« F/A-18C », « F-16C »).
+
+### Vérifié en exécutant
+4 scénarios au banc, rouges sur la v1.19 · banc 94/94 en français et 94/94 en anglais ·
+`test_i18n` 2 135/2 135 · `test_radar` 26/26. Chaque écran rendu en grand à côté de sa
+figure du manuel ; la table des écarts de [RADAR.md](docs/RADAR.md) est vide pour les cinq
+pages. Pas vu dans le cockpit.
+
 ## v1.19 — 2026-11-10
 
 Lot 19 du [plan d'action](docs/PLAN.md) : **les symboles OTAN, comme la carte F10 de DCS**.

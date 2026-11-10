@@ -57,10 +57,15 @@ it reproduces: [docs/SYMBOLES.md](SYMBOLES.md) (in French).
 
 ## Radar Kit — F/A-18C and F-16C
 
-Two palette groups, **Radar F/A-18C** and **Radar F-16C**, explain each aircraft's
-air-to-air radar page. Everything is drawn from the module's ED manual, and every
-element cites its page: [RADAR.md](RADAR.md). The two symbologies do not mix: a mark
-only goes on a track of its own aircraft.
+Cockpit displays have their own palette tab: **Cockpit displays**, next to **Shapes**.
+Inside, one button per module (**F/A-18C**, **F-16C**), each with its air-to-air radar
+pages and their symbols. The tab and module you pick are remembered. Everything is drawn
+from the module's ED manual, and every element cites its page: [RADAR.md](RADAR.md)
+(in French). Each display follows the manual's figure: glass, scales, labels where they
+sit (stacked or boxed as in the cockpit), and the data fields (heading, airspeed,
+altitude, weapon…) in place with the figure's sample text; your own flight's values go
+in the label. The two symbologies do not mix: a mark only goes on a track of its own
+aircraft.
 
 **F/A-18C — RDR ATTK page**
 
