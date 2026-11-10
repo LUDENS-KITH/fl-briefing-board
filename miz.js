@@ -215,6 +215,16 @@ const MIZ = (() => {
     if (INFANTRY.test(type)) return { k: 'infantry' };
     return { k: 'ground', guess: true };
   }
+  /* un nom de type DCS, rangé comme l'import le rangerait : la table relevée, puis les noms
+     de la défense aérienne et de l'infanterie ; rien quand l'import devinerait (lot 26 :
+     la recherche de la palette) */
+  function typeFamily(type){
+    const row = TABLE[type];
+    if (row && row[1]) return row[1];
+    if (AIR_DEF.test(type)) return EWR.test(type) ? 'radar' : AAA.test(type) ? 'aaa' : 'sam';
+    if (INFANTRY.test(type)) return 'infantry';
+    return null;
+  }
   /* la famille du groupe : celle qui revient le plus, la première en cas d'égalité */
   function mainFamily(fams){
     const n = new Map();
@@ -481,7 +491,7 @@ const MIZ = (() => {
     return { bytes: zipBytes([...next, dtc]), cartridge: name, units: units.length };
   }
 
-  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, WYPT_MAX };
+  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, typeFamily, WYPT_MAX };
 })();
 
 if (typeof module !== 'undefined') module.exports = MIZ;

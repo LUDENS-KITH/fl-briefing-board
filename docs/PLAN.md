@@ -49,7 +49,7 @@ engagés.
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | v1.23 | fait le 2026-11-10 |
 | 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | proposé le 2026-11-10 |
-| 26 | Recherche dans la palette | proposition | S | lot 19 | — | proposé le 2026-11-10 |
+| 26 | Recherche dans la palette | proposition | S | lot 19 | v1.25 | fait le 2026-11-10 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -1057,6 +1057,11 @@ le champ. Utile dès que les bibliothèques et les modules s'ajoutent.
 
 **Fait quand** : au banc, rouges avant le code : filtre, sans résultat, `Échap`, dans les
 deux langues.
+
+**Fait le 2026-11-10 (v1.25).** Nom, mot d'écran, module ou type DCS ; un type est rangé
+comme à l'import (table relevée au lot 21, puis les noms de la défense aérienne). **Écart
+au plan** : « SA-11 » donne la menace sol-air générique, pas sa portée — les véhicules de
+base de DCS ne sont pas dans les fichiers lisibles (lot 21).
 
 **Ordre proposé** : 19, puis 23 (les deux constats de Vince), puis 21 et 22 (l'import qui
 en profite), 24, puis 20, 26 et 25. Chaque lot attend son « GO ».

@@ -17,6 +17,12 @@ translated.
 | Ground / Sea | tank, radar, surface-to-air threat with engagement circle, airfield, ship, carrier, FARP |
 | Tactical | friendly, hostile, unknown, auto-numbered waypoint, objective, holding orbit, IP, bullseye |
 
+**Search**: the field at the top of the palette keeps only the matching tiles, across
+tabs and modules — a name ("tanker"), a display word ("TWS"), a module ("A-10C II") or
+a DCS unit type ("SA-11", "Buk"): the type gives the family the mission import would give
+it. `Esc` clears the field and restores the palette; letters typed in the field are not
+shortcuts.
+
 The four fixed-wing aircraft are intentionally readable at small size: wingspan, sweep,
 engine count and default size differ. The tanker carries a boom, the civilian aircraft
 has a T-tail, and the bomber has four engines.

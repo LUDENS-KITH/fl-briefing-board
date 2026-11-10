@@ -58,7 +58,12 @@
   .grp{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fl-silver-3);
     margin:10px 2px 6px;font-weight:700}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .grp[hidden], .grid[hidden], #palmods[hidden]{display:none}
+  .grp[hidden], .grid[hidden], #palmods[hidden], #paltabs[hidden], #palnone[hidden], .tile[hidden]{display:none}
+  /* lot 26 : recherche en tête de palette */
+  #palq{width:100%;box-sizing:border-box;font:inherit;font-size:11px;padding:5px 7px;margin:2px 0 6px;border-radius:6px;
+    border:1px solid var(--fl-line, #2A3642);background:rgba(230,237,245,.04);color:var(--fl-silver-1)}
+  #palq:focus{outline:none;border-color:var(--fl-blue-2)}
+  #palnone{font-size:10.5px;line-height:1.3;color:var(--fl-silver-3);margin:10px 2px}
   /* lot 23 : onglets Formes / Écrans de bord, puis un bouton par module */
   #paltabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:2px 0 8px}
   #paltabs button, #palmods button{font:inherit;font-size:10.5px;line-height:1.15;padding:5px 3px;border-radius:6px;
@@ -370,7 +375,7 @@
   </div>
 </div>
 
-<script src="i18n.js?v=1.7"></script>
+<script src="i18n.js?v=1.8"></script>
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
 <script src="vendor/milsymbol-3.0.4.js"></script>
@@ -378,8 +383,8 @@
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="mapclass.js?v=1.1"></script>
-<script src="miz.js?v=1.4"></script>
-<script src="board.js?v=1.24"></script>
+<script src="miz.js?v=1.5"></script>
+<script src="board.js?v=1.25"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

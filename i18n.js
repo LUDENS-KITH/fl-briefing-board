@@ -76,6 +76,8 @@ const EN = {
   'Silhouettes': 'Silhouettes',
   'Symboles OTAN': 'NATO symbols',
   'Symboles russes': 'Russian symbols',
+  'Chercher : nom, type DCS, module…': 'Search: name, DCS type, module…',
+  'Aucune forme ne correspond à « {0} »': 'No shape matches “{0}”',
   'Cap mag.': 'Mag. hdg',
   'Déclinaison magnétique de la planche': 'Magnetic declination of the board',
   'Décl. ?': 'Decl. ?',
