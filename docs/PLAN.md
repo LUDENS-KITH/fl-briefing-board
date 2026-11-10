@@ -17,7 +17,7 @@ propositions, non engagées, rangées par rapport valeur / coût. Le lot 9 répo
 demande de Vince du 2026-10-06, les lots 10 à 12 à celles du 2026-10-07, le lot 13 à celle du 2026-10-08. Les lots 14 à 17
 forment le chantier **Visibilité** ([VISIBILITE.md](VISIBILITE.md)), demandé le 2026-10-08 :
 proposés, non engagés. Les lots 19 à 26 forment le chantier **Symbologie DCS et écrans de
-bord**, demandé le 2026-11-10 : plan écrit à sa demande ; lot 19 livré (v1.19), les autres non
+bord**, demandé le 2026-11-10 : plan écrit à sa demande ; lot 19 en ligne (v1.19), les autres non
 engagés.
 
 ## 2. Vue d'ensemble
@@ -42,7 +42,7 @@ engagés.
 | 16 | Interface en anglais | demande | M-L | — | v1.17, v1.18 | fait le 2026-10-09 (livraisons 1 et 2) |
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
-| 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | v1.19 | fait le 2026-11-10, fusion à valider |
+| 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | v1.19 | en ligne le 2026-11-10 |
 | 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
 | 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | — | proposé le 2026-11-10 |
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | — | proposé le 2026-11-10 |
@@ -879,7 +879,7 @@ chaque forme a un SIDC valide pour milsymbol et une ligne dans SYMBOLES.md. Rend
 en image, grossi, à côté des icônes `nato/` de DCS (relevé hors dépôt). Démo : une
 planche en OTAN.
 
-**Fait le 2026-11-10 (v1.19)**, fusion à valider. 13 formes codées et 15 familles de la
+**Fait et en ligne le 2026-11-10 (v1.19)**, fusionné (#29), vu sur l'adresse publique. 13 formes codées et 15 familles de la
 carte DCS ([SYMBOLES.md](SYMBOLES.md)) ; `test_symboles` 285/285 et 7 scénarios au banc,
 rouges sur la v1.18 ; banc 90/90 dans les deux langues. **Écarts au plan**, tous
 relevés dans l'installation de DCS à l'ouverture du lot :
@@ -1091,3 +1091,4 @@ avis contraire :
 | 2026-10-10 | Fusion de la livraison 2 (#26) : v1.18 en ligne, palette FCR et guide anglais vérifiés sur l'adresse publique ; lot 16 clos |
 | 2026-11-10 | Chantier Symbologie DCS et écrans de bord : plan écrit à sa demande (lots 19 à 26), aucun lot engagé |
 | 2026-11-10 | « Oui, lance le lot 19 » : bibliothèque OTAN livrée en v1.19, fusion à valider ; écarts au plan notés au lot |
+| 2026-11-10 | « Oui, fusionne » : #29 fusionnée (plan #28 absorbé) ; publication Pages en échec côté GitHub (erreur 500, panne partielle d'Actions), relancée ; v1.19 vue sur l'adresse publique : planche « Ordre de bataille » en symboles OTAN, familles dans la palette |
