@@ -395,6 +395,78 @@ const GROUPS = [
   ['tac', 'Tactique'],
 ];
 
+/* ================= bibliothèque OTAN, comme la carte F10 (lot 19) =================
+   DCS dessine ses unités en symboles normalisés (MIL-STD-2525 / APP-6), thème « OTAN »
+   de MissionEditor/data/NewMap/images/nato/ : chaque icône est tracée en noir sur un fond
+   blanc que le jeu teint à la couleur de la coalition, et le cadre est le même pour les
+   deux camps. Le tableau ne publie aucune de ces images : il fait dessiner la norme par
+   milsymbol (vendor/), avec le même rendu — fond à la couleur de l'objet, trait noir.
+
+   Champs lus par board.js :
+     nato      le code du symbole (SIDC), MIL-STD-2525C ou, à 20 chiffres, 2525D
+     natoDraw  à défaut de code, un dessin du projet d'après l'icône DCS (FARP)
+     dcs       la clé de l'icône DCS reproduite (P00910000xx de classifier.lua)
+     dir       la flèche de direction de la norme suit le cap posé
+     ring      cercle d'engagement autour du symbole, comme la silhouette du SAM
+     natoK     taille propre du symbole, quand la norme le dessine plus grand (poste de commandement)
+     natoOnly  famille DCS sans silhouette : dans la palette en OTAN seulement ; posée puis
+               vue en silhouettes, elle prend le dessin de `like` et son repère `silTag`
+   Chaque code, chaque clé et chaque écart à l'icône DCS sont dans docs/SYMBOLES.md. */
+
+const NATO_OF = {
+  fighter:  ['SFAPMFF--------', '0024', true],
+  bomber:   ['SFAPMFB--------', '0027', true],
+  tanker:   ['SFAPMFK--------', '0064', true],
+  airliner: ['SFAPC----------', 'Aircraft_civilian', true],
+  helo:     ['SFAPMHU--------', '0020', true],
+  awacs:    ['SFAPMFRW-------', '0056', true],
+  drone:    ['SFAPMFQ--------', '0023', true],
+  tank:     ['SFGPUCA--------', '0001', true],
+  radar:    ['10031000001301005000', '0036', false],
+  sam:      ['SFGPUCDM-------', '0009', false],
+  ship:     ['SFSPCLDD-------', '0068', true],
+  carrier:  ['SFSPCLCV-------', '0065', true],
+};
+for (const [k, [nato, dcs, dir]] of Object.entries(NATO_OF)) Object.assign(SHAPES[k], { nato, dcs, dir });
+SHAPES.sam.ring = true;
+
+/* le FARP : DCS le montre en cercle et T, hors norme (images/common/, clé 0022) */
+SHAPES.farp.dcs = '0022';
+SHAPES.farp.natoDraw = (c, halo) => {
+  c.beginPath(); c.arc(0, 0, .74, 0, 7);
+  if (halo){ c.save(); c.strokeStyle = halo; c.lineWidth *= 2.6; c.stroke(); c.restore(); }
+  c.fill();
+  c.save(); c.strokeStyle = '#000';
+  c.stroke();
+  c.beginPath(); c.moveTo(-.38, -.36); c.lineTo(.38, -.36); c.moveTo(0, -.36); c.lineTo(0, .44);
+  c.lineWidth *= 1.5; c.stroke();
+  c.restore();
+};
+
+/* les familles de la carte DCS que le tableau n'avait pas : relevées dans classifier.lua */
+const DCS_FAMILIES = {
+  attack:      { g:'air', label:"Avion d'attaque",         like:'fighter',  silTag:'A',   nato:'SFAPMFA--------', dcs:'0025', dir:true },
+  cargo:       { g:'air', label:'Avion de transport',      like:'airliner', silTag:'C',   nato:'SFAPMFC--------', dcs:'0029', dir:true },
+  recon:       { g:'air', label:'Reconnaissance',          like:'fighter',  silTag:'R',   nato:'SFAPMFR--------', dcs:'0026', dir:true },
+  attack_helo: { g:'air', label:"Hélicoptère d'attaque",   like:'helo',     silTag:'A',   nato:'SFAPMHA--------', dcs:'0021', dir:true },
+  ifv:         { g:'sol', label:'Véhicule de combat',      like:'tank',     silTag:'VCI', nato:'SFGPUCIZ-------', dcs:'0002', dir:true },
+  artillery:   { g:'sol', label:'Artillerie automotrice',  like:'tank',     silTag:'ART', nato:'SFGPUCFHE------', dcs:'0006', dir:true },
+  mlrs:        { g:'sol', label:'Lance-roquettes',         like:'tank',     silTag:'LRM', nato:'SFGPUCFRMS-----', dcs:'0007', dir:true },
+  truck:       { g:'sol', label:'Véhicule à roues',        like:'tank',     silTag:'VÉH', nato:'10031000001634000000', dcs:'0005', dir:true },
+  aaa:         { g:'sol', label:'Canons antiaériens',      like:'radar',    silTag:'AAA', nato:'SFGPUCDG-------', dcs:'0015', dir:false },
+  sam_short:   { g:'sol', label:'SAM courte portée',       like:'sam',      silTag:'SAM-CP', nato:'SFGPUCDML------', dcs:'0011', dir:false, ring:true },
+  sam_med:     { g:'sol', label:'SAM moyenne portée',      like:'sam',      silTag:'SAM-MP', nato:'SFGPUCDMM------', dcs:'0012', dir:false, ring:true },
+  sam_long:    { g:'sol', label:'SAM longue portée',       like:'sam',      silTag:'SAM-LP', nato:'SFGPUCDMH------', dcs:'0013', dir:false, ring:true },
+  cp:          { g:'sol', label:'Poste de commandement',   like:'friend',   silTag:'PC',  natoK:.8, nato:'SFGPUH---------', dcs:'0071', dir:false },
+  ew:          { g:'sol', label:'Guerre électronique',     like:'radar',    silTag:'GE',  nato:'SFGPUUMSE------', dcs:'0028', dir:false },
+  sub:         { g:'sol', label:'Sous-marin',              like:'ship',     silTag:'SM',  nato:'SFUPS----------', dcs:'0038', dir:true },
+};
+for (const [k, f] of Object.entries(DCS_FAMILIES)){
+  const base = SHAPES[f.like];
+  SHAPES[k] = { s0: base.s0, tile: base.tile, hit: base.hit, ldy: base.ldy, ...f, natoOnly: true,
+                draw: (c, o) => base.draw(c, o), ...(base.side && { side: base.side }) };
+}
+
 /* ================= kit radar =================
    Écrans de bord et symbologie radar, module par module. Tout est dessiné ici, en
    vecteurs, d'après le manuel ED du module : aucune capture du jeu, aucune image de

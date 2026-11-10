@@ -14,12 +14,15 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.18', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.19', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
    traduisent une fois, à l'ouverture ; tout autre texte passe par tr() quand il s'affiche */
-for (const k in SHAPES) SHAPES[k].label = tr(SHAPES[k].label);
+for (const k in SHAPES){
+  SHAPES[k].label = tr(SHAPES[k].label);
+  if (SHAPES[k].silTag) SHAPES[k].silTag = tr(SHAPES[k].silTag);
+}
 for (const g of GROUPS) g[1] = tr(g[1]);
 for (const t of THEATRES) t.name = tr(t.name);
 
@@ -29,6 +32,7 @@ let nmPx = 0;                           // pixels par mille nautique
 let tb = 1;                             // grossissement des textes : > 1 seulement pendant l'export kneeboard
 let bare = false;                       // dessin d'export : sans les aides d'édition (cadre du kneeboard)
 let unit = 'nm', measOn = false;        // unité d'affichage des distances ; cotes sur les prochains traits
+let lib = 'sil';                        // symboles : 'sil' silhouettes du tableau, 'nato' comme la carte F10 (lot 19)
 
 /* ---------- carte vivante : fond de carte réel, objets accrochés au terrain ----------
    Sans carte, le plan garde son repère écran (cam = null), comme avant. Avec une carte,
@@ -977,9 +981,72 @@ function drawRuler(o){
 
 /* ---------- symboles ---------- */
 /* translation, rotation, échelle — l'épaisseur de trait reste constante */
+/* ---------- symboles OTAN (lot 19) ----------
+   Le réglage vaut pour tout le briefing ; un objet garde son identité (`k`), seule la
+   bibliothèque choisit son dessin. Dans la coupe, la norme n'a pas de vue de profil :
+   les silhouettes y restent. Les marqueurs tactiques, l'armement et les écrans de bord
+   n'ont pas de code et gardent leur dessin. */
+function natoSpec(o){
+  const sh = o && o.t === 'sym' && SHAPES[o.k];
+  if (lib !== 'nato' || !sh || o.v === 'p' || !(sh.nato || sh.natoDraw)) return null;
+  /* la flèche de direction dit un cap posé : un symbole posé d'un clic n'en a pas */
+  const a = o.a || 0, direction = sh.dir && Math.abs(a) > 1e-3
+    ? Math.round(((a * 180 / Math.PI) % 360 + 360) % 360) : null;
+  return { sidc: sh.nato || null, fill: o.c, direction };
+}
+/* milsymbol dessine dans une image, à la taille réelle de l'écran (densité de pixels et
+   export compris) : une image par code, couleur, taille et direction */
+const natoCache = new Map();
+function natoImage(spec, px, halo){
+  const key = [spec.sidc, spec.fill, Math.round(px), spec.direction, halo].join('|');
+  let im = natoCache.get(key);
+  if (im) return im;
+  const sym = new ms.Symbol(spec.sidc, { size: px, fill: true, fillColor: spec.fill, fillOpacity: 1,
+    frameColor: '#000', iconColor: '#000', strokeWidth: 6, ...(spec.direction !== null && { direction: spec.direction }),
+    ...(halo && { outlineColor: halo, outlineWidth: Math.max(1.5, px / 14) }) });
+  const an = sym.getAnchor(), sz = sym.getSize();
+  im = { cv: sym.asCanvas(), ax: an.x, ay: an.y, w: sz.width, h: sz.height };
+  if (natoCache.size > 600) natoCache.clear();
+  natoCache.set(key, im);
+  return im;
+}
+const NATO_K = 1.25;                            // taille d'un symbole OTAN, en tailles de symbole : l'encombrement d'un chasseur en silhouette
+const natoBox = new WeakMap();                  // objet → encombrement du symbole dessiné, pour l'étiquette
+function paintNato(c, o, sh, spec, s){
+  const k = Math.max(1, Math.hypot(c.getTransform().a, c.getTransform().b));
+  const halo = dark && !o.mini ? 'rgba(230,237,245,.9)' : '';
+  if (sh.ring && !o.mini){                      // cercle d'engagement, comme la silhouette du SAM
+    c.save(); c.lineWidth = o.w || 4; c.setLineDash([.16 * s, .13 * s]);
+    c.beginPath(); c.arc(o.x, o.y, 1.6 * s, 0, 7); c.stroke(); c.restore();
+  }
+  if (!spec.sidc){                              // dessin du projet d'après l'icône DCS (FARP)
+    c.save(); c.translate(o.x, o.y); c.scale(s, s); c.lineWidth = 2.2 / s;
+    c.fillStyle = o.c; sh.natoDraw(c, halo); c.restore();
+    natoBox.set(o, { bottom: .74 * s });
+    return;
+  }
+  /* la norme dessine tous les cadres à la même taille : la taille par défaut d'une forme
+     (s0, qui grossit le bombardier en silhouette) ne compte pas, l'agrandissement posé, si */
+  const px = (o.mini ? 23 : SIZE * (o.s || 1) / (sh.s0 || 1) * NATO_K * (sh.natoK || 1)) * k, im = natoImage(spec, px, halo);
+  c.drawImage(im.cv, o.x - im.ax / k, o.y - im.ay / k, im.w / k, im.h / k);
+  /* l'étiquette se range sous le cadre, pas sous la flèche de direction */
+  const fr = spec.direction === null ? im : natoImage({ ...spec, direction: null }, px, halo);
+  natoBox.set(o, { bottom: (fr.h - fr.ay) / k });
+}
+
 function paintSym(c, o){
   const sh = SHAPES[o.k]; if (!sh) return;
   const s = SIZE * (o.s || 1), side = o.v === 'p' && sh.side;
+  const spec = natoSpec(o);
+  if (spec){
+    paintNato(c, o, sh, spec, s);
+    if (sh.num || o.mini) return;
+    const src = o.__src || o, ra = routeAlt.has(src) ? altText(routeAlt.get(src)) : '';
+    const under = [o.lbl, ra].filter(Boolean).join(' · ');
+    if (under) label(c, o.x, labelY(o), under, o.c);
+    return;
+  }
+  natoBox.delete(o);
   c.save();
   c.translate(o.x, o.y);
   if (!sh.upright) c.rotate(o.a || 0);      // une forme droite (écran, HAFU) ne tourne jamais
@@ -1019,11 +1086,11 @@ function paintSym(c, o){
     c.textAlign = 'center'; c.textBaseline = 'middle';
     c.fillText(o.n, o.x, o.y + 1);
     c.restore();
-  } else if (sh.tag && !o.mini){               // étiquette fixe de la forme
+  } else if ((sh.tag || sh.silTag) && !o.mini){   // étiquette fixe de la forme ; repère d'une famille DCS
     c.save();
     c.font = '700 ' + Math.max(11 * tb, s * .38) + 'px ui-sans-serif, system-ui, sans-serif';
     c.textAlign = 'center'; c.textBaseline = 'top';
-    c.fillText(sh.tag, o.x, o.y + s * (o.k === 'sam' ? 1.7 : 1.05));
+    c.fillText(sh.tag || sh.silTag, o.x, o.y + s * (o.k === 'sam' || sh.ring ? 1.7 : 1.05));
     c.restore();
   }
   /* sous un waypoint de la route liée, son altitude rejoint l'étiquette */
@@ -1035,7 +1102,9 @@ function paintSym(c, o){
 function labelY(o){
   const sh = SHAPES[o.k] || {}, s = SIZE * (o.s || 1);
   if (o.v === 'p') return o.y - s * .95 - 16;         // coupe : étiquette au-dessus
-  return o.y + s * (sh.ldy || (o.k === 'sam' ? 1.7 : 1.2)) + (sh.tag ? 15 : 2);
+  const nb = natoSpec(o) && natoBox.get(o);
+  if (nb) return o.y + Math.max(nb.bottom, sh.ring ? 1.6 * s : 0) + 4;   // sous le symbole OTAN dessiné
+  return o.y + s * (sh.ldy || (o.k === 'sam' || sh.ring ? 1.7 : 1.2)) + (sh.tag || sh.silTag ? 15 : 2);
 }
 
 /* le cadre du kneeboard : une aide d'édition, qui ne se montre ni en présentation, ni
@@ -1696,7 +1765,11 @@ addEventListener('paste', e => {
   if (it) addImage(it.getAsFile());
 });
 
-/* ---------- palette de formes ---------- */
+/* ---------- palette de formes ----------
+   Refaite quand la bibliothèque change : ses vignettes dessinent la bibliothèque choisie,
+   et les familles DCS sans silhouette n'y sont qu'en OTAN (lot 19). */
+function buildPalette(){
+pal.textContent = '';
 for (const [g, titre] of GROUPS){
   const h = document.createElement('div'); h.className = 'grp'; h.textContent = titre;
   pal.appendChild(h);
@@ -1704,7 +1777,7 @@ for (const [g, titre] of GROUPS){
   pal.appendChild(grid);
 
   for (const k in SHAPES){
-    if (SHAPES[k].g !== g) continue;
+    if (SHAPES[k].g !== g || (SHAPES[k].natoOnly && lib !== 'nato')) continue;
     const b = document.createElement('button');
     b.className = 'tile' + (tool === 'sym' && k === symKey ? ' on' : '');
     b.dataset.k = k; b.title = SHAPES[k].label;
@@ -1721,6 +1794,15 @@ for (const [g, titre] of GROUPS){
     b.appendChild(lab);
     grid.appendChild(b);
   }
+}
+}
+buildPalette();
+function setLib(v){
+  lib = v === 'nato' ? 'nato' : 'sil';
+  /* une famille DCS choisie n'a plus de vignette en silhouettes : retour à la sélection */
+  const lost = lib !== 'nato' && tool === 'sym' && SHAPES[symKey] && SHAPES[symKey].natoOnly;
+  buildPalette();                                  // la vignette de la forme choisie y reste allumée
+  if (lost) setTool('select');
 }
 pal.addEventListener('click', e => {
   const b = e.target.closest('.tile'); if (!b) return;
@@ -2069,6 +2151,7 @@ document.getElementById('zfit').onclick = () => {
 addEventListener('keyup', e => { if (e.key === ' ') spaceHeld = false; });
 
 $('hdg').onclick = () => { headRef = headRef === 'mag' ? 'true' : 'mag'; commit(); };
+$('lib').onclick = () => { setLib(lib === 'nato' ? 'sil' : 'nato'); commit(); };
 $('decl').onclick = () => {
   const v = prompt(tr('Déclinaison magnétique de cette planche, en degrés : Est positif (6 ou 6E), Ouest négatif (-2 ou 2W).\nRecopiez celle de votre mission DCS pour des caps identiques au cockpit. Laissez vide pour le calcul automatique sur carte (WMM2025).'),
                    magDec === null ? '' : String(magDec).replace('.', LANG === 'en' ? '.' : ','));
@@ -2100,7 +2183,7 @@ function dataBlob(url){
 async function briefingFile(){
   stash();
   const out = { format: FILE_FORMAT, version: FILE_VERSION, app: APP.version, saved: new Date().toISOString(),
-                cur, unit, split, headRef, boards: boardsRecord(), images: {} };
+                cur, unit, split, headRef, lib, boards: boardsRecord(), images: {} };
   for (const b of out.boards) for (const o of b.objs)
     if (o.t === 'img' && !(o.id in out.images) && imgBlobs.has(o.id)) out.images[o.id] = await blobData(imgBlobs.get(o.id));
   return out;
@@ -2142,6 +2225,7 @@ async function openBriefing(file){
   for (const b of boards) for (const o of b.objs) if (o.t === 'img') o.el = imageOf(o.id);
   unit = j.unit === 'km' ? 'km' : 'nm'; $('unit').textContent = unit === 'km' ? 'km' : 'NM';
   split = !!j.split; headRef = j.headRef === 'mag' ? 'mag' : 'true';
+  setLib(j.lib);                               // un fichier d'avant le lot 19 s'ouvre en silhouettes
   load(Math.max(0, Math.min(+j.cur || 0, boards.length - 1)));
   sel = null; renderTabs(); fit(); commit();
   toast(boards.length > 1 ? tr('Briefing ouvert : {0} planches', boards.length) : tr('Briefing ouvert : 1 planche'));
@@ -2531,6 +2615,8 @@ function commit(){
   $('scale').textContent = tr(cam ? 'Échelle auto' : 'Échelle');
   $('hdg').textContent = tr(headRef === 'mag' ? 'Cap mag.' : 'Cap vrai');
   $('hdg').classList.toggle('on', headRef === 'mag');
+  $('lib').textContent = tr(lib === 'nato' ? 'Symboles OTAN' : 'Silhouettes');
+  $('lib').classList.toggle('on', lib === 'nato');
   const dc = cam ? declAt(cam.x, cam.y) : declAt(0, 0);
   $('decl').textContent = dc === null ? tr('Décl. ?') : tr('Décl. {0}', fmtDecl(dc));
   $('decl').title = tr(magDec !== null ? 'Déclinaison saisie pour cette planche — cliquer pour la changer ou revenir au calcul automatique'
@@ -2542,7 +2628,7 @@ function commit(){
   try {
     stash();
     if (DEMO) return;                        // la démo ne touche pas au tableau du visiteur
-    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, boards: boardsRecord() }));
+    localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, lib, boards: boardsRecord() }));
   } catch(_){}
 }
 
@@ -2597,6 +2683,25 @@ function demoBoards(){
     sym('blast', gx(71), groundY() - 10, 0, O, .7, { v:'p' }),
   ];
   const view = { x: (bx + kx) / 2, y: (by + ky) / 2 + (ky - by) * .1, z: zoom };
+  /* l'ordre de bataille de la frappe, à voir en symboles OTAN (lot 19) : le réglage
+     « Silhouettes » de la barre passe tout le briefing aux symboles de la carte F10 */
+  const obat = withUid('b', [
+    sym('sam_long', kx + d(130), ky - d(50), 0, R, 1, { lbl:'SA-10' }),
+    sym('sam_short', kx - d(70), ky - d(40), 0, R, 1, { lbl:'SA-15' }),
+    sym('aaa', kx + d(20), ky + d(75), 0, R, 1, { lbl:'ZSU-23-4' }),
+    sym('radar', kx + d(240), ky - d(150), 0, R, 1, { lbl:'EWR 1L13' }),
+    sym('cp', kx + d(220), ky + d(40), 0, R, 1),
+    sym('ifv', kx - d(120), ky + d(125), -1.9, R, 1, { lbl:'BMP-2' }),
+    sym('mlrs', kx + d(120), ky + d(150), 0, R, 1, { lbl:'BM-21' }),
+    sym('attack', sx - d(40), sy - d(10), 1.3, B, 1, { lbl:'HAWG 1-1' }),
+    sym('fighter', sx - d(80), sy - d(70), 1.1, B, 1, { lbl:'UZI 1-1' }),
+    sym('awacs', bx - d(160), by - d(230), 1.57, B, 1, { lbl:'MAGIC' }),
+    sym('tanker', bx - d(60), by - d(170), 1.57, B, 1, { lbl:'TEXACO' }),
+    sym('carrier', bx - d(220), by + d(90), .3, B, 1, { lbl:'CVN-71' }),
+    sym('farp', sx - d(150), sy + d(130), 0, B, 1, { lbl:'FARP London' }),
+    { t:'text', s:tr('Ordre de bataille : cliquez « Silhouettes » dans la barre pour les symboles OTAN de la carte F10'),
+      x: view.x - d(420), y: view.y - d(330), c:'#0B1F33', w:2 },
+  ]);
   const board = (name, objs) => ({ name, objs, nmPx: 0, prof: { ceil, range, linked: true },
     map: { theatre: 'Caucasus', style: 'topo' }, cam: { ...view }, magDec: null, past: [], future: [] });
   /* une planche sans carte : l'écran radar du F/A-18C en TWS, tel qu'on l'explique au
@@ -2642,7 +2747,7 @@ function demoBoards(){
     sym('fighter', h2x, h2y, beamA, R, 1, { lbl:'BANDIT 2' }),
     sym('fighter', h3x, h3y, 0, R, 1, { lbl:'BANDIT 3' }),
   ];
-  return [board('Ingress', ingress), board(tr('Attaque'), attaque),
+  return [board('Ingress', ingress), board(tr('Attaque'), attaque), { ...board(tr('Ordre de bataille'), obat), prof:{ ceil, range, linked:false } },
           { ...board('Interception', interception), prof:{ ceil, range, linked:false, pane:'fa18', rrng:40 } },
           flat('Radar F/A-18C', radar), flat('Radar F-16C', viper)];
 }
@@ -2690,6 +2795,7 @@ $('movingsave').onclick = () => {
   split = !!(data && data.split);
   if (data && data.showAF === false) showAF = false;
   if (data && data.headRef === 'mag') headRef = 'mag';
+  if (data && data.lib === 'nato' && !DEMO) setLib('nato');
   if (DEMO){
     boards = demoBoards(); split = true; showAF = true;
     document.body.classList.add('demo');

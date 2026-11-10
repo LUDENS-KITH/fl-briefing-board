@@ -161,6 +161,7 @@ corde — sinon elle pointerait de travers sur une courbe prononcée.
 | `headRef` | `true` `mag` | référence des caps affichés ; persistée |
 | `magDec` | nombre ou `null` | déclinaison saisie pour la planche (° Est positif) ; dans l'historique |
 | `split` | booléen | écran partagé plan / coupe ; persisté |
+| `lib` | `sil` `nato` | bibliothèque de symboles de tout le briefing : silhouettes du tableau, ou symboles OTAN de la carte F10 (lot 19) ; persistée et écrite dans le fichier de briefing, hors historique ; `setLib()` la change et refait la palette |
 | `prof` | `{ ceil, range, linked, pane, rrng, raz, grid }` | plafond (ft), largeur (NM) et route liée de la planche montée ; vue du panneau du bas (`fa18`, `f16`, absente = coupe), échelle et balayage de la vue radar ; `grid` : mission importée sans carte, caps de grille ; dans l'historique |
 | `view` | `m` `p` | vue du geste en cours, fixée au `pointerdown` et gardée jusqu'au relâché |
 | `symKey` | clé de `SHAPES` | forme que posera l'outil `sym` |
@@ -454,7 +455,7 @@ en v0.1 (voir [ETAT.md](ETAT.md) §6).
 | | |
 |---|---|
 | Clé | `fl-briefing-board-v3` |
-| Contenu | `{ cur, unit, split, showAF, headRef, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
+| Contenu | `{ cur, unit, split, showAF, headRef, lib, boards: [{ name, nmPx, prof, map, cam, magDec, objs }] }` — les objets écrits par `record()`, sans l'élément image ; l'historique n'est pas conservé |
 | Images de fond | un objet `img` garde sa place, sa taille et son `id` ; ses octets vivent en **IndexedDB** (base `fl-briefing-board`, magasin `images`, clé = `id`). Au démarrage, `restoreImages()` les relit, retire les images introuvables en le disant, puis n'y garde que les `id` encore cités |
 | Écriture | à chaque `commit()` |
 | Échec | capturé et ignoré — le tableau reste utilisable, il ne se souvient pas |
@@ -464,16 +465,16 @@ La démo n'écrit ni en localStorage ni en IndexedDB.
 **✚ Nouveau** (lot 11) remplace `boards` par une planche « Phase 1 » vide, vide
 `imgBlobs` et `imgEls`, puis `commit()` réécrit la clé et `idbKeep(new Set())` vide le
 magasin d'images. Les préférences du poste (`unit`, `split`, `showAF`, `headRef`, `dark`)
-restent. Comme `openBriefing()`, il ne laisse pas d'historique : il demande confirmation.
+et la bibliothèque `lib` restent. Comme `openBriefing()`, il ne laisse pas d'historique : il demande confirmation.
 
 ### Fichier de briefing
 
 `⇩ Briefing` écrit un `.json` : `{ format: 'fl-briefing-board', version: 1, app, saved,
-cur, unit, split, headRef, boards, images }`, où `boards` suit l'écriture de la sauvegarde
+cur, unit, split, headRef, lib, boards, images }`, où `boards` suit l'écriture de la sauvegarde
 locale (`boardsRecord()`) et `images` associe chaque `id` à sa data URL. `openBriefing()`
 vérifie `format` et `version`, puis ne garde que ce que le moteur sait dessiner : types
 d'objets connus, formes présentes dans `SHAPES`, théâtres connus, images en PNG, JPEG,
-WebP ou GIF. Un fichier reçu vient d'ailleurs ; les noms de planches passent par
+WebP ou GIF. Sans `lib` (fichier d'avant la v1.19), il s'ouvre en silhouettes. Un fichier reçu vient d'ailleurs ; les noms de planches passent par
 `textContent`, les étiquettes par le canvas.
 
 La clé porte la version du format. `v1` (jusqu'au 2026-09-17) ignorait `a`, `s`,
@@ -518,6 +519,13 @@ maClé: { g:'air', label:'Mon aéronef', s0:1.1, tile:.38, hit:1.25, draw(c){
 | `keep` | d'une marque : jamais retirée par une autre marque posée sur sa piste | absent |
 | `raw` | un écho brut : désigné, il devient la piste `newTrack` ; `rawA`, son cap alors | absent |
 | `over` | se pose par-dessus ce qu'on touche, sans le saisir | absent |
+| `nato` | code de la norme (SIDC 2525C à 15 caractères, ou 2525D à 20 chiffres) que milsymbol dessine en symboles OTAN | absent = la forme garde son dessin |
+| `natoDraw(c, halo)` | dessin du projet en symboles OTAN, pour une icône DCS hors norme (FARP) | absent |
+| `dcs` | clé de l'icône DCS reproduite, citée dans [SYMBOLES.md](SYMBOLES.md) | requis avec `nato` ou `natoDraw` |
+| `dir` | la flèche de direction de la norme montre le cap posé | `false` |
+| `ring` | cercle d'engagement pointillé autour du symbole OTAN | absent |
+| `natoK` | échelle propre du symbole OTAN | `1` |
+| `natoOnly` | famille de la carte DCS : dans la palette en symboles OTAN seulement ; en silhouettes, le dessin de `like` et le repère `silTag` | absent |
 
 `draw(c, o)` reçoit aussi l'objet : un écran y lit son échelle et son azimut, un HAFU sa
 marque. `withMark()` dessine la marque d'une piste ; `paintSym()` l'appelle en dernier,
@@ -525,6 +533,12 @@ par-dessus la tige de cap, et la marque porte un liseré de la couleur du fond d
 (`HALO`) qui la détache des traits du HAFU. Une forme droite sans tige garde une poignée, au coin haut droit, qui la
 redimensionne. Le kit radar vit en fin de `symbols.js`, un groupe de palette par module,
 et chaque élément cite sa source dans [RADAR.md](RADAR.md).
+
+En symboles OTAN, `paintSym()` passe la main à `paintNato()` pour toute forme qui a `nato`
+ou `natoDraw`, hors coupe : l'image de milsymbol est mise en cache par code, couleur,
+taille, cap et liseré, et sa taille suit `s / s0` pour qu'un bombardier ne sorte pas plus
+gros qu'un chasseur. Une forme qui reçoit un code le cite dans [SYMBOLES.md](SYMBOLES.md) ;
+`node tools/test_symboles.js` le vérifie.
 
 Aides disponibles : `sil()` (silhouette symétrique décrite d'un seul côté),
 `body()` (remplissage léger + contour), `pods()` (nacelles symétriques).

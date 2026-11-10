@@ -224,6 +224,7 @@
   <button id="theme" title="Fond clair / sombre">◐</button>
   <button id="split" title="Coupe : vue de profil sous la vue de dessus, altitudes en pieds et niveaux de vol">⊟ Coupe</button>
   <button id="meas"  title="Cotes : distance et cap sur les traits et flèches (prochains tracés, et la sélection)">📐 Cotes</button>
+  <button id="lib"   title="Symboles de tout le briefing : silhouettes du tableau, ou symboles OTAN comme la carte F10 de DCS (MIL-STD-2525 / APP-6)">Silhouettes</button>
   <button id="hdg"   title="Caps vrais ou magnétiques (comme au cockpit DCS)">Cap vrai</button>
   <button id="decl"  title="Déclinaison magnétique de la planche">Décl. ?</button>
   <button id="unit"  title="Unité des distances : milles nautiques ou kilomètres">NM</button>
@@ -360,14 +361,15 @@
   </div>
 </div>
 
-<script src="i18n.js?v=1.1"></script>
+<script src="i18n.js?v=1.2"></script>
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
-<script src="symbols.js?v=0.11"></script>
+<script src="vendor/milsymbol-3.0.4.js"></script>
+<script src="symbols.js?v=0.12"></script>
 <script src="radar.js?v=1.0"></script>
 <script src="projections.js?v=1.0"></script>
 <script src="miz.js?v=1.2"></script>
-<script src="board.js?v=1.18"></script>
+<script src="board.js?v=1.19"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

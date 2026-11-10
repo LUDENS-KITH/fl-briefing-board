@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-10-09**, version **v1.18**.
+> Document vivant. Dernière mise à jour : **2026-11-10**, version **v1.19**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,9 +16,10 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [briefing.flightledger.io](https://briefing.flightledger.io/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 83 scénarios, à passer en français et en anglais) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 90 scénarios, à passer en français et en anglais) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
-(`node tools/test_miz.js`, 46 vérifications). Pas de déploiement.
+(`node tools/test_miz.js`, 46 vérifications), et depuis la v1.19 les sources des symboles OTAN
+(`node tools/test_symboles.js`). Pas de déploiement.
 C'est cohérent avec son âge — un jour — mais c'est à connaître avant de s'y appuyer.
 
 ## 2. Ce qui est vérifié
@@ -113,6 +114,8 @@ par événements pointeur réels, pas en relisant le code.
 | Ravitailleurs et AWACS | 1 scénario au banc, rouge sur le moteur d'avant : ravitailleur et AWACS accrochés à leur orbite, routes tiretées, étiquettes (niveau, TACAN, fréquence), orbite Race-Track au milieu de sa branche et dans son axe, bilan ; 65/65. Mission réelle de Vince (« CAUCASUS - Entraînement Sol - FA-18C Multi 4 », 1,4 Mo) dans Brave : Texaco 11 (FL200, TCN 12Y TEX, 251.000) et Overlord 1 (FL250, 260.000) sur leurs orbites | conforme | 2026-10-07 |
 | Déménagement | Bascule sur `briefing.flightledger.io` (v1.16). 6 scénarios au banc, rouges avant le code : à la nouvelle adresse, un tableau vierge montre le bandeau (nom, ancienne adresse, consigne) et « Récupérer » ouvre la page de récupération ; absent avec un briefing en cours, ailleurs, après novembre, dans la démo ; « Compris » le ferme pour de bon ; lien du panneau ⓘ ; 77/77. Page de récupération prouvée sur la vraie ancienne origine : symbole et image de fond relus, téléchargés, rouverts intacts | conforme | 2026-10-08 |
 | Interface en anglais | Lot 16 (v1.17, v1.18). `node tools/test_i18n.js` 1 914/1 914 : chaque texte affiché a sa traduction (noms des formes lus en exécutant `symbols.js`), rien d'écrit en dur, mêmes valeurs insérées, et chaque bouton cité par un guide existe à l'écran dans la langue du guide ; en échec sur une traduction retirée et sur les 11 libellés français que citait le guide anglais. 6 scénarios au banc, rouges sur la v1.16 : aucun texte français à l'écran en anglais (info-bulles, panneaux fermés, dessins de la démo, écrans radar, messages), aucun texte anglais en français, kneeboard et PNG exportés en anglais (en-tête, date américaine), bascule par le bouton EN / FR qui garde le choix et le travail. Banc 83/83 dans chaque langue | conforme | 2026-10-09 |
+| Symboles OTAN | Lot 19 (v1.19). `node tools/test_symboles.js` 285/285, rouge sur la v1.18 (29 échecs) : chaque code est dessiné par milsymbol, cite sa clé d'icône DCS et sa ligne dans [SYMBOLES.md](SYMBOLES.md) ; les 15 familles DCS ont un dessin de repli et un repère ; aucun aéronef ni unité sans code sans raison écrite ; marqueurs tactiques et armement sans code. 7 scénarios au banc, rouges sur la v1.18 : bascule Silhouettes ↔ OTAN de tout le briefing, sélection et historique gardés ; réglage gardé à la réouverture et dans le fichier, ancien fichier en silhouettes ; chasseur dessiné cadre et signe noirs, rempli de sa couleur (pixels lus) ; familles dans la palette en OTAN seulement, repli en silhouettes ; flèche de direction au geste de pose, pas au clic ni sur un SAM ; kneeboard en OTAN ; ✚ Nouveau garde le réglage, une mission importée prend les codes de ses menaces. Banc 90/90 en français et en anglais ; `test_i18n` 2 115/2 115 | conforme | 2026-11-10 |
+| Symboles OTAN | navigateur, vrais clics : les 28 formes codées posées sur fond clair et sombre, comparées une à une aux icônes `nato/` de l'installation DCS du poste ; repli des 15 familles en silhouettes ; planche de démo « Ordre de bataille » à 1 440 × 900. Le rendu n'a pas été comparé à la carte F10 en jeu | conforme | 2026-11-10 |
 | Référencement et présentation | `node tools/test_seo.js` 133/133 depuis la bascule (149 avant, chaque lien vers l'ancienne origine comptait), rouge avant le code (27 échecs) : titre, description (50 à 160 caractères), canonique, Open Graph et carte Twitter, image de partage présente, texte sans script, liens vers les présentations ; pages `fr/` et `en/` : langue, `hreflang` croisés, données `SoftwareApplication`, boutons vers le tableau et la démo, non-affiliation, un seul `h1`, images avec `alt` et dimensions, aucun lien local cassé ; plan du site, `robots.txt`, réglages Jekyll et `noindex` des six documents de travail. Mutation : un lien d'image et un `hreflang` faussés sont signalés. Dans Brave à 1 440 et 375 px : aucune image cassée, aucun défilement horizontal. Banc 71/71 (non-régression) | conforme | 2026-10-08 |
 | Numéros de waypoint | 6 scénarios au banc, rouges avant le code : tout supprimé, le suivant repart de 1 ; le dernier supprimé rend son numéro ; un trou au milieu comblé puis la suite reprend (2, puis 5) ; la copie prend le plus petit libre ; un briefing ouvert au compteur d'avant (`wpN` 9) numérote au plus petit libre ; liens des guides du panneau ⓘ vers la page mise en forme ; 71/71. Dans Brave, vrais clics : 1-2-3-4 posés, 2 supprimé, le suivant porte 2 | conforme | 2026-10-08 |
 | Nouveau briefing | 3 scénarios au banc, rouges avant le code : tableau garni (2 planches, image, km) remis à une planche vide, sans carte ni historique, km gardé, vierge à la réouverture, IndexedDB vide ; refus de la confirmation sans effet ; tableau déjà vierge sans question ; Effacer inchangé (non-régression) ; 64/64. Démo dans Brave, vrai clic : boîte de confirmation (« Les 5 planches… »), tableau vierge, message | conforme | 2026-10-07 |
@@ -174,6 +177,11 @@ recolorables :
 - *Armement / Effets* : missile, bombe, explosion, abattu, éjection, leurres ;
 - *Sol / Mer* : char, radar, menace sol-air, aéroport, navire, porte-avions, FARP ;
 - *Tactique* : ami, hostile, inconnu, waypoint auto-numéroté, objectif, orbite, point IP, bullseye.
+
+**Symboles OTAN** (v1.19) : un réglage de la barre passe tout le briefing des silhouettes
+aux symboles de la carte F10 de DCS (MIL-STD-2525, dessinés par milsymbol) : 13 formes
+codées, 15 familles de la carte DCS de plus dans la palette, flèche de direction, liseré
+sur fond sombre ; gardé dans le fichier de briefing. Sources : [SYMBOLES.md](SYMBOLES.md).
 
 **Outils de tracé** : sélection, flèche, trait, crayon libre, cercle, rectangle,
 zone hachurée, règle, texte, gomme ; trois styles de trait ; cotes distance et cap
