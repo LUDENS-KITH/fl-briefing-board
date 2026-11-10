@@ -43,7 +43,7 @@ engagés.
 | 17 | Visibilité : mesure (relevés Search Console et GitHub, compteur si décidé) | demande | S | D1, D3 | — | proposé le 2026-10-08 |
 | 18 | Visibilité : déménagement vers `briefing.flightledger.io` — bandeau d'avertissement, puis bascule avancée au 2026-10-08 | demande | S | D1 | v1.15, v1.16 | bascule le 2026-10-08 |
 | 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | v1.19 | en ligne le 2026-11-10 |
-| 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
+| 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | v1.24 | fait le 2026-11-10 |
 | 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | v1.21 | fait le 2026-11-10 |
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | v1.22 | fait le 2026-11-10 |
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
@@ -914,6 +914,13 @@ comme référence visuelle et la clé citée dans SYMBOLES.md. Troisième valeur
 
 **Fait quand** : chaque famille du lot 19 a son dessin russe ; banc et `test_symboles`
 étendus ; rendu relu à côté du thème `russian/`.
+
+**Fait le 2026-11-10 (v1.24).** Les 30 icônes relevées pixel par pixel, redessinées en
+traits (`RU_GLYPHS`), rendues à côté des icônes agrandies du jeu ; le FARP prend l'icône
+de `common/`, le thème russe n'en a pas. **Écarts au plan** : le trait est un peu plus
+épais que le pixel du jeu, pour rester lisible ; le symbole reste droit, la façon dont la
+carte du jeu tourne ces icônes n'ayant pas été vue. **Pas encore fait** : la relecture
+sur la carte du jeu.
 
 #### Lot 21 — Import : chaque unité à son symbole DCS
 

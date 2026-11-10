@@ -1,4 +1,4 @@
-# Symboles OTAN — sources
+# Symboles OTAN et russes — sources
 
 > Document vivant, ouvert le **2026-11-10** avec la **v1.19** (lot 19, [PLAN.md](PLAN.md)).
 > Chaque symbole de la bibliothèque OTAN cite ici son code et l'icône de DCS qu'il
@@ -72,7 +72,60 @@ dessin de la forme la plus proche et un repère écrit dessous.
 | `infantry` | `SFGPUCI--------` | 0201 · « POINT 201 », sans titre dans `classifier.lua` : rectangle barré, que DCS donne aux fantassins et au personnel de pont (lot 21) | char, « INF » | — |
 | `ground` | `SFGPU----------` | 0035 · « Friendly Ground Unit » de l'éditeur ; pour un type que l'installation de DCS ne décrit pas (lot 21) | char, « ? » | cadre nu de la norme, sans la languette de l'icône DCS ; DCS a une icône pour chaque type, le tableau ne la connaît pas pour les véhicules de base |
 
-## Sans code, dans les deux bibliothèques
+## Bibliothèque russe, comme la carte F10 en thème russe (lot 20)
+
+DCS a un second thème de carte, « russe » : `MissionEditor/data/NewMap/images/russian/`,
+une icône par clé — **les mêmes clés qu'en OTAN**. Chaque icône est un trait blanc d'un
+pixel (deux pour les SAM) bordé de noir, sans cadre, que le jeu teint à la couleur de la
+coalition ; 32 × 32 pixels, 48 × 48 pour les navires.
+
+**Aucune bibliothèque libre ne dessine cette symbologie** : le projet la redessine en
+vecteurs, icône par icône, d'après ces images relevées pixel par pixel (`RU_GLYPHS` dans
+`symbols.js`, en coordonnées de pixels de l'icône). **Aucune image n'est publiée.** Rendu
+relu à côté des icônes du jeu, agrandies, le 2026-11-10.
+
+| DCS | Le tableau | Source |
+|---|---|---|
+| Trait blanc d'un pixel, bordé d'un pixel noir, teint à la couleur de la coalition | trait à la couleur de l'objet, un peu plus épais (1,2 pixel d'icône, 2,4 pour les SAM) pour rester lisible à l'écran, bordure noire | pixels des fichiers `russian/` |
+| Une icône pour les deux camps | idem | un seul fichier par clé |
+| Les navires dessinés en 48 × 48 | plus grands que les autres, comme dans le jeu | taille des fichiers |
+| — | sur fond sombre, le liseré clair de l'OTAN | choix du tableau |
+| — | le symbole reste droit ; pas de flèche de direction (le thème n'en a pas) ; le SAM garde son cercle d'engagement | la façon dont la carte tourne ces icônes n'a pas été vue à l'écran |
+
+| Forme (`k`) | Icône du thème russe | Dessin |
+|---|---|---|
+| `fighter` | 0024 | flèche, aile basse |
+| `bomber` | 0027 | aile haute, dôme dessus |
+| `tanker` | 0064 | aile haute, octogone et « 3 » |
+| `airliner` | `Aircraft_civilian` | T |
+| `helo` | 0020 | rotor en X sur la tige |
+| `awacs` | 0056 | trois barres, rond et éclair |
+| `drone` | 0023 | aile à montants |
+| `tank` | 0001 | losange |
+| `radar` | 0036 | antenne hachurée sur chevalet |
+| `sam` | 0009 | flèche pleine sur socle |
+| `ship` | 0068 (48 × 48) | coque pointue, deux traits |
+| `carrier` | 0065 (48 × 48) | coque, pont et quille |
+| `farp` | 0022, `common/` | pas d'icône russe : celle de `common/`, comme en OTAN |
+| `attack` | 0025 | flèche sur l'aile |
+| `cargo` | 0029 | aile haute, octogone et « T » |
+| `recon` | 0026 | aile traversée d'une flèche |
+| `attack_helo` | 0021 | rotor en X, losange plein |
+| `ifv` | 0002 | pignon, deux traits au pied |
+| `artillery` | 0006 | losange, tube dedans |
+| `mlrs` | 0007 | carré à deux bras |
+| `truck` | 0005 | arche |
+| `aaa` | 0015 | flèche entre deux traits |
+| `sam_short` | 0011 | flèche sur socle à butées |
+| `sam_med` | 0012 | flèche sur socle à deux barres |
+| `sam_long` | 0013 | flèche sur socle à trois barres |
+| `cp` | 0071 | fanion plein |
+| `ew` | 0028 | trois barres, ligne brisée à deux flèches |
+| `sub` | 0038 | coque biseautée |
+| `infantry` | 0201 | flèche et rond |
+| `ground` | 0035 | deux flèches, chevalet |
+
+## Sans code, dans les trois bibliothèques
 
 - **Aéroport** : la carte DCS dessine les aérodromes elle-même, sans icône du thème OTAN.
 - **Armement et effets** (missile, bombe, explosion, abattu, éjection, leurres) : la
@@ -147,4 +200,3 @@ antiaériens, `Soldier`/`Infantry`/`Paratrooper`), comme depuis le lot 6 ; sinon
 - **L'infanterie** : `classifier.lua` ne lui donne aucun titre, mais le lot 21 a lu
   l'icône que DCS donne aux fantassins : 0201, « POINT 201 », un rectangle barré — la
   famille `infantry` ci-dessus.
-- **Le thème russe** : lot 20.

@@ -28,7 +28,8 @@ orientable, redimensionnable et **recolorable sans perte**. Pour en ajouter une 
 
 Le bouton **Silhouettes** de la barre passe tout le briefing aux **Symboles OTAN**, ceux
 que DCS dessine sur la carte F10 et dans l'éditeur de mission (norme MIL-STD-2525,
-APP-6) ; un second clic revient aux silhouettes. Rien n'est perdu : chaque objet garde sa
+APP-6) ; un second clic passe aux **Symboles russes**, ceux du thème russe de la même
+carte ; un troisième revient aux silhouettes. Rien n'est perdu : chaque objet garde sa
 place, son cap, sa taille, sa couleur et son nom.
 
 - **Comme dans DCS** : un seul cadre pour les deux camps, rempli de la couleur de l'objet,
@@ -49,6 +50,9 @@ place, son cap, sa taille, sa couleur et son nom.
 - **Le réglage suit le briefing** : il est gardé dans le navigateur et dans le fichier de
   briefing (⇩ Briefing), et ✚ Nouveau le garde. Un ancien fichier s'ouvre en silhouettes.
   Les exports (PNG, kneeboard) et la présentation dessinent ce qui est à l'écran.
+- **Symboles russes** : le trait de chaque icône du thème russe de DCS, à la couleur de
+  l'objet et bordé de noir, sans cadre — redessiné par le projet, icône par icône. Les
+  mêmes familles qu'en OTAN ; pas de flèche de direction, le thème n'en a pas.
 - **Sur fond sombre**, un liseré clair entoure le symbole, pour que le trait noir reste
   visible. La carte F10 du jeu est claire et n'en a pas besoin.
 

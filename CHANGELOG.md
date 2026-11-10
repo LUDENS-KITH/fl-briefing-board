@@ -3,6 +3,24 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.24 — 2026-11-10
+
+Lot 20 du [plan d'action](docs/PLAN.md) : **la carte F10 en thème russe**.
+
+### Ajouté
+- Troisième valeur du réglage des symboles : **Silhouettes · OTAN · Russe**. Les 30
+  familles dessinées en OTAN ont leur glyphe du thème russe de DCS — trait à la couleur
+  de l'objet, bordé de noir, sans cadre —, redessiné en vecteurs d'après les icônes du
+  jeu ; le FARP garde l'icône commune aux deux thèmes. Les familles DCS sont dans la
+  palette en OTAN comme en russe ; le réglage se garde dans le navigateur et le fichier.
+
+### Vérifié en exécutant
+`test_symboles` 671 vérifications (chaque famille a son glyphe, à la clé de son icône
+OTAN, dans son icône, cité dans SYMBOLES.md) · 3 scénarios au banc, rouges avant le code,
+et 2 scénarios OTAN mis au réglage à trois valeurs · banc complet en français et en
+anglais · les 30 glyphes rendus à côté des icônes du jeu agrandies. **Pas encore vu sur
+la carte du jeu** : il faut ouvrir DCS.
+
 ## v1.23 — 2026-11-10
 
 Lot 24 du [plan d'action](docs/PLAN.md) : **l'A-10C II, module de l'escadrille Sucellus,

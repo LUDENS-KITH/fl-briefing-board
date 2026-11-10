@@ -1473,7 +1473,7 @@ const PX = (x, y, r, rgb) => `(() => { drawFrame(); const g = cv.getContext('2d'
     && Math.abs(d[i + 2] - ${rgb[2]}) < 14 && d[i + 3] > 240) n++; return n; })()`;
 const symLib = a => a.s('lib');
 
-test('Symboles : le réglage passe tout le briefing de Silhouettes à OTAN, garde la sélection et l\'historique', async (ok) => {
+test('Symboles : le réglage passe tout le briefing de Silhouettes à OTAN puis Russe, garde la sélection et l\'historique', async (ok) => {
   const a = await open();
   const btn = a.d.getElementById('lib');
   ok(!!btn, 'pas de réglage Symboles dans la barre');
@@ -1491,7 +1491,12 @@ test('Symboles : le réglage passe tout le briefing de Silhouettes à OTAN, gard
   a.button('.tab:not(.add)');
   ok(a.s('natoSpec(objs.find(o => o.k === "fighter")).sidc') === 'SFAPMFF--------', 'la première planche n\'a pas suivi');
   a.button('#lib');
-  ok(symLib(a) === 'sil' && a.s('natoSpec(objs[0])') === null, 'le retour aux silhouettes ne prend pas');
+  ok(symLib(a) === 'ru', `réglage après deux clics : ${symLib(a)}`);
+  ok(/russe|russian/i.test(btn.textContent), `libellé du bouton : ${btn.textContent}`);
+  ok(a.s('natoSpec(objs[0])') === null && a.s('ruSpec(objs[0]) && ruSpec(objs[0]).key') === '0024', `chasseur en russe : ${a.s('JSON.stringify(ruSpec(objs[0]))')}`);
+  ok(a.s('past.length') === past, 'l\'historique a bougé');
+  a.button('#lib');
+  ok(symLib(a) === 'sil' && a.s('natoSpec(objs[0])') === null && a.s('ruSpec(objs[0])') === null, 'le retour aux silhouettes ne prend pas');
 });
 
 test("Symboles : le choix survit à la réouverture et au fichier de briefing ; un fichier sans réglage s'ouvre en silhouettes", async (ok) => {
@@ -1537,7 +1542,7 @@ test('Symboles OTAN : les familles DCS sont dans la palette en OTAN seulement ; 
   ok(!absent.length, `absentes de la palette OTAN : ${absent.join(', ')}`);
   a.tile('mlrs'); a.click(400, 300);
   ok(a.s('natoSpec(objs[0]).sidc') === 'SFGPUCFRMS-----', `code du lance-roquettes : ${a.s('JSON.stringify(natoSpec(objs[0]))')}`);
-  a.button('#lib');
+  a.button('#lib'); a.button('#lib');
   ok(!a.d.querySelector('.tile[data-k="mlrs"]'), 'les familles DCS restent dans la palette des silhouettes');
   ok(a.s('tool') === 'select', `outil après le retour : ${a.s('tool')}`);
   ok(a.s(PX(400, 300, 30, [47, 140, 255])) > 0, 'le lance-roquettes posé ne se dessine plus en silhouettes');
@@ -1582,6 +1587,61 @@ test('Symboles : ✚ Nouveau garde le réglage ; la mission importée en OTAN pr
   ok(a.s('natoSpec(objs.find(o => o.k === "sam")).sidc') === 'SFGPUCDM-------', 'le SAM importé n\'a pas son code OTAN');
   ok(a.s('natoSpec(objs.find(o => o.k === "fighter")).sidc') === 'SFAPMFF--------', 'le vol importé n\'a pas son code OTAN');
   ok(a.s('natoSpec(objs.find(o => o.k === "wp"))') === null, 'un waypoint a changé de dessin');
+});
+
+/* ---------- lot 20 : la bibliothèque russe, comme la carte F10 en thème russe ---------- */
+const toRu = a => { a.button('#lib'); a.button('#lib'); };
+
+test('Symboles russes : un chasseur se dessine comme sur la carte F10 russe — trait de sa couleur bordé de noir, sans cadre plein', async (ok) => {
+  const a = await open();
+  a.button('#theme');                                       // fond clair : le noir s'y voit
+  a.tile('fighter'); a.click(400, 300);
+  a.button('#lib');
+  const bleuNato = a.s(PX(400, 300, 40, [47, 140, 255]));
+  a.button('#lib');
+  ok(symLib(a) === 'ru', `réglage : ${symLib(a)}`);
+  const noir = a.s(PX(400, 300, 40, [0, 0, 0])), bleu = a.s(PX(400, 300, 40, [47, 140, 255]));
+  ok(noir > 40, `russe : ${noir} pixels noirs (bordure du trait)`);
+  ok(bleu > 10, `russe : ${bleu} pixels bleus (le trait à la couleur de l'objet)`);
+  ok(bleu * 3 < bleuNato, `russe : ${bleu} pixels bleus, contre ${bleuNato} pour le dôme plein de l'OTAN`);
+  /* l'aile du chasseur (0024) : un trait horizontal sous la flèche, au centre, pas au-dessus */
+  const g = a.s('JSON.stringify(SHAPES.fighter.ru)');
+  ok(/"key":"0024"/.test(g), `glyphe du chasseur : ${g}`);
+});
+
+test('Symboles russes : chaque famille DCS a son dessin, dans la palette en russe ; le SAM garde son cercle', async (ok) => {
+  const a = await open();
+  toRu(a);
+  const fam = ['attack', 'cargo', 'recon', 'attack_helo', 'ifv', 'artillery', 'mlrs', 'truck', 'aaa',
+               'sam_short', 'sam_med', 'sam_long', 'cp', 'ew', 'sub', 'infantry', 'ground'];
+  const absent = fam.filter(k => !a.d.querySelector(`.tile[data-k="${k}"]`));
+  ok(!absent.length, `absentes de la palette russe : ${absent.join(', ')}`);
+  const sans = a.s('JSON.stringify(Object.keys(SHAPES).filter(k => (SHAPES[k].nato || SHAPES[k].natoDraw) && !SHAPES[k].ru && !SHAPES[k].ruDraw))');
+  ok(sans === '[]', `familles sans dessin russe : ${sans}`);
+  a.tile('sam_long'); a.click(400, 300);
+  ok(a.s('ruSpec(objs[0]) && ruSpec(objs[0]).key') === '0013', `SAM longue portée : ${a.s('JSON.stringify(ruSpec(objs[0]))')}`);
+  /* le cercle d'engagement, tireté, à 1,6 taille de symbole */
+  const r = a.s('Math.round(1.6 * SIZE * objs[0].s)');
+  ok(a.s(INK(400 + r, 300, 3, 'B > 150 && B > R + 60')) > 0, `cercle d'engagement à ${r} px absent`);
+});
+
+test('Symboles russes : le choix survit à la réouverture et au fichier ; le kneeboard les dessine', async (ok) => {
+  let a = await open();
+  a.tile('fighter'); a.click(400, 300);
+  toRu(a);
+  a = await reload();
+  ok(symLib(a) === 'ru', `après réouverture : ${symLib(a)}`);
+  const f = await a.saved();
+  ok(f && JSON.parse(f.text).lib === 'ru', 'le réglage n\'est pas dans le fichier');
+  const b = await open();
+  b.openFile(new b.w.File([f.text], f.name, { type:'application/json' })); await pause(400);
+  ok(symLib(b) === 'ru', `fichier rouvert sur un poste vierge : ${symLib(b)}`);
+  const black = c => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i] < 14 && d[i + 1] < 14 && d[i + 2] < 14 && d[i + 3] > 240) n++; return n; };
+  const ru = await b.w.kneeboardCanvas();
+  b.button('#lib');
+  const sil = await b.w.kneeboardCanvas();
+  ok(black(ru) > black(sil) + 30, `pixels noirs (bordure) : ${black(ru)} en russe, ${black(sil)} en silhouettes`);
 });
 
 /* ---------- lot 23 : écrans de bord, une bibliothèque par module ---------- */

@@ -472,6 +472,90 @@ for (const [k, f] of Object.entries(DCS_FAMILIES)){
                 draw: (c, o) => base.draw(c, o), ...(base.side && { side: base.side }) };
 }
 
+/* ================= bibliothèque russe, comme la carte F10 en thème russe (lot 20) =================
+   Le thème « russe » de DCS (MissionEditor/data/NewMap/images/russian/) dessine chaque
+   famille d'un trait blanc d'un pixel bordé de noir, que le jeu teint à la couleur de la
+   coalition, sans cadre. Aucune bibliothèque libre ne dessine cette symbologie : le
+   projet la redessine en vecteurs, icône par icône, d'après les images 32 × 32 (48 × 48
+   pour les navires) relevées pixel par pixel ; aucune image n'est publiée.
+
+   Un glyphe, en coordonnées de pixels de l'icône (centre du pixel = son indice) :
+     key  la clé de l'icône DCS (comme `dcs` pour l'OTAN), citée dans docs/SYMBOLES.md
+     n    côté de l'icône, 32 ou 48
+     s    traits d'un pixel, [x0, y0, x1, y1, …] ;  w2  traits de deux pixels (SAM)
+     f    surfaces pleines (pointes de flèche), [x0, y0, x1, y1, …]
+     r    rectangles pleins [x0, y0, x1, y1] (fanion du poste de commandement)
+     c    cercles [cx, cy, r]
+   Le FARP n'a pas d'icône russe : DCS prend celle de images/common/, comme en OTAN. */
+const RU_GLYPHS = {
+  fighter:  { key:'0024', s:[[15,9,15,27], [10,19,20,19]], f:[[15,9,17,11,13,11]] },
+  bomber:   { key:'0027', s:[[15,12,15,27], [7,12,23,12], [12,11,13,10,14,9,16,9,17,10,18,11]] },
+  tanker:   { key:'0064', s:[[7,12,23,12], [15,13,15,15], [15,24,15,27],
+                             [13,15,17,15,20,18,20,21,17,24,13,24,10,21,10,18,13,15],
+                             [14,17,16,17,17,18,16,19,15,19], [16,19,17,20,17,21,16,22,14,22]] },
+  airliner: { key:'Aircraft_civilian', s:[[7,8,23,8], [15,9,15,23]] },
+  helo:     { key:'0020', s:[[8,3,15,10,22,3], [8,17,15,10,22,17], [15,10,15,27]] },
+  attack_helo: { key:'0021', s:[[8,3,15,10,22,3], [8,17,15,10,22,17], [15,10,15,27]], f:[[15,6,17,8,15,10,13,8]] },
+  awacs:    { key:'0056', s:[[7,12,23,12], [7,14,23,14], [7,16,23,16], [15,17,15,20], [15,24,15,27],
+                             [14,20,16,20,17,21,17,23,16,24,14,24,13,23,13,21,14,20],
+                             [18,22,20,20,22,21,24,19], [21,19,20,20], [21,22,22,21]] },
+  drone:    { key:'0023', s:[[7,12,23,12], [7,10,7,14], [23,10,23,14], [15,13,15,27]] },
+  attack:   { key:'0025', s:[[7,12,23,12], [15,13,15,27]], f:[[15,9,17,11,13,11]] },
+  cargo:    { key:'0029', s:[[7,12,23,12], [15,13,15,15], [15,24,15,27],
+                             [13,15,17,15,20,18,20,21,17,24,13,24,10,21,10,18,13,15],
+                             [13,18,17,18], [15,18,15,21]] },
+  recon:    { key:'0026', s:[[7,12,23,12], [15,12,15,27], [10,17,20,7], [18,7,20,7,20,9]] },
+  tank:     { key:'0001', s:[[16,5,22,17,16,29,10,17,16,5]] },
+  artillery:{ key:'0006', s:[[16,5,22,17,16,29,10,17,16,5], [16,11,16,23], [14,15,14,19], [18,15,18,19]] },
+  ifv:      { key:'0002', s:[[10,29,10,11,16,5,22,11,22,29,10,29], [10,27,22,27]] },
+  mlrs:     { key:'0007', s:[[10,9,22,9,22,22,10,22,10,9], [5,4,10,9], [27,4,22,9]] },
+  truck:    { key:'0005', s:[[10,29,10,12,11,10,13,8,16,7,19,8,21,10,22,12,22,29,10,29]] },
+  infantry: { key:'0201', s:[[15,9,15,12]], f:[[15,6,17,8,13,8]], c:[[15,17,4]] },
+  ground:   { key:'0035', s:[[8,4,8,7,10,10,13,13,17,13,20,10,22,7,22,4], [15,13,15,14],
+                             [15,14,9,29,21,29,15,14]], f:[[8,3,9,4,7,4], [22,3,23,4,21,4]] },
+  radar:    { key:'0036', s:[[7,4,23,4], [15,5,15,15], [15,15,6,24], [15,15,24,24], [6,25,24,25],
+                             [7,2,3,6], [9,2,5,6], [25,2,21,6], [27,2,23,6]] },
+  aaa:      { key:'0015', s:[[15,7,15,28], [12,11,12,21], [18,11,18,21]], f:[[15,2,17,6,13,6]] },
+  sam:      { key:'0009', w2:[[15.5,8,15.5,24], [3,25.5,28,25.5]], f:[[15,1,16,1,18,7,13,7]] },
+  sam_short:{ key:'0011', w2:[[15.5,8,15.5,24], [3,25.5,28,25.5], [3.5,22,3.5,29], [27.5,22,27.5,29]], f:[[15,1,16,1,18,7,13,7]] },
+  sam_med:  { key:'0012', w2:[[15.5,8,15.5,24], [3,25.5,28,25.5], [3,28.5,28,28.5], [3.5,23,3.5,29], [27.5,23,27.5,29]], f:[[15,1,16,1,18,7,13,7]] },
+  sam_long: { key:'0013', w2:[[15.5,8,15.5,21], [3,22.5,28,22.5], [3,25.5,28,25.5], [3,28.5,28,28.5], [3.5,20,3.5,29], [27.5,20,27.5,29]], f:[[15,1,16,1,18,7,13,7]] },
+  ew:       { key:'0028', s:[[7,12,23,12], [7,14,23,14], [7,16,23,16], [15,11,15,27],
+                             [6,6,10,10,12,8,14,10,15,11,16,10,18,8,20,10,24,6], [6,8,6,6,8,6], [22,6,24,6,24,8]] },
+  cp:       { key:'0071', s:[[2,15,2,29]], r:[[2,2,29,15]] },
+  ship:     { key:'0068', n:48, s:[[18,44,18,9,24,3,30,9,30,44,18,44], [20,36,28,36], [20,38,28,38]] },
+  carrier:  { key:'0065', n:48, s:[[18,44,18,9,30,9,30,44,18,44], [19,8,24,3,29,8], [24,10,24,43]] },
+  sub:      { key:'0038', s:[[10,29,10,12,15,7,21,2,21,29,10,29]] },
+};
+for (const [k, g] of Object.entries(RU_GLYPHS)) SHAPES[k].ru = g;
+SHAPES.farp.ruDraw = SHAPES.farp.natoDraw;
+
+/* dessine un glyphe dans le repère [-1, 1] (16 pixels de l'icône par unité) : la bordure
+   noire d'abord (un pixel de chaque côté du trait), puis le trait à la couleur de
+   l'objet ; `halo` détache la bordure noire d'un fond sombre */
+function ruPaint(c, g, color, halo){
+  const o = ((g.n || 32) - 1) / 2;
+  c.save();
+  c.scale(1 / 16, 1 / 16); c.translate(-o, -o);
+  c.lineJoin = 'miter'; c.lineCap = 'square';
+  const line = a => { c.moveTo(a[0], a[1]); for (let i = 2; i < a.length; i += 2) c.lineTo(a[i], a[i + 1]); };
+  const pass = (ink, add, w1) => {
+    c.strokeStyle = c.fillStyle = ink;
+    for (const [list, w] of [[g.s, 1], [g.w2, 2]]){
+      if (!list) continue;
+      c.lineWidth = w * w1 + add; c.beginPath(); list.forEach(line); c.stroke();
+    }
+    c.lineWidth = w1 + add;
+    for (const f of g.f || []){ c.beginPath(); line(f); c.closePath(); c.fill(); c.stroke(); }
+    for (const [x0, y0, x1, y1] of g.r || []){ c.beginPath(); c.rect(x0, y0, x1 - x0, y1 - y0); c.fill(); c.stroke(); }
+    for (const [x, y, r] of g.c || []){ c.beginPath(); c.arc(x, y, r, 0, 7); c.stroke(); }
+  };
+  if (halo) pass(halo, 4.4, 1.2);
+  pass('#000', 2.4, 1.2);
+  pass(color, 0, 1.2);
+  c.restore();
+}
+
 /* ================= kit radar =================
    Écrans de bord et symbologie radar, module par module. Tout est dessiné ici, en
    vecteurs, d'après le manuel ED du module : aucune capture du jeu, aucune image de

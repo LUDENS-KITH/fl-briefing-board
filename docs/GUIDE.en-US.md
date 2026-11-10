@@ -28,7 +28,8 @@ recolored without quality loss. To add a shape, see [docs/MODELE.md §8](MODELE.
 
 The **Silhouettes** button in the toolbar switches the whole briefing to **NATO symbols**,
 the ones DCS draws on the F10 map and in the mission editor (MIL-STD-2525, APP-6). Click
-it again to go back to silhouettes. Nothing is lost: every object keeps its position,
+it again for **Russian symbols**, those of the same map's Russian theme; a third click goes
+back to silhouettes. Nothing is lost: every object keeps its position,
 heading, size, color and name.
 
 - **As in DCS**: one frame for both sides, filled with the object's color, with the frame
@@ -49,6 +50,9 @@ heading, size, color and name.
 - **The setting belongs to the briefing**: it is kept in the browser and in the briefing
   file (⇩ Briefing), and ✚ New keeps it. An older file opens in silhouettes. Exports
   (PNG, kneeboard) and presentation mode draw what is on screen.
+- **Russian symbols**: the line of each icon of the DCS Russian theme, in the object's
+  color with a black edge, no frame — redrawn by the project, icon by icon. The same
+  families as in NATO; no direction arrow, the theme has none.
 - **On a dark background**, a light outline surrounds the symbol so that the black lines
   stay visible. The game's F10 map is light and does not need one.
 

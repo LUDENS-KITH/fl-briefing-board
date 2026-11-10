@@ -1,4 +1,4 @@
-/* Bibliothèque OTAN (lot 19) : vérifications sans navigateur.
+/* Bibliothèques OTAN (lot 19) et russe (lot 20) : vérifications sans navigateur.
      node tools/test_symboles.js
    Chaque forme qui porte un code OTAN doit avoir un code que milsymbol sait dessiner, la
    clé de l'icône DCS qu'il reproduit et sa ligne dans docs/SYMBOLES.md. Les familles de
@@ -52,6 +52,28 @@ for (const k of FAMILIES){
   ok(typeof sh.silTag === 'string' && sh.silTag.length > 0, `${k} : pas de repère écrit en silhouettes`);
   ok(sh.g === 'air' || sh.g === 'sol', `${k} : groupe de palette ${sh.g}`);
 }
+
+/* ---------- la bibliothèque russe (lot 20) ----------
+   Chaque forme dessinée en OTAN a son glyphe russe, redessiné d'après l'icône du thème
+   russe de DCS qui porte la même clé ; chaque trait tient dans l'icône ; SYMBOLES.md
+   cite la clé dans sa section russe. */
+const ruDoc = (doc.split('## Bibliothèque russe')[1] || '').split(/\r?\n## /)[0];
+ok(ruDoc.length > 200, 'SYMBOLES.md : pas de section « Bibliothèque russe »');
+for (const k of coded){
+  const sh = S[k], g = sh.ru;
+  ok(!!g || typeof sh.ruDraw === 'function', `${k} : pas de dessin russe`);
+  if (!g) continue;
+  ok(g.key === sh.dcs, `${k} : glyphe russe ${g.key}, icône OTAN ${sh.dcs} — DCS donne la même clé aux deux thèmes`);
+  const n = g.n || 32, all = [...(g.s || []), ...(g.w2 || []), ...(g.f || []), ...(g.r || [])];
+  ok(all.length + (g.c || []).length > 0, `${k} : glyphe russe vide`);
+  for (const a of all){
+    ok(a.length >= 4 && a.length % 2 === 0, `${k} : tracé russe mal formé ${JSON.stringify(a)}`);
+    ok(a.every(v => v >= 0 && v <= n - 1), `${k} : tracé russe hors de l'icône ${n} × ${n} : ${JSON.stringify(a)}`);
+  }
+  ok(ruDoc.includes(g.key), `${k} : la section russe de SYMBOLES.md ne cite pas l'icône ${g.key}`);
+}
+for (const k of Object.keys(S).filter(k => S[k].g === 'tac' || S[k].g === 'arm'))
+  ok(!S[k].ru && !S[k].ruDraw, `${k} : marqueur tactique ou armement avec un glyphe russe`);
 
 /* ---------- ce qui reste sans code est dit ---------- */
 const WITHOUT = { airport: 'Aéroport' };
