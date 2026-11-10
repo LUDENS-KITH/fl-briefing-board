@@ -58,9 +58,10 @@
 - **Un mode présentation** — plein écran, phases au clavier, pointeur laser, et la
   manœuvre qui se déroule d'une phase à l'autre : pour mener le briefing en partage
   d'écran.
-- **L'import d'une mission DCS** — glissez le `.miz` : la route du vol, le bullseye, les
-  défenses aériennes, les navires, les ravitailleurs et les AWACS avec leur orbite, leur
-  TACAN et leur fréquence se posent sur la carte, au mètre près.
+- **L'import d'une mission DCS** — glissez le `.miz` : la route du vol, le bullseye, tous
+  les groupes au sol et en mer au symbole de la carte F10, les ravitailleurs et les AWACS
+  avec leur orbite, leur TACAN et leur fréquence se posent sur la carte, au mètre près ; ce
+  que la carte F10 cache au pilote reste caché.
 - **La route dans la DTC du F/A-18C** — la route préparée sur le tableau s'écrit dans la
   cartouche de données d'une copie de la mission : le pilote démarre ses points chargés.
 
