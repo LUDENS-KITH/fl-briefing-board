@@ -369,6 +369,89 @@ const soutien = `mission =
   eq('lot 21 : mission du lot 6 — le convoi de base posé à sa catégorie, menaces inchangées',
      [m.ground.map(fam), m.threats.map(t => t.k)], [[['Convoi', 'ground', 'red']], ['sam', 'radar', 'carrier', 'ship']]);
 
+  /* 7. lot 22 : les dessins de la carte F10. Format relu dans l'éditeur du jeu
+     (MissionEditor/modules/me_draw_panel.lua, saveToMission) : points relatifs à mapX/mapY,
+     angle en degrés, rotation x' = x cos − y sin, y' = x sin + y cos ; couleurs 0xRRGGBBAA. */
+  const dessins = `mission =
+{
+  ["theatre"] = "Caucasus",
+  ["coalition"] = { ["blue"] = { ["country"] = { [1] = { ["name"] = "USA", ["plane"] = { ["group"] = {
+      [1] = { ["name"] = "UZI 1", ["units"] = { [1] = { ["type"] = "FA-18C_hornet", ["skill"] = "Client", }, },
+              ["route"] = { ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, ["alt"] = 13, }, }, }, },
+    }, }, }, }, }, },
+  ["drawings"] = {
+    ["layers"] = {
+      [1] = { ["name"] = "Red", ["visible"] = true, ["objects"] = {
+        [1] = { ["primitiveType"] = "TextBox", ["layerName"] = "Red", ["name"] = "Text Box-9", ["visible"] = true,
+                ["mapX"] = 0, ["mapY"] = 0, ["text"] = "rouge seulement", ["fontSize"] = 24, ["colorString"] = "0xff0000ff", ["angle"] = 0, }, }, },
+      [2] = { ["name"] = "Blue", ["visible"] = true, ["objects"] = {
+        [1] = { ["primitiveType"] = "Icon", ["layerName"] = "Blue", ["name"] = "Icon-1", ["visible"] = true,
+                ["mapX"] = 500, ["mapY"] = 600, ["file"] = "P91000001.png", ["scale"] = 1, ["angle"] = 45, ["colorString"] = "0x0000ffff", }, }, },
+      [3] = { ["name"] = "Neutral", ["visible"] = true, ["objects"] = {}, },
+      [4] = { ["name"] = "Common", ["visible"] = true, ["objects"] = {
+        [1] = { ["primitiveType"] = "Line", ["lineMode"] = "segments", ["closed"] = true, ["layerName"] = "Common", ["name"] = "Line-1",
+                ["visible"] = true, ["mapX"] = 1000, ["mapY"] = 2000, ["colorString"] = "0xff0000ff", ["style"] = "dash", ["thickness"] = 8,
+                ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, }, [2] = { ["x"] = 100, ["y"] = 0, }, [3] = { ["x"] = 100, ["y"] = 100, }, }, },
+        [2] = { ["primitiveType"] = "Line", ["lineMode"] = "free", ["closed"] = false, ["layerName"] = "Common", ["name"] = "Line-2",
+                ["visible"] = true, ["mapX"] = 0, ["mapY"] = 0, ["colorString"] = "0x00ff0080", ["style"] = "solid", ["thickness"] = 4,
+                ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, }, [2] = { ["x"] = 10, ["y"] = 5, }, [3] = { ["x"] = 20, ["y"] = 0, }, }, },
+        [3] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "circle", ["layerName"] = "Common", ["name"] = "Polygon-1", ["visible"] = true,
+                ["mapX"] = -3000, ["mapY"] = 4000, ["radius"] = 5000, ["colorString"] = "0x000000ff", ["fillColorString"] = "0xff000080",
+                ["style"] = "solid", ["thickness"] = 16, },
+        [4] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "rect", ["layerName"] = "Common", ["name"] = "Polygon-2", ["visible"] = true,
+                ["mapX"] = 0, ["mapY"] = 0, ["width"] = 200, ["height"] = 100, ["angle"] = 90, ["colorString"] = "0xffff00ff",
+                ["fillColorString"] = "0x00000000", ["style"] = "dot", ["thickness"] = 8, },
+        [5] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "oval", ["layerName"] = "Common", ["name"] = "Polygon-3", ["visible"] = true,
+                ["mapX"] = 0, ["mapY"] = 0, ["r1"] = 300, ["r2"] = 100, ["angle"] = 0, ["colorString"] = "0xffffffff",
+                ["fillColorString"] = "0xffffff40", ["style"] = "boundry1", ["thickness"] = 8, },
+        [6] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "arrow", ["layerName"] = "Common", ["name"] = "Polygon-4", ["visible"] = true,
+                ["mapX"] = 10, ["mapY"] = 20, ["length"] = 800, ["angle"] = 0, ["colorString"] = "0xff0000ff",
+                ["fillColorString"] = "0xff000080", ["style"] = "solid", ["thickness"] = 8,
+                ["points"] = { [1] = { ["x"] = 999, ["y"] = 999, }, }, },
+        [7] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "free", ["layerName"] = "Common", ["name"] = "Polygon-5", ["visible"] = true,
+                ["mapX"] = 100, ["mapY"] = 100, ["colorString"] = "0xff0000ff", ["fillColorString"] = "0xff000080", ["style"] = "solid", ["thickness"] = 8,
+                ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, }, [2] = { ["x"] = 50, ["y"] = 0, }, [3] = { ["x"] = 0, ["y"] = 50, }, }, },
+        [8] = { ["primitiveType"] = "Line", ["lineMode"] = "segment", ["closed"] = false, ["layerName"] = "Common", ["name"] = "Line-cachée",
+                ["visible"] = false, ["mapX"] = 0, ["mapY"] = 0, ["colorString"] = "0xff0000ff", ["style"] = "solid", ["thickness"] = 8,
+                ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, }, [2] = { ["x"] = 1, ["y"] = 1, }, }, },
+      }, },
+      [5] = { ["name"] = "Author", ["visible"] = true, ["objects"] = {
+        [1] = { ["primitiveType"] = "TextBox", ["layerName"] = "Author", ["name"] = "Text Box-1", ["visible"] = true,
+                ["mapX"] = 700, ["mapY"] = 800, ["text"] = "MOZDOK\\nZONE SEAD", ["fontSize"] = 24, ["colorString"] = "0x000000ff",
+                ["fillColorString"] = "0x0080ff80", ["angle"] = 0, ["borderThickness"] = 4, },
+        [2] = { ["primitiveType"] = "Icon", ["layerName"] = "Author", ["name"] = "Icon-2", ["visible"] = true,
+                ["mapX"] = -500, ["mapY"] = -600, ["file"] = "P91000072.png", ["scale"] = 1, ["angle"] = 0, ["colorString"] = "0xffffffff", }, }, },
+    },
+    ["options"] = { ["hiddenOnF10Map"] = { ["Pilot"] = { ["Blue"] = false, ["Red"] = true, ["Neutral"] = false, }, }, },
+  },
+}`;
+  const md = await MIZ.readMiz(zip([['mission', dessins]]));
+  const bleu = MIZ.drawingsFor(md, 'blue', false), noms = d => d.map(o => o.name);
+  eq('lot 22 : calques Common et Author, plus celui de la coalition ; l\'objet invisible écarté', noms(bleu),
+     ['Icon-1', 'Line-1', 'Line-2', 'Polygon-1', 'Polygon-2', 'Polygon-3', 'Polygon-4', 'Polygon-5', 'Text Box-1', 'Icon-2']);
+  eq('lot 22 : carte F10 cachée aux pilotes rouges — aucun dessin', MIZ.drawingsFor(md, 'red', false).length, 0);
+  eq('lot 22 : en vue du concepteur, tous les calques', noms(MIZ.drawingsFor(md, 'red', true)).length, 12 - 1);
+  const by = n => bleu.find(o => o.name === n) || {};
+  const PT = o => (o.pts || []).map(p => [Math.round(p.x * 100) / 100, Math.round(p.y * 100) / 100]);
+  eq('trait : segments fermés, absolus, tireté, couleur', [by('Line-1').t, PT(by('Line-1')), by('Line-1').ls, by('Line-1').c],
+     ['line', [[1000, 2000], [1100, 2000], [1100, 2100], [1000, 2000]], 'dash', { r: 255, g: 0, b: 0, a: 1 }]);
+  eq('trait : main levée ouverte, alpha', [PT(by('Line-2')).length, by('Line-2').c.a], [3, 128 / 255]);
+  eq('cercle : centre et rayon', [by('Polygon-1').t, by('Polygon-1').x, by('Polygon-1').y, by('Polygon-1').r], ['circle', -3000, 4000, 5000]);
+  eq('rectangle : hauteur au nord, largeur à l\'est, tourné de 90°', PT(by('Polygon-2')),
+     [[100, 50], [-100, 50], [-100, -50], [100, -50], [100, 50]]);
+  eq('rectangle : pointillé', by('Polygon-2').ls, 'dot');
+  const ov = PT(by('Polygon-3'));
+  eq('ovale : fermé, r1 au nord, r2 à l\'est', [ov.length, ov[0], ov[12]], [49, [300, 0], [0, 100]]);
+  eq('ovale : bordure à motif → trait plein', by('Polygon-3').ls, 'solid');
+  eq('flèche : refaite depuis sa longueur, pointe au bout', PT(by('Polygon-4'))[3], [10, 820]);
+  eq('flèche : 8 points', PT(by('Polygon-4')).length, 8);
+  eq('zone libre : points absolus', PT(by('Polygon-5')), [[100, 100], [150, 100], [100, 150]]);
+  eq('texte : lignes, taille, position', [by('Text Box-1').t, by('Text Box-1').s, by('Text Box-1').size, by('Text Box-1').x, by('Text Box-1').y],
+     ['text', 'MOZDOK\nZONE SEAD', 24, 700, 800]);
+  eq('icône : famille de son icône, cap', [by('Icon-1').t, by('Icon-1').k, by('Icon-1').a], ['icon', 'tank', 45]);
+  eq('icône sans famille : repère et nom de l\'icône', [by('Icon-2').k, by('Icon-2').hint], [null, 'Airbase Building']);
+  eq('épaisseur : la moitié du trait de l\'éditeur, bornée', [by('Line-1').w, by('Line-2').w, by('Polygon-1').w], [4, 2, 8]);
+
   /* refus */
   const refus = async (label, fn, re) => { let e = ''; try { await fn(); } catch (x){ e = x.message; } eq(label, re.test(e), true); };
   const colt = zip([['mission', mission.replace(/FA-18C_hornet/g, 'F-16C_50')]]);

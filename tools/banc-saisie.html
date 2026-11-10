@@ -1684,6 +1684,61 @@ test('Import : la vue du concepteur pose les cachés, marqués, et le réglage s
   ok(!a.s('objs.filter(o => o.k === "tank").some(o => /^(caché|hidden)/.test(o.lbl))'), 'un groupe visible marqué caché');
 });
 
+/* ---------- lot 22 : les dessins de la carte F10 ---------- */
+const DESSINS = `mission =
+{
+  ["theatre"] = "Caucasus",
+  ["coalition"] = { ["blue"] = { ["bullseye"] = { ["x"] = -291014, ["y"] = 617414, },
+    ["country"] = { [1] = { ["name"] = "USA", ["plane"] = { ["group"] = {
+      [1] = { ["name"] = "UZI 1", ["units"] = { [1] = { ["type"] = "FA-18C_hornet", ["skill"] = "Client", }, },
+              ["route"] = { ["points"] = {
+                [1] = { ["x"] = -356437, ["y"] = 618211, ["alt"] = 13, ["alt_type"] = "BARO", ["name"] = "", },
+                [2] = { ["x"] = -330000, ["y"] = 640000, ["alt"] = 7620, ["alt_type"] = "BARO", ["name"] = "CAP", }, }, }, },
+    }, }, }, }, }, },
+  ["drawings"] = { ["layers"] = {
+    [1] = { ["name"] = "Red", ["visible"] = true, ["objects"] = {
+      [1] = { ["primitiveType"] = "TextBox", ["layerName"] = "Red", ["name"] = "T-rouge", ["visible"] = true,
+              ["mapX"] = -340000, ["mapY"] = 630000, ["text"] = "ROUGE", ["fontSize"] = 24, ["colorString"] = "0xff0000ff", ["angle"] = 0, }, }, },
+    [2] = { ["name"] = "Common", ["visible"] = true, ["objects"] = {
+      [1] = { ["primitiveType"] = "Line", ["lineMode"] = "segments", ["closed"] = false, ["layerName"] = "Common", ["name"] = "Couloir",
+              ["visible"] = true, ["mapX"] = -350000, ["mapY"] = 620000, ["colorString"] = "0xff0000ff", ["style"] = "dash", ["thickness"] = 8,
+              ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, }, [2] = { ["x"] = 10000, ["y"] = 10000, }, [3] = { ["x"] = 20000, ["y"] = 10000, }, }, },
+      [2] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "circle", ["layerName"] = "Common", ["name"] = "Tir", ["visible"] = true,
+              ["mapX"] = -340000, ["mapY"] = 630000, ["radius"] = 5000, ["colorString"] = "0x00ff00ff", ["fillColorString"] = "0x00000000",
+              ["style"] = "solid", ["thickness"] = 8, },
+      [3] = { ["primitiveType"] = "Polygon", ["polygonMode"] = "free", ["layerName"] = "Common", ["name"] = "Zone", ["visible"] = true,
+              ["mapX"] = -345000, ["mapY"] = 625000, ["colorString"] = "0xffff00ff", ["fillColorString"] = "0xffff0080", ["style"] = "solid", ["thickness"] = 8,
+              ["points"] = { [1] = { ["x"] = 0, ["y"] = 0, }, [2] = { ["x"] = 5000, ["y"] = 0, }, [3] = { ["x"] = 0, ["y"] = 5000, }, }, },
+      [4] = { ["primitiveType"] = "TextBox", ["layerName"] = "Common", ["name"] = "Consigne", ["visible"] = true,
+              ["mapX"] = -335000, ["mapY"] = 635000, ["text"] = "ZONE DE TIR\\nFL100 MAX", ["fontSize"] = 24, ["colorString"] = "0x000000ff", ["angle"] = 0, },
+      [5] = { ["primitiveType"] = "Icon", ["layerName"] = "Common", ["name"] = "Icone", ["visible"] = true,
+              ["mapX"] = -338000, ["mapY"] = 632000, ["file"] = "P91000001.png", ["scale"] = 1, ["angle"] = 90, ["colorString"] = "0xffffffff", },
+    }, },
+  }, },
+}`;
+
+test('Import : les dessins de la carte F10 sous les symboles, ancrés, à leur couleur ; le calque adverse écarté', async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Champ de tir.miz', [['mission', DESSINS]])); await pause(400);
+  const o = JSON.parse(a.s('JSON.stringify(objs.map((o, i) => ({ i, t: o.t, k: o.k, c: o.c, ls: o.ls, locked: !!o.locked, s: o.s, n: (o.pts || []).length, a: o.a })))'));
+  const st = o.find(x => x.t === 'stroke' && x.ls === 'dash'), ci = o.find(x => x.t === 'circle'), zo = o.find(x => x.t === 'zone');
+  const tx = o.find(x => x.t === 'text'), ic = o.find(x => x.t === 'sym' && x.k === 'tank');
+  ok(!!st && st.n === 3 && /^rgba\(255, ?0, ?0/.test(st.c), `couloir : ${JSON.stringify(st)}`);
+  ok(!!ci && /^rgba\(0, ?255, ?0/.test(ci.c), `cercle : ${JSON.stringify(ci)}`);
+  ok(!!zo && zo.n === 3, `zone : ${JSON.stringify(zo)}`);
+  ok(!!tx && tx.s === 'ZONE DE TIR\nFL100 MAX', `texte : ${JSON.stringify(tx)}`);
+  ok(!!ic && Math.abs(ic.a - Math.PI / 2) < 1e-6, `icône : ${JSON.stringify(ic)}`);
+  ok(!o.some(x => x.t === 'text' && x.s === 'ROUGE'), 'le calque rouge est posé pour un vol bleu');
+  const drawn = [st, ci, zo, tx, ic].filter(Boolean);
+  ok(drawn.length === 5 && drawn.every(x => x.locked), 'dessins non ancrés');
+  const firstSym = o.find(x => x.t === 'sym' && x.k !== 'tank');
+  ok(drawn.length === 5 && firstSym && drawn.every(x => x.i < firstSym.i), 'dessins au-dessus des symboles');
+  ok(/dessins|drawings/.test(a.toast()), `bilan : « ${a.toast()} »`);
+  /* le texte sur deux lignes : sa boîte en tient deux */
+  const h = a.s('bbox(objs.find(o => o.t === "text")).h'), h1 = a.s('bbox({ t: "text", s: "X", x: 0, y: 0, w: 4 }).h');
+  ok(h > h1 * 1.5, `boîte du texte sur deux lignes : ${h} contre ${h1}`);
+});
+
 (async () => {
   const out = document.getElementById('out'), sum = document.getElementById('sum');
   /* ?grep=… ne joue que les scénarios dont le nom contient ce texte */

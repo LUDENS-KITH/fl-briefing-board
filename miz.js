@@ -201,8 +201,9 @@ const MIZ = (() => {
      DCS n'y sont pas, leur base est chiffrée — le nom du type quand il dit le système, comme
      pour les défenses aériennes depuis le lot 6 ; sinon la famille de la catégorie, comptée
      au bilan de l'import. */
-  const TABLE = typeof MAPCLASS !== 'undefined' ? MAPCLASS
-              : typeof require === 'function' ? require('./mapclass.js') : {};
+  const MC = typeof MAPCLASS !== 'undefined' ? { MAPCLASS, MAPKEY, MAPHINT }
+           : typeof require === 'function' ? require('./mapclass.js') : {};
+  const TABLE = MC.MAPCLASS || {}, KEYFAM = MC.MAPKEY || {}, HINT = MC.MAPHINT || {};
   const AAA = /Shilka|ZSU|ZU-23|Gepard|Vulcan|flak|bofors|KS-19|S-60/i;
   const INFANTRY = /^(Soldier|Infantry|Paratrooper)\b/i;
   const AD_FAM = new Set(['sam', 'sam_short', 'sam_med', 'sam_long', 'radar', 'aaa', 'ew']);
@@ -252,6 +253,81 @@ const MIZ = (() => {
     const mhz = sf && +sf.frequency > 0 ? +sf.frequency / 1e6 : +g.frequency > 0 ? +g.frequency : null;
     return { tacan: bc && bc.channel ? `${bc.channel}${bc.modeChannel || ''}${bc.callsign ? ' ' + bc.callsign : ''}` : '',
              freq: mhz };
+  }
+
+  /* ---------- les dessins de la carte F10 (lot 22) ----------
+     Format de l'éditeur (MissionEditor/modules/me_draw_panel.lua, saveToMission) : chaque
+     objet a sa position mapX/mapY en mètres DCS (x au nord, y à l'est), ses points relatifs
+     à elle, un angle en degrés qui tourne x' = x cos − y sin, y' = x sin + y cos. Le
+     rectangle porte sa hauteur au nord et sa largeur à l'est, l'ovale r1 au nord et r2 à
+     l'est ; la flèche est refaite depuis sa longueur, comme au chargement dans l'éditeur
+     (polygonArrowMakePoints). Couleurs 0xRRGGBBAA (parseColorString). */
+  const rgba = v => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return null;
+    return { r: Math.floor(n / 16777216) % 256, g: Math.floor(n / 65536) % 256, b: Math.floor(n / 256) % 256, a: (n % 256) / 255 };
+  };
+  /* les motifs de bordure de l'éditeur (images/draw/lines.lua) : au trait le plus proche */
+  const LS = { dash: 'dash', dotdash: 'dash', dot: 'dot', dot2: 'dot' };
+  const lineStyle = st => LS[String(st || '')] || 'solid';
+  const width = th => Math.max(1, Math.min(8, Math.round((+th || 8) / 2)));
+  function arrowPoints(len){
+    const leg = len / 8, head = len / 3, body = len - head;
+    return [[leg, 0], [leg, body], [head, body], [0, len], [-head, body], [-leg, body], [-leg, 0], [leg, 0]];
+  }
+  function drawing(o){
+    const X = +o.mapX || 0, Y = +o.mapY || 0, A = (+o.angle || 0) * Math.PI / 180;
+    const cos = Math.cos(A), sin = Math.sin(A);
+    const at = ([px, py], turn) => turn ? { x: X + px * cos - py * sin, y: Y + px * sin + py * cos } : { x: X + px, y: Y + py };
+    const rel = () => list(o.points).map(q => [+q.x || 0, +q.y || 0]);
+    const base = { name: String(o.name || ''), layer: String(o.layerName || ''), c: rgba(o.colorString) || { r: 255, g: 0, b: 0, a: 1 } };
+    const stroke = { w: width(o.thickness), ls: lineStyle(o.style) };
+    const fill = rgba(o.fillColorString), filled = !!(fill && fill.a > 0);
+    if (o.primitiveType === 'Line'){
+      const pts = rel().map(q => at(q, false));
+      if (o.closed === true && pts.length > 1) pts.push({ ...pts[0] });
+      return pts.length > 1 ? { t: 'line', ...base, ...stroke, mode: String(o.lineMode || ''), pts } : null;
+    }
+    if (o.primitiveType === 'Polygon'){
+      const mode = String(o.polygonMode || '');
+      if (mode === 'circle') return { t: 'circle', ...base, ...stroke, filled, x: X, y: Y, r: +o.radius || 0 };
+      let local;
+      if (mode === 'rect'){
+        const h = Math.abs(+o.height || 0) / 2, w = Math.abs(+o.width || 0) / 2;
+        local = [[h, -w], [h, w], [-h, w], [-h, -w], [h, -w]];
+      } else if (mode === 'oval'){
+        const r1 = +o.r1 || 0, r2 = +o.r2 || 0;
+        local = Array.from({ length: 49 }, (_, i) => [r1 * Math.cos(i * Math.PI / 24), r2 * Math.sin(i * Math.PI / 24)]);
+      } else if (mode === 'arrow') local = arrowPoints(+o.length || 0);
+      else local = rel();
+      const turn = mode !== 'free';
+      const pts = local.map(q => at(q, turn)).map(q => ({ x: Math.round(q.x * 1e3) / 1e3, y: Math.round(q.y * 1e3) / 1e3 }));
+      return pts.length > 2 ? { t: 'poly', ...base, ...stroke, filled, mode, pts } : null;
+    }
+    if (o.primitiveType === 'TextBox')
+      return { t: 'text', ...base, x: X, y: Y, s: String(o.text ?? ''), size: +o.fontSize || 24 };
+    if (o.primitiveType === 'Icon'){
+      const f = String(o.file || ''), m = /^P0*91(\d{6})\.png$/i.exec(f), key = m ? m[1].slice(-4) : f;
+      return { t: 'icon', ...base, x: X, y: Y, k: KEYFAM[key] || null, key, hint: HINT[key] || f.replace(/\.png$/i, ''),
+               a: +o.angle || 0, scale: +o.scale || 1 };
+    }
+    return null;
+  }
+  function drawingsOf(m){
+    const d = m.drawings || {}, hid = (((d.options || {}).hiddenOnF10Map || {}).Pilot) || {};
+    const layers = list(d.layers).map(l => ({ name: String(l.name || ''), visible: l.visible !== false,
+      objects: list(l.objects).filter(o => o && o.visible !== false).map(drawing).filter(Boolean) }));
+    return { layers, hidden: { blue: hid.Blue === true, red: hid.Red === true, neutrals: hid.Neutral === true } };
+  }
+  /* ce que voit le pilote d'une coalition : Common et Author toujours, le calque de sa
+     coalition, rien si la mission cache la carte F10 aux pilotes de son camp ; le
+     concepteur voit tous les calques. Un calque masqué dans l'éditeur ne se pose pas. */
+  const SIDE_LAYER = { blue: 'Blue', red: 'Red', neutrals: 'Neutral' };
+  function drawingsFor(m, side, designer){
+    const d = m.drawn || { layers: [], hidden: {} };
+    if (!designer && d.hidden[side]) return [];
+    const keep = new Set(['Common', 'Author', SIDE_LAYER[side]]);
+    return d.layers.filter(l => l.visible && (designer || keep.has(l.name))).flatMap(l => l.objects);
   }
 
   function content(m, dict, opts = {}){
@@ -315,6 +391,7 @@ const MIZ = (() => {
       }
     }
     out.unknownTypes = [...unknown].sort();
+    out.drawn = drawingsOf(m);
     return out;
   }
 
@@ -404,7 +481,7 @@ const MIZ = (() => {
     return { bytes: zipBytes([...next, dtc]), cartridge: name, units: units.length };
   }
 
-  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, WYPT_MAX };
+  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, WYPT_MAX };
 })();
 
 if (typeof module !== 'undefined') module.exports = MIZ;

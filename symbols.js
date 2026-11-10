@@ -461,9 +461,10 @@ const DCS_FAMILIES = {
   ew:          { g:'sol', label:'Guerre électronique',     like:'radar',    silTag:'GE',  nato:'SFGPUUMSE------', dcs:'0028', dir:false },
   sub:         { g:'sol', label:'Sous-marin',              like:'ship',     silTag:'SM',  nato:'SFUPS----------', dcs:'0038', dir:true },
   /* lot 21 : l'infanterie, icône 0201 que DCS donne aux fantassins ; et l'unité terrestre
-     sans précision, cadre nu de la norme, pour le type que l'installation ne décrit pas */
+     sans précision, cadre nu de la norme (icône 0035 de DCS, « Friendly Ground Unit »),
+     pour le type que l'installation ne décrit pas */
   infantry:    { g:'sol', label:'Infanterie',              like:'tank',     silTag:'INF', nato:'SFGPUCI--------', dcs:'0201', dir:true },
-  ground:      { g:'sol', label:'Unité terrestre',         like:'tank',     silTag:'?',   nato:'SFGPU----------', dcs:'— (aucune)', dir:false },
+  ground:      { g:'sol', label:'Unité terrestre',         like:'tank',     silTag:'?',   nato:'SFGPU----------', dcs:'0035', dir:false },
 };
 for (const [k, f] of Object.entries(DCS_FAMILIES)){
   const base = SHAPES[f.like];

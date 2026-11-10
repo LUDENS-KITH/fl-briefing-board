@@ -127,6 +127,13 @@ nouvelle planche.
   Sinaï, Afghanistan, Mariannes, Kola —, tout se pose **sur la carte**, au mètre près.
   Ailleurs, sur une **planche sans carte** à l'échelle exacte, nord de la grille DCS en
   haut ; ses caps portent alors un « G » (grille).
+- Les **dessins de la carte F10** viennent aussi — traits, cercles, rectangles, ovales,
+  flèches, zones et textes que l'auteur a tracés dans l'éditeur, à leur couleur —, sous
+  tout le reste et **ancrés** : on pose et on saisit par-dessus sans les bousculer. Les
+  calques Common et Author, et celui de votre coalition ; rien si la mission cache la
+  carte F10 aux pilotes de votre camp (sauf en vue du concepteur). Ce que le tableau ne
+  dessine pas — fond plein, motif de bordure, cadre d'un texte — prend le trait le plus
+  proche : une zone remplie devient une zone hachurée, une bordure à motif un trait plein.
 - **Ce que la carte F10 cache reste caché** : un groupe caché dans l'éditeur n'est pas
   posé, et le bilan de l'import dit combien d'unités sont restées cachées. Pour préparer
   la mission, **Vue pilote** dans la barre passe en **Vue du concepteur** : les groupes

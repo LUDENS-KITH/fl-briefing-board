@@ -70,7 +70,7 @@ dessin de la forme la plus proche et un repère écrit dessous.
 | `ew` | `SFGPUUMSE------` | 0028 · moyen de guerre électronique | radar, « GE » | DCS ajoute un trait en zigzag au-dessus de « EW » |
 | `sub` | `SFUPS----------` | 0038 · sous-marin | navire, « SM » | — |
 | `infantry` | `SFGPUCI--------` | 0201 · « POINT 201 », sans titre dans `classifier.lua` : rectangle barré, que DCS donne aux fantassins et au personnel de pont (lot 21) | char, « INF » | — |
-| `ground` | `SFGPU----------` | — (aucune) : cadre nu de la norme, pour un type que l'installation de DCS ne décrit pas (lot 21) | char, « ? » | DCS a une icône pour chaque type ; le tableau ne la connaît pas pour les véhicules de base |
+| `ground` | `SFGPU----------` | 0035 · « Friendly Ground Unit » de l'éditeur ; pour un type que l'installation de DCS ne décrit pas (lot 21) | char, « ? » | cadre nu de la norme, sans la languette de l'icône DCS ; DCS a une icône pour chaque type, le tableau ne la connaît pas pour les véhicules de base |
 
 ## Sans code, dans les deux bibliothèques
 
@@ -94,27 +94,34 @@ types qui les portent.
 | Icônes DCS | Famille |
 |---|---|
 | 0001 | `tank` |
-| 0002, 0003 (reconnaissance), 0004 (transport de troupes), 0204 (antichar : BRDM-2 Malyutka, VAB Mephisto) | `ifv` |
-| 0005, 0212 (camions et engins de servitude) | `truck` |
+| 0002, 0003 (reconnaissance), 0004 (transport de troupes), 0203 et 0204 (antichar ; BRDM-2 Malyutka, VAB Mephisto) | `ifv` |
+| 0005 (« Supply »), 0207 (« Fuel Supply »), 0212 (« Engineers » ; dans DCS, les camions et engins de servitude) | `truck` |
 | 0006 | `artillery` |
 | 0007, 0208 (lanceurs sol-sol : Scud, M142, TOS-1A) | `mlrs` |
 | 0009, 0202, 0213 à 0217 (missile sol-air, sans portée) | `sam` |
 | 0010, 0011, 0014, 0017, 0018, 0078, 0079, 0084 à 0088 (courte portée : ближнего действия, малой дальности) | `sam_short` |
-| 0012, 0054, 0080 à 0082, 0089 (moyenne portée : средней дальности) | `sam_med` |
+| 0012, 0080 à 0082, 0089 (moyenne portée : средней дальности) | `sam_med` |
 | 0013 | `sam_long` |
 | 0015, 0016, 0205 | `aaa` |
 | 0028 | `ew` |
 | 0036, 0083 (radar mobile) | `radar` |
 | 0045, 0046, 0047, 0050, 0071 | `cp` |
-| 0201 | `infantry` |
-| 0037, 0039 (vedette), 0066 à 0070 | `ship` |
+| 0201, `P910000065.png` (« Airborne Troops ») | `infantry` |
+| 0035 (« Friendly Ground Unit ») | `ground` |
+| 0037, 0039 (« Warship »), 0052 à 0054 (bâtiment d'assaut, destroyer, frégate), 0057, 0211 (navires marchand et civil), 0066 à 0070 | `ship` |
 | 0038 | `sub` |
-| 0065 | `carrier` |
-| 0020, 0096 (hélicoptère de reconnaissance) | `helo` |
+| 0051, 0065 | `carrier` |
+| 0020, 0062 (anti-sous-marin), 0096 (reconnaissance) | `helo` |
 | aéronefs : 0021 à 0027, 0029, 0056, 0064 | leurs familles du tableau (`attack_helo`, `drone`, `fighter`, `attack`, `recon`, `bomber`, `cargo`, `awacs`, `tanker`) |
 
-**Sans famille** : bâtiment (0076), cargaison (0352), balise (0035), train (0108), avion de
-lutte anti-sous-marine (0063) ; l'unité prend alors la famille de sa catégorie.
+**Sans famille** : bâtiment (0076), cargaison (0352), train (0108), avion de lutte
+anti-sous-marine (0063), dépôt (0072) ; l'unité prend alors la famille de sa catégorie, et
+une icône de dessin (lot 22) un repère « objectif » avec son nom.
+
+Les noms entre guillemets sont ceux que l'éditeur donne aux icônes de dessin
+(`images/draw/icons.lua`). Ils ont corrigé deux lectures du lot 19 : **0054 est une
+frégate** (« FF » sur son image ; `classifier.lua` la titre SAM moyenne portée, mais la
+carte montre l'image), et 0035 l'unité terrestre amie générique.
 
 **Hors de la table** : les véhicules et navires de base de DCS (T-72B, M-2 Bradley, BTR-80…)
 ne déclarent leur icône dans aucun fichier lisible ; leur base, `Scripts/Database.edce`, est
@@ -134,8 +141,9 @@ antiaériens, `Soldier`/`Infantry`/`Paratrooper`), comme depuis le lot 6 ; sinon
 - **Les icônes voisines d'une famille déjà au tableau** : véhicule de reconnaissance
   (0003, proche du véhicule de combat), SAM canon-missile (0014, proche du SAM courte
   portée), postes de guidage et de contrôle, contrôleur aérien avancé (0045, 0046, 0047,
-  0050, proches du poste de commandement), seconde icône du SAM moyenne portée (0054). Le
-  lot 21 les range à la famille voisine, sans forme à part.
+  0050, proches du poste de commandement). Le lot 21 les range à la famille voisine, sans
+  forme à part. (Le lot 19 comptait ici 0054 comme seconde icône du SAM moyenne portée :
+  c'est une frégate, voir plus haut.)
 - **L'infanterie** : `classifier.lua` ne lui donne aucun titre, mais le lot 21 a lu
   l'icône que DCS donne aux fantassins : 0201, « POINT 201 », un rectangle barré — la
   famille `infantry` ci-dessus.

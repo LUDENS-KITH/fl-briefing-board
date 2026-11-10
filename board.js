@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.21', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.22', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -578,9 +578,10 @@ function drawObj(o){
     ctx.beginPath(); ctx.arc(o.x1, o.y1, Math.hypot(o.x2-o.x1, o.y2-o.y1), 0, 7); ctx.stroke();
   }
   else if (o.t === 'text'){
-    ctx.font = '600 ' + (13 + o.w * 3) * tb + 'px ui-sans-serif, system-ui, sans-serif';
+    const fs = (13 + o.w * 3) * tb;
+    ctx.font = '600 ' + fs + 'px ui-sans-serif, system-ui, sans-serif';
     ctx.textBaseline = 'middle';
-    ctx.fillText(o.s, o.x, o.y);
+    String(o.s).split('\n').forEach((l, i) => ctx.fillText(l, o.x, o.y + i * fs * 1.2));   // lot 22 : plusieurs lignes
   }
   else if (o.t === 'zone')  drawZone(o);
   else if (o.t === 'terrain') drawTerrain(o);
@@ -1171,7 +1172,10 @@ function pin(x, y){
 
 function bbox(o){
   if (o.t === 'sym'){ const r = SIZE * (o.s || 1) * ((SHAPES[o.k] || {}).box || 1.15); return { x:o.x-r, y:o.y-r, w:r*2, h:r*2 }; }
-  if (o.t === 'text'){ const w = o.s.length * (7 + o.w * 1.6); return { x:o.x-4, y:o.y-14, w:w+8, h:28 }; }
+  if (o.t === 'text'){
+    const ls = String(o.s).split('\n'), w = Math.max(...ls.map(l => l.length)) * (7 + o.w * 1.6);
+    return { x:o.x-4, y:o.y-14, w:w+8, h:28 + (ls.length - 1) * (13 + o.w * 3) * 1.2 };
+  }
   if (o.t === 'img')  return { x:o.x, y:o.y, w:o.w2, h:o.h2 };
   if (o.t === 'kframe') return { x:o.x, y:o.y, w:o.w2, h:kbHeight(o) };
   if (o.t === 'dome'){ const { rx, ry } = domeGeom(o); return { x:o.x1 - rx, y:groundY() - ry, w:2 * rx, h:ry }; }
@@ -2318,7 +2322,9 @@ function groupLabel(t){
 function importMission(m, f, base){
   const proj = PROJECTIONS[m.theatre], onMap = !!(proj && THEATRES.some(t => t.id === m.theatre));
   const be = m.bullseye[f ? f.side : 'blue'], wps = f ? f.points : [], sup = m.support || [], grd = m.ground || [];
-  const all = [...wps, ...m.threats, ...grd, ...(be ? [be] : []), ...sup.flatMap(a => a.points)];
+  const drawn = MIZ.drawingsFor(m, f ? f.side : 'blue', designer);           // lot 22
+  let all = [...wps, ...m.threats, ...grd, ...(be ? [be] : []), ...sup.flatMap(a => a.points)];
+  if (!all.length) all = drawn.map(d => d.pts ? d.pts[0] : d);              // une mission qui n'a que ses dessins
   if (!all.length){ toast(tr('Rien à importer : ni vol pilotable, ni menace, ni bullseye')
                           + (m.hiddenUnits ? ' — ' + tr('{0} unités cachées sur la carte F10', m.hiddenUnits) : '')); return; }
   cancelGesture(); leaveGesture();
@@ -2326,7 +2332,7 @@ function importMission(m, f, base){
   let pos, camM = null, nmPxM = 0, grid = null;
   if (onMap){
     const geo = new Map(all.map(q => [q, MIZ.toGeo(proj, q.x, q.y)]));
-    pos = q => { const [la, lo] = geo.get(q); return [lon2x(lo), lat2y(la)]; };
+    pos = q => { const [la, lo] = geo.get(q) || MIZ.toGeo(proj, q.x, q.y); return [lon2x(lo), lat2y(la)]; };
     const la = [...geo.values()].map(g => g[0]), lo = [...geo.values()].map(g => g[1]);
     camM = fitCam([Math.min(...la), Math.min(...lo), Math.max(...la), Math.max(...lo)]);
   } else {
@@ -2381,6 +2387,26 @@ function importMission(m, f, base){
                      hook: { to: host.uid, u: .2, v: -.42, da: Math.PI / 2 } });
   }
   out.unshift(...routes);                                  // les routes sous les symboles
+  /* les dessins de la carte F10 (lot 22), sous tout le reste et ancrés : on pose et on
+     saisit par-dessus sans les bousculer. Ce que le tableau ne dessine pas (fond plein,
+     motifs de bordure, cadre d'un texte) prend le trait le plus proche. */
+  const css = c => `rgba(${c.r}, ${c.g}, ${c.b}, ${Math.round(c.a * 1000) / 1000})`;
+  const pinned = drawn.map(d => {
+    const c = css(d.c), P = d.pts && d.pts.map(pos);
+    if (d.t === 'line') return { t:'stroke', pts: P, c, w: d.w, ls: d.ls };
+    if (d.t === 'circle'){ const [x1, y1] = pos(d), [x2, y2] = pos({ x: d.x + d.r, y: d.y }); return { t:'circle', x1, y1, x2, y2, c, w: d.w, ls: d.ls }; }
+    if (d.t === 'poly') return d.filled ? { t:'zone', pts: P.slice(0, d.mode === 'free' ? P.length : -1), c, w: d.w, ls: d.ls }
+                                        : { t:'stroke', pts: d.mode === 'free' ? [...P, P[0]] : P, c, w: d.w, ls: d.ls };
+    /* taille : celle de l'éditeur ramenée aux textes du tableau (10 → 16 px, 24 → 19 px,
+       35 → 22 px) ; à la taille de l'éditeur, une consigne en 35 couvrait la planche */
+    if (d.t === 'text'){ const [x, y] = pos(d); return { t:'text', s: d.s, x, y, c, w: Math.max(1, Math.min(3, Math.round(d.size / 12))) }; }
+    if (d.t === 'icon'){
+      const k = d.k && SHAPES[d.k] ? d.k : 'target';
+      return { ...sym(k, d, c, d.k ? {} : { lbl: d.hint }), a: d.a * Math.PI / 180, s: (SHAPES[k].s0 || 1) * d.scale };
+    }
+    return null;
+  }).filter(Boolean).map(o => ({ ...o, locked: true }));
+  out.unshift(...pinned);
   /* coupe : plafond au-dessus du point le plus haut, largeur sur la longueur de la route */
   const maxFt = Math.max(0, ...wps.map(q => q.alt * 3.28084));
   const nm = wps.slice(1).reduce((s, q, i) => s + Math.hypot(q.x - wps[i].x, q.y - wps[i].y) / 1852, 0);
@@ -2401,6 +2427,7 @@ function importMission(m, f, base){
           be && tr('bullseye'),
           nT && (nT > 1 ? tr('{0} ravitailleurs', nT) : tr('1 ravitailleur')),
           nA && tr('{0} AWACS', nA),
+          pinned.length && tr(pinned.length > 1 ? '{0} dessins de la carte F10' : '1 dessin de la carte F10', pinned.length),
           m.hiddenUnits && tr(m.hiddenUnits > 1 ? '{0} unités cachées sur la carte F10, non posées' : '1 unité cachée sur la carte F10, non posée', m.hiddenUnits),
           m.unknownUnits && tr(m.unknownUnits > 1 ? '{0} unités au symbole de leur catégorie, type inconnu du tableau : {1}'
                                                   : '1 unité au symbole de sa catégorie, type inconnu du tableau : {1}',

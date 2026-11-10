@@ -373,6 +373,8 @@ const EN = {
   '{0} menaces': '{0} threats',
   '{0} groupes au sol': '{0} ground groups',
   '{0} groupe au sol': '{0} ground group',
+  '{0} dessins de la carte F10': '{0} F10 map drawings',
+  '1 dessin de la carte F10': '1 F10 map drawing',
   '{0} unités cachées sur la carte F10, non posées': '{0} hidden units on the F10 map, not placed',
   '1 unité cachée sur la carte F10, non posée': '1 hidden unit on the F10 map, not placed',
   '{0} unités cachées sur la carte F10': '{0} hidden units on the F10 map',
