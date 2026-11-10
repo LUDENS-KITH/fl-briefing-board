@@ -36,7 +36,7 @@ FAMILY = {
     "0020": "helo", "0021": "attack_helo", "0022": "farp", "0023": "drone", "0024": "fighter",
     "0025": "attack", "0026": "recon", "0027": "bomber", "0028": "ew", "0029": "cargo",
     "0036": "radar", "0037": "ship", "0038": "sub", "0045": "cp", "0046": "cp", "0047": "cp",
-    "0050": "cp", "0054": "sam_med", "0056": "awacs", "0064": "tanker", "0065": "carrier",
+    "0050": "cp", "0056": "awacs", "0064": "tanker", "0065": "carrier",
     "0066": "ship", "0067": "ship", "0068": "ship", "0069": "ship", "0070": "ship", "0071": "cp",
     # relevées pour l'import (lot 21), titres de classifier.lua et images de images/nato/ :
     # ЗРК ближнего действия / ЗСУ / БМ ЗРК ближн. действ. ; боевой катер ; мобильная РЛС ;
@@ -52,6 +52,17 @@ FAMILY = {
     # TOS-1A), 0204 véhicules antichars (BRDM-2 Malyutka, VAB Mephisto)
     "0201": "infantry", "0205": "aaa", "0202": "sam", "0213": "sam", "0214": "sam", "0215": "sam",
     "0216": "sam", "0217": "sam", "0212": "truck", "0208": "mlrs", "0204": "ifv",
+    # noms des icônes de dessin (images/draw/icons.lua, lot 22), qui corrigent deux lectures :
+    # 0054 est une frégate (« FF » sur son image ; classifier.lua la titre SAM moyenne portée,
+    # mais la carte montre l'image), 0035 l'unité terrestre amie générique ; et : 0051
+    # porte-avions, 0052 bâtiment d'assaut, 0053 destroyer, 0057 navire marchand, 0211 navire
+    # civil, 0059 intercepteur, 0060 ravitailleur, 0062 hélicoptère anti-sous-marin, 0203
+    # antichar, 0207 dépôt de carburant
+    "0054": "ship", "0035": "ground", "0051": "carrier", "0052": "ship", "0053": "ship",
+    "0057": "ship", "0211": "ship", "0059": "fighter", "0060": "tanker", "0062": "helo",
+    "0203": "ifv", "0207": "truck",
+    # icônes de dessin rangées sous leur nom de fichier
+    "Field_Artillery.png": "artillery", "Aircraft_civilian.png": "airliner", "P910000065.png": "infantry",
 }
 
 def norm(k):
@@ -125,6 +136,13 @@ def main():
             print("doublon divergent :", name, table[name], [k4, fam])
         table.setdefault(name, [k4, fam])
     rows = dict(sorted(table.items()))
+    # les icônes que l'éditeur propose pour les dessins de la carte (lot 22) : leur nom,
+    # pour l'étiquette d'une icône sans famille au tableau
+    hints = {}
+    icons = (DCS / "MissionEditor/data/NewMap/images/draw/icons.lua").read_text(encoding="utf-8", errors="replace")
+    for f, h in re.findall(r"file\s*=\s*'([^']+)'\s*,\s*hint\s*=\s*_\('([^']+)'\)", icons):
+        k = re.fullmatch(r"P0*91(\d{6})\.png", f)
+        hints[k.group(1)[-4:] if k else f] = h
     body = ",\n".join(f"  {json.dumps(k, ensure_ascii=False)}: {json.dumps(v)}" for k, v in rows.items())
     OUT.write_text(
         "/* Généré par tools/build_mapclass.py — ne pas modifier à la main.\n"
@@ -133,7 +151,11 @@ def main():
         "   (CoreMods, Mods). Les véhicules et navires de base n'y sont pas : leur base est\n"
         "   chiffrée ; l'import les range à leur catégorie (miz.js). */\n"
         f"const MAPCLASS = {{\n{body}\n}};\n"
-        "if (typeof module !== 'undefined') module.exports = MAPCLASS;\n",
+        "/* clé d'icône → famille du tableau (import des unités et des icônes de dessin) */\n"
+        f"const MAPKEY = {json.dumps(dict(sorted(FAMILY.items())))};\n"
+        "/* icônes de dessin de l'éditeur (images/draw/icons.lua) : clé ou fichier → nom */\n"
+        f"const MAPHINT = {json.dumps(dict(sorted(hints.items())), ensure_ascii=False)};\n"
+        "if (typeof module !== 'undefined') module.exports = { MAPCLASS, MAPKEY, MAPHINT };\n",
         encoding="utf-8", newline="\n")
     fams = sum(1 for v in rows.values() if v[1])
     print(f"{len(rows)} types ({fams} à une famille du tableau) ; {how['exécuté']} définitions exécutées, "

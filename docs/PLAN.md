@@ -45,7 +45,7 @@ engagés.
 | 19 | Symboles : bibliothèque **OTAN, comme DCS** (MIL-STD-2525 / APP-6), au choix avec les silhouettes | demande | M | — | v1.19 | en ligne le 2026-11-10 |
 | 20 | Symboles : bibliothèque **russe, comme DCS** | demande | M | lot 19 | — | proposé le 2026-11-10 |
 | 21 | Import `.miz` : chaque unité au symbole que DCS lui donne, toutes les unités au sol, ce que la carte F10 cache reste caché | demande | L | lot 19 | v1.21 | fait le 2026-11-10 |
-| 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | — | proposé le 2026-11-10 |
+| 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | v1.22 | fait le 2026-11-10 |
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | — | proposé le 2026-11-10 |
 | 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | proposé le 2026-11-10 |
@@ -966,6 +966,18 @@ mission : zones de tir, couloirs, consignes écrites.
 primitive et de chaque mode, sur deux calques ; banc : formes posées, ancrées, à leur
 couleur ; Sandbox Colchide et Registan dans Brave : traits, zones et textes à leur place
 sur la carte du théâtre, relus à côté de la carte de l'éditeur.
+
+**Fait le 2026-11-10 (v1.22).** Le format relu dans l'éditeur du jeu
+(`me_draw_panel.lua`, `saveToMission`) : points relatifs à `mapX`/`mapY`, angle en degrés,
+hauteur du rectangle et `r1` de l'ovale au nord, flèche refaite depuis sa longueur comme au
+chargement. Toutes les primitives et tous les modes posés, ancrés, sous les symboles ; banc
+et `test_miz` verts ; Sandbox Colchide et Registan rendus dans Brave. **Écarts au plan** :
+un **remplissage** devient une zone hachurée (le tableau n'a pas d'aplat), le **cadre** d'un
+texte n'est pas dessiné, la **taille** d'un texte est ramenée à l'échelle des textes du
+tableau (une consigne en 35 couvrait la planche) ; le texte du tableau a gagné plusieurs
+lignes. **Pas encore fait** : la relecture à côté de la carte de l'éditeur, qui demande
+d'ouvrir DCS ; l'ancrage d'un texte — coin haut-gauche retenu — n'est écrit dans aucun
+fichier lisible et se confirmera là.
 
 #### Lot 23 — Écrans de bord : une bibliothèque par module, et des écrans justes
 

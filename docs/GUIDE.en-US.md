@@ -121,6 +121,13 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
   Afghanistan, Marianas, Kola —, everything lands **on the map**, to the metre. Elsewhere,
   on a **board without a map** at exact scale, DCS grid north up; its headings then carry
   a "G" (grid).
+- The **F10 map drawings** come along — lines, circles, rectangles, ovals, arrows, areas
+  and texts the author drew in the editor, in their color —, under everything else and
+  **pinned**: you place and grab on top without disturbing them. The Common and Author
+  layers, and your coalition's; none if the mission hides the F10 map from your side's
+  pilots (except in designer view). What the board cannot draw — solid fill, patterned
+  border, a text's frame — takes the nearest stroke: a filled area becomes a hatched
+  area, a patterned border a solid line.
 - **What the F10 map hides stays hidden**: a group hidden in the editor is not placed,
   and the import summary says how many units stayed hidden. To prepare the mission,
   **Pilot view** in the toolbar switches to **Designer view**: hidden groups are placed

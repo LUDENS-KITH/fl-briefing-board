@@ -115,7 +115,7 @@ objet porte un `uid`, posé à sa première écriture (`withUids()` dans `commit
 | `terrain` | `pts[[x,y]…]` | coupe : crête du relief, remplie jusqu'au sol |
 | `dome` | `x1` (site), `x2` (rayon), `y2` (plafond), `lbl` | coupe : enveloppe sol-air, demi-ellipse posée au sol |
 | `block` | `y1`, `y2`, `lbl` | coupe : tranche d'altitude pleine largeur |
-| `text` | `s`, `x`, `y` | **`s` est la chaîne**, `x,y` son ancre (ligne de base médiane) |
+| `text` | `s`, `x`, `y` | **`s` est la chaîne**, `x,y` son ancre (ligne de base médiane) ; un `\n` passe à la ligne (lot 22) |
 | `img` | `el`, `x`, `y`, `w2`, `h2`, `w0`, `h0` | image de fond : élément DOM, coin haut-gauche, taille courante, taille d'origine |
 | `kframe` | `x`, `y`, `w2` | cadre du kneeboard, un par planche : coin haut-gauche et largeur ; sa hauteur suit les proportions de la zone du plan de la page (`kbHeight()`). Aide d'édition : jamais dessiné en présentation ni dans un export (`bare`) |
 

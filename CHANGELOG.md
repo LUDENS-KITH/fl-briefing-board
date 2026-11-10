@@ -3,6 +3,36 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.22 — 2026-11-10
+
+Lot 22 du [plan d'action](docs/PLAN.md) : **le briefing reprend ce que l'auteur a tracé sur
+la carte de sa mission**.
+
+### Ajouté
+- Import des **dessins de la carte F10** : traits (segments, segment, main levée), cercles,
+  rectangles, ovales, flèches et zones libres, textes, icônes — à leur couleur, leur
+  épaisseur et leur style (plein, tirets, pointillés), sous tout le reste et ancrés.
+  Calques Common et Author, plus celui de la coalition du vol ; un objet masqué dans
+  l'éditeur n'est pas posé ; la carte cachée aux pilotes d'un camp ne leur pose aucun
+  dessin, sauf en vue du concepteur. Le bilan les compte.
+- Une icône de dessin prend la famille de son icône DCS ; sans famille, un repère
+  « objectif » et le nom de l'icône.
+- Un texte du tableau peut tenir sur plusieurs lignes.
+
+### Corrigé
+- Icône DCS 0054 : une frégate (son image et son nom dans l'éditeur), et non la seconde
+  icône du SAM moyenne portée qu'en disait SYMBOLES.md au lot 19 d'après le titre de
+  `classifier.lua`. Les icônes 0005 et 0212 sont nommées « Supply » et « Engineers » par
+  l'éditeur.
+
+### Vérifié en exécutant
+`test_miz` 117/117 (mission fabriquée : chaque primitive et chaque mode, cinq calques,
+objet masqué, carte cachée aux rouges) · 1 scénario au banc, rouge sur la v1.19 · banc
+97/97 en français et en anglais. Sandbox Colchide (59 dessins) et Champ du Registan (9)
+rendus dans Brave : les cercles des pas de tir du Registan tombent sur leurs waypoints.
+**Pas encore relu à côté de la carte de l'éditeur** : il faut ouvrir DCS ; en particulier,
+l'ancrage d'un texte (coin haut-gauche retenu) n'est écrit dans aucun fichier lisible.
+
 ## v1.21 — 2026-11-10
 
 Lot 21 du [plan d'action](docs/PLAN.md) : **une mission importée ressemble à sa carte F10,

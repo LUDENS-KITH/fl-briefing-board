@@ -695,8 +695,8 @@ const MAPCLASS = {
   "P20_drivable": ["0005", "truck"],
   "P3C_Orion": ["0063", null],
   "PGL_625": ["0014", "sam_short"],
-  "PL5EII Loadout": ["0035", null],
-  "PL8 Loadout": ["0035", null],
+  "PL5EII Loadout": ["0035", "ground"],
+  "PL8 Loadout": ["0035", "ground"],
   "PLZ05": ["0006", "artillery"],
   "PT_76": ["0002", "ifv"],
   "Pile of Woods": ["0076", null],
@@ -725,7 +725,7 @@ const MAPCLASS = {
   "SA342M": ["0021", "attack_helo"],
   "SA342Minigun": ["0021", "attack_helo"],
   "SA342Mistral": ["0021", "attack_helo"],
-  "SD10 Loadout": ["0035", null],
+  "SD10 Loadout": ["0035", "ground"],
   "SK-60": ["0025", "attack"],
   "SNR_75V": ["0083", "radar"],
   "SON_9": ["0083", "radar"],
@@ -901,8 +901,12 @@ const MAPCLASS = {
   "ural_atz5_civil": ["0212", "truck"],
   "us carrier shooter": ["0201", "infantry"],
   "us carrier tech": ["0201", "infantry"],
-  "warning_board_a": ["0035", null],
-  "warning_board_b": ["0035", null],
+  "warning_board_a": ["0035", "ground"],
+  "warning_board_b": ["0035", "ground"],
   "zil-131_civil": ["0005", "truck"]
 };
-if (typeof module !== 'undefined') module.exports = MAPCLASS;
+/* clé d'icône → famille du tableau (import des unités et des icônes de dessin) */
+const MAPKEY = {"0001": "tank", "0002": "ifv", "0003": "ifv", "0004": "ifv", "0005": "truck", "0006": "artillery", "0007": "mlrs", "0009": "sam", "0010": "sam_short", "0011": "sam_short", "0012": "sam_med", "0013": "sam_long", "0014": "sam_short", "0015": "aaa", "0016": "aaa", "0017": "sam_short", "0018": "sam_short", "0020": "helo", "0021": "attack_helo", "0022": "farp", "0023": "drone", "0024": "fighter", "0025": "attack", "0026": "recon", "0027": "bomber", "0028": "ew", "0029": "cargo", "0035": "ground", "0036": "radar", "0037": "ship", "0038": "sub", "0039": "ship", "0045": "cp", "0046": "cp", "0047": "cp", "0050": "cp", "0051": "carrier", "0052": "ship", "0053": "ship", "0054": "ship", "0056": "awacs", "0057": "ship", "0059": "fighter", "0060": "tanker", "0062": "helo", "0064": "tanker", "0065": "carrier", "0066": "ship", "0067": "ship", "0068": "ship", "0069": "ship", "0070": "ship", "0071": "cp", "0078": "sam_short", "0079": "sam_short", "0080": "sam_med", "0081": "sam_med", "0082": "sam_med", "0083": "radar", "0084": "sam_short", "0085": "sam_short", "0086": "sam_short", "0087": "sam_short", "0088": "sam_short", "0089": "sam_med", "0096": "helo", "0201": "infantry", "0202": "sam", "0203": "ifv", "0204": "ifv", "0205": "aaa", "0207": "truck", "0208": "mlrs", "0211": "ship", "0212": "truck", "0213": "sam", "0214": "sam", "0215": "sam", "0216": "sam", "0217": "sam", "Aircraft_civilian.png": "airliner", "Field_Artillery.png": "artillery", "P910000065.png": "infantry"};
+/* icônes de dessin de l'éditeur (images/draw/icons.lua) : clé ou fichier → nom */
+const MAPHINT = {"0001": "Armor", "0002": "IFV", "0003": "Recon", "0004": "Mechanized", "0005": "Supply", "0006": "Armored Artillery", "0007": "Rocket Artillery", "0009": "Air Defence SAM", "0010": "Air Defense SRD", "0011": "Air Defense Single LN", "0012": "Air Defense Dual LN", "0013": "Air Defense Multiple LN", "0014": "Surface to Air Missile", "0015": "Direct Fire Gun", "0018": "Short Range SAM", "0020": "Utility Helicopter", "0021": "Attack Helicopter", "0023": "Unmanned Aircraft", "0024": "Fighter Aircraft", "0025": "Attack Aircraft", "0026": "Recon Aircraft", "0027": "Bomber Aircraft", "0028": "Electronic Warfare Jammer", "0029": "Cargo Aircraft", "0035": "Friendly Ground Unit", "0036": "Air Defence SR", "0038": "Submarine", "0039": "Warship", "0040": "Arrow", "0045": "Air Defence Control Station", "0051": "Carrier", "0052": "Assualt Ship", "0053": "Destroyer", "0054": "Frigate", "0056": "AWACS", "0057": "Merchant Ship", "0058": "Light Aircraft", "0059": "Interceptor Aircraft", "0060": "Tanker Aircraft", "0062": "Anti-Sub Helicopter", "0072": "Airbase Building", "0096": "Recon Helicopter", "0108": "Railway", "0109": "Waypoint", "0203": "Antitank", "0204": "Mobile Antitank", "0207": "Fuel Supply", "0208": "Mobile Rocket LN", "0211": "Civilian Ship", "0212": "Engineers", "Aircraft_civilian.png": "Civilian Aircraft", "Field_Artillery.png": "Field Artillery", "P910000065.png": "Airborne Troops"};
+if (typeof module !== 'undefined') module.exports = { MAPCLASS, MAPKEY, MAPHINT };
