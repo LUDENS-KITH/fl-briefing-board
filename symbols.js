@@ -583,13 +583,16 @@ function ruPaint(c, g, color, halo){
    PB11 → PB15 à droite de haut en bas, PB16 → PB20 en bas de droite à gauche.
    Le MFD du F-16C a ses 20 boutons aux mêmes places, numérotés autrement (MFD_OSB). */
 const DDI_PB = (() => {
-  const p = {}, k = [-.52, -.26, 0, .26, .52];
-  k.forEach((v, i) => {
-    p[5 - i]  = { x: -.935, y: v };
-    p[6 + i]  = { x: v, y: -.935 };
-    p[11 + i] = { x: .935, y: v };
-    p[20 - i] = { x: v, y: .935 };
-  });
+  /* places mesurées sur l'image d'origine de la figure 82 (p. 162) : les boutons des
+     côtés descendent un peu sous le milieu du verre, entre le bouton NIGHT/DAY en haut
+     et les molettes BRT et CONT en bas */
+  const p = {}, top = [-.49, -.25, 0, .247, .506], bot = [-.50, -.253, 0, .243, .50], side = [-.50, -.244, .02, .28, .54];
+  for (let i = 0; i < 5; i++){
+    p[5 - i]  = { x: -.915, y: side[i] };
+    p[6 + i]  = { x: top[i], y: -.91 };
+    p[11 + i] = { x: .918, y: side[i] };
+    p[20 - i] = { x: bot[i], y: .912 };
+  }
   return p;
 })();
 /* le verre, mesuré sur les figures (lot 23) : ±0,79 quand les boutons sont à ±0,935 */
@@ -655,20 +658,96 @@ function scopeLabel(c, s, x, y, al = 'center', bg = null, size = .062){
   });
 }
 
-/* boîtier, boutons et verre : gris, indépendants de la couleur choisie */
+/* ---------- boîtiers : chaque avion le sien (lot 27) ----------
+   Un écran se dessine dans son repère : le verre à ±0,79. Le boîtier qui l'entoure est
+   celui du poste, relevé sur l'image d'origine de la figure du manuel ED ; il déborde
+   ce repère (le DDI du F/A-18C porte son bouton NIGHT/DAY au-dessus du rang du haut),
+   alors l'écran entier est ramené dans le carré de la forme : `k` le réduit, `dy` le
+   recentre. scopeArea() donne la zone tactique telle qu'elle est posée. */
+const BEZELS = { ddi: { k: .91, dy: .0975 }, mfd: { k: .935, dy: 0 }, mfcd: { k: .87, dy: -.02 } };
+function bezelFrame(c, kind){ const b = BEZELS[kind]; c.scale(b.k, b.k); c.translate(0, b.dy); }
+function scopeArea(sh){
+  const b = BEZELS[sh.scope.bez || 'ddi'], [L, T, R, B] = sh.scope.area;
+  return [L * b.k, (T + b.dy) * b.k, R * b.k, (B + b.dy) * b.k];
+}
+/* une bascule ou une plaque : texte gris clair, petit */
+function bezelText(c, t, x, y, size = .05, col = '#D5DADF'){
+  c.save(); c.fillStyle = col;
+  c.font = '700 10px ui-sans-serif, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.translate(x, y); c.scale(size / 10, size / 10); c.fillText(t, 0, 0); c.restore();
+}
+function roundBox(c, x, y, w, h, r){ c.beginPath(); c.roundRect(x - w / 2, y - h / 2, w, h, r); c.fill(); c.stroke(); }
+
+/* DDI du F/A-18C (figure 82, p. 162) : boîtier gris, coins du haut coupés à 45°, la
+   platine du bouton NIGHT/DAY/OFF au-dessus du rang du haut, les molettes BRT et CONT
+   aux coins du bas avec leur plaque ; boutons arrondis, marqués d'une barre (debout en
+   haut et en bas, couchée sur les côtés), des fentes entre eux ; verre aux coins
+   largement arrondis. */
 function ddiBezel(c){
+  bezelFrame(c, 'ddi');
   const lw = c.lineWidth;
   c.save();
   c.lineWidth = lw * .5;
-  c.fillStyle = '#161D25'; c.strokeStyle = '#3C4854';
-  c.beginPath(); c.roundRect(-1, -1, 2, 2, .09); c.fill(); c.stroke();
-  c.fillStyle = '#26303A';
+  c.fillStyle = '#4A5056'; c.strokeStyle = '#737B82';
+  c.beginPath();                                          // boîtier
+  c.moveTo(-1.01, .94); c.lineTo(-1.01, -.59); c.lineTo(-.58, -1.025); c.lineTo(-.27, -1.025);
+  c.quadraticCurveTo(-.27, -1.195, -.2, -1.195); c.lineTo(.2, -1.195); c.quadraticCurveTo(.27, -1.195, .27, -1.025);
+  c.lineTo(.58, -1.025); c.lineTo(1.01, -.59); c.lineTo(1.01, .94); c.quadraticCurveTo(1.01, 1.0, .95, 1.0);
+  c.lineTo(-.95, 1.0); c.quadraticCurveTo(-1.01, 1.0, -1.01, .94); c.closePath();
+  c.fill(); c.stroke();
+  /* fentes entre les boutons */
+  c.fillStyle = '#2A2F34'; c.strokeStyle = '#5E666D';
+  for (const y of [-.369, -.111, .152, .415]) for (const x of [-.915, .918]) roundBox(c, x, y, .1, .024, .01);
+  for (const x of [-.379, -.132, .118, .369]) for (const y of [-.91, .912]) roundBox(c, x, y, .024, .1, .01);
+  /* boutons */
   for (const n in DDI_PB){
-    const b = DDI_PB[n];
-    c.beginPath(); c.roundRect(b.x - .045, b.y - .045, .09, .09, .02); c.fill(); c.stroke();
+    const b = DDI_PB[n], side = n <= 5 || (n >= 11 && n <= 15);
+    c.fillStyle = '#BFC4C8'; c.strokeStyle = '#80878D';
+    roundBox(c, b.x, b.y, .125, .125, .035);
+    c.fillStyle = '#30353A';
+    if (side) c.fillRect(b.x - .042, b.y - .007, .084, .014); else c.fillRect(b.x - .007, b.y - .042, .014, .084);
+  }
+  /* NIGHT/DAY/OFF, molettes BRT et CONT */
+  c.fillStyle = '#23272B'; c.strokeStyle = '#80878D';
+  c.beginPath(); c.arc(0, -1.094, .075, 0, 7); c.fill(); c.stroke();
+  c.save(); c.strokeStyle = '#C9CED2'; c.lineWidth = lw * .9;
+  c.beginPath(); c.moveTo(-.025, -1.06); c.lineTo(.03, -1.13); c.stroke(); c.restore();
+  bezelText(c, 'NIGHT', -.155, -1.155, .038); bezelText(c, 'DAY', .135, -1.155, .038); bezelText(c, 'OFF', -.155, -1.09, .038);
+  for (const [x, plate, t] of [[-.922, -.70, 'BRT'], [.90, .695, 'CONT']]){
+    c.fillStyle = '#2A2F34'; c.strokeStyle = '#80878D';
+    roundBox(c, plate, .835, .17, .07, .03);
+    bezelText(c, t, plate, .837, .045);
+    c.fillStyle = '#C9CED2'; c.strokeStyle = '#80878D';
+    c.beginPath(); c.arc(x, .83, .1, 0, 7); c.fill(); c.stroke();
+    c.beginPath(); c.arc(x, .83, .06, 0, 7); c.stroke();
   }
   c.fillStyle = HALO;
-  c.beginPath(); c.roundRect(-GLASS, -GLASS, 2 * GLASS, 2 * GLASS, .05); c.fill();
+  c.beginPath(); c.roundRect(-GLASS, -GLASS, 2 * GLASS, 2 * GLASS, .16); c.fill();
+  c.restore();
+}
+
+/* MFD du F-16C (figure p. 394) : boîtier gris bleuté, carré ; boutons carrés en relief
+   dans leur logement ; aux quatre coins une bascule verticale, GAIN et SYM en haut, BRT
+   et CON en bas ; verre noir. */
+function mfdBezel(c){
+  bezelFrame(c, 'mfd');
+  const lw = c.lineWidth, k = [-.50, -.248, 0, .248, .50];
+  c.save();
+  c.lineWidth = lw * .5;
+  c.fillStyle = '#30373D'; c.strokeStyle = '#4F5961';
+  c.beginPath(); c.roundRect(-1.065, -1.065, 2.13, 2.13, .08); c.fill(); c.stroke();
+  const osb = (x, y) => {
+    c.fillStyle = '#1D2227'; c.strokeStyle = '#4F5961'; roundBox(c, x, y, .19, .19, .025);
+    c.fillStyle = '#3A434A'; c.strokeStyle = '#6A757E'; roundBox(c, x, y, .135, .135, .015);
+  };
+  for (const v of k){ osb(v, -.935); osb(v, .935); osb(-.941, v); osb(.941, v); }
+  for (const [x, y, t] of [[-.941, -.751, 'GAIN'], [.941, -.751, 'SYM'], [-.941, .78, 'BRT'], [.941, .78, 'CON']]){
+    c.fillStyle = '#1D2227'; c.strokeStyle = '#4F5961'; roundBox(c, x, y, .16, .22, .03);
+    c.fillStyle = '#4A545C'; c.strokeStyle = '#6A757E'; roundBox(c, x, y, .12, .18, .02);
+    bezelText(c, t, x, y - .035, .042); bezelText(c, '↓', x, y + .045, .05);
+  }
+  c.fillStyle = HALO;
+  c.beginPath(); c.roundRect(-GLASS, -GLASS, 2 * GLASS, 2 * GLASS, .1); c.fill();
   c.restore();
 }
 
@@ -879,7 +958,7 @@ const MFD_OSB = (() => {
    de l'objet. Les places sont mesurées sur les figures p. 394, 397 et 413. */
 function f16Fcr(c, o){
   const sc = SHAPES[o.k].scope, lw = c.lineWidth, ink = c.strokeStyle, WH = '#E6EDF5';
-  ddiBezel(c);
+  mfdBezel(c);
   const [L, T, R, B] = sc.area, hy = (T + B) / 2;
   c.save();
   c.lineWidth = lw * .35;
@@ -963,7 +1042,7 @@ function f16Track(c){
 const f16Page = (label, sub, bottom) => ({ g:'f16', label, under:true, upright:true, box:1, s0:4.5, smax:12, tile:.62,
   ldy:1.12, col:'#4FC3F7', draw: f16Fcr,
   /* A6 couvre toute la largeur, ±60° ; A3 ±30°, A1 ±10° (p. 395-396, n° 8) */
-  scope: { area: [-.70, -.694, .70, .692], span: 60, cone: az => az * 10,
+  scope: { bez:'mfd', area: [-.70, -.694, .70, .692], span: 60, cone: az => az * 10,
            page: sub.toLowerCase(), rng:40, az:6, ranges:[5, 10, 20, 40, 80, 160], azs:[1, 3, 6],
            pb: { 1:'CRM', 2:sub, 3:'NORM', 4:'OVRD', 5:'CNTL', 6:'CONT', 18:'A\n{az}', 17:'4\nB',
                  15:bottom[0], 14:bottom[1], 13:bottom[2], 12:bottom[3], 11:bottom[4] },
@@ -1030,35 +1109,51 @@ const MFCD_K = [-.52, -.30, -.07, .17, .40];
 const MFCD_OSB = (() => {
   const p = {}, k = [-.50, -.25, 0, .25, .50];
   for (let i = 0; i < 5; i++){
-    p[1 + i]  = { x: k[i], y: -.94, lx: k[i], ly: -.745, al: 'center' };
-    p[6 + i]  = { x: .935, y: MFCD_K[i], lx: .715, ly: MFCD_K[i], al: 'right' };
-    p[15 - i] = { x: k[i], y: .945, lx: k[i], ly: .745, al: 'center' };
-    p[20 - i] = { x: -.935, y: MFCD_K[i], lx: -.725, ly: MFCD_K[i], al: 'left' };
+    p[1 + i]  = { x: k[i], y: -.95, lx: k[i], ly: -.745, al: 'center' };
+    p[6 + i]  = { x: .98, y: MFCD_K[i], lx: .715, ly: MFCD_K[i], al: 'right' };
+    p[15 - i] = { x: k[i], y: .964, lx: k[i], ly: .745, al: 'center' };
+    p[20 - i] = { x: -.986, y: MFCD_K[i], lx: -.725, ly: MFCD_K[i], al: 'left' };
   }
   return p;
 })();
 const A10_WH = '#E6EDF5';
 
-/* boîtier : 20 boutons, bascules ADJ et DSP en haut, CON et BRT en bas, SYM à droite
-   du rang du bas, bouton DAY/NT/OFF à gauche (fig. 228) */
+/* boîtier (fig. 228, image d'origine) : gris sombre, quatre vis ; 20 boutons gris clair
+   reliés au verre par un trait ; bascules + ADJ − et + DSP − en haut, + CON − et
+   + BRT − en bas, − SYM + à droite du rang du bas, bouton DAY/NT/OFF à gauche */
 function mfcdBezel(c){
+  bezelFrame(c, 'mfcd');
   const lw = c.lineWidth;
   c.save();
   c.lineWidth = lw * .5;
-  c.fillStyle = '#161D25'; c.strokeStyle = '#3C4854';
-  c.beginPath(); c.roundRect(-1, -1, 2, 2, .06); c.fill(); c.stroke();
-  c.fillStyle = '#26303A';
+  c.fillStyle = '#33383C'; c.strokeStyle = '#555C62';
+  c.beginPath(); c.roundRect(-1.147, -1.09, 2.29, 2.22, .05); c.fill(); c.stroke();
+  c.fillStyle = '#1E2225';
+  for (const [x, y] of [[-1.07, -1.01], [1.07, -1.01], [-1.07, 1.05], [1.07, 1.05]]){ c.beginPath(); c.arc(x, y, .03, 0, 7); c.fill(); c.stroke(); }
+  c.save(); c.strokeStyle = '#C9CDD1'; c.lineWidth = lw * .4;
+  c.beginPath();
   for (const n in MFCD_OSB){
     const b = MFCD_OSB[n];
-    c.beginPath(); c.roundRect(b.x - .045, b.y - .045, .09, .09, .015); c.fill(); c.stroke();
+    if (Math.abs(b.y) > .9){ const sy = Math.sign(b.y); c.moveTo(b.x, sy * .865); c.lineTo(b.x, sy * .815); }
+    else { const sx = Math.sign(b.x); c.moveTo(sx * .895, b.y); c.lineTo(sx * .82, b.y); }
   }
-  for (const [x, y] of [[-.935, -.80], [.935, -.80], [-.935, .70], [.935, .70]]){
-    c.beginPath(); c.roundRect(x - .045, y - .11, .09, .22, .015); c.fill(); c.stroke();
+  c.stroke(); c.restore();
+  c.fillStyle = '#C5C9CC'; c.strokeStyle = '#7E858B';
+  for (const n in MFCD_OSB){ const b = MFCD_OSB[n]; roundBox(c, b.x, b.y, .165, .165, .03); }
+  for (const [x, y, t] of [[-.986, -.83, 'ADJ'], [.98, -.83, 'DSP'], [-.986, .73, 'CON'], [.98, .73, 'BRT']]){
+    c.fillStyle = '#C5C9CC'; roundBox(c, x, y, .145, .245, .025);
+    bezelText(c, '+', x, y - .08, .05, '#2A2F33'); bezelText(c, t, x, y, .045, '#2A2F33'); bezelText(c, '−', x, y + .08, .05, '#2A2F33');
   }
-  c.beginPath(); c.roundRect(.70, .905, .18, .08, .015); c.fill(); c.stroke();
-  c.beginPath(); c.arc(-.79, .945, .05, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = '#C5C9CC'; roundBox(c, .79, .97, .245, .125, .025);
+  bezelText(c, '− SYM +', .79, .97, .045, '#2A2F33');
+  c.fillStyle = '#1E2225'; roundBox(c, -.62, .98, .1, .17, .015);
+  bezelText(c, 'DAY', -.62, .925, .03); bezelText(c, 'NT', -.62, .98, .03); bezelText(c, 'OFF', -.62, 1.035, .03);
+  c.fillStyle = '#9AA0A5';
+  c.beginPath(); c.arc(-.815, 1.01, .095, 0, 7); c.fill(); c.stroke();
+  c.save(); c.strokeStyle = '#2A2F33'; c.lineWidth = lw * .9;
+  c.beginPath(); c.moveTo(-.85, 1.05); c.lineTo(-.78, .97); c.stroke(); c.restore();
   c.fillStyle = HALO;
-  c.beginPath(); c.roundRect(-GLASS, -GLASS, 2 * GLASS, 2 * GLASS, .03); c.fill();
+  c.beginPath(); c.roundRect(-GLASS, -.80, 2 * GLASS, 1.6, .04); c.fill();
   c.restore();
 }
 

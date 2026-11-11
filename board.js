@@ -829,7 +829,7 @@ function drawRadarPane(w){
   /* drawObj, pas paintSym : c'est lui qui pose la couleur du trait */
   drawObj({ t:'sym', k, x:cx, y:cy, a:0, s: half / SIZE, c: SHAPES[k].col, w:4,
             rng: prof.rrng ?? sc.rng, az: prof.raz ?? sc.az });
-  const [L, T, R, B] = sc.area;
+  const [L, T, R, B] = scopeArea(SHAPES[k]);           // la zone telle que le boîtier la pose
   const X = f => cx + half * (L + (f + 1) / 2 * (R - L)), Y = f => cy + half * (B - f * (B - T));
   const list = (v.shown || []).slice().sort((p, q) => p.nm - q.nm);
   list.forEach((c, i) => {
