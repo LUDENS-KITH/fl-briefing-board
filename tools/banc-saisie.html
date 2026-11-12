@@ -1700,6 +1700,7 @@ test('Symboles russes : le choix survit à la réouverture et au fichier ; le kn
 const INK = (x, y, r, test) => `(() => { drawFrame(); const g = cv.getContext('2d'), k = cv.width / cv.clientWidth;
   const d = g.getImageData((${x} - ${r}) * k, (${y} - ${r}) * k, ${2 * r} * k, ${2 * r} * k).data; let n = 0;
   for (let i = 0; i < d.length; i += 4){ const R = d[i], G = d[i + 1], B = d[i + 2]; if (${test}) n++; } return n; })()`;
+const SCOPE_MOD = (a, k) => a.s(`(() => { const s = SHAPES[${JSON.stringify(k)}]; return s && s.scope ? (GROUPS.find(g => g[0] === s.g) || [])[2] : null; })()`);
 const shown = (a, k) => { const t = a.d.querySelector(`.tile[data-k="${k}"]`); return !!(t && t.offsetParent); };
 /* un point de l'écran (repère du verre, ±0,79) posé en (520, 360), demi-côté 153 px :
    le boîtier de l'avion le réduit et le recentre (BEZELS, lot 27) */
@@ -1714,7 +1715,7 @@ test('Écrans de bord : la palette les range à part, un onglet par module', asy
   ok(shown(a, 'fighter') && !shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'à l\'ouverture, les écrans sont parmi les formes');
   a.button('#paltabs [data-pal="ecrans"]');
   const mods = [...a.d.querySelectorAll('#palmods button')].map(b => b.textContent);
-  ok(mods.join() === 'F/A-18C,F-16C,A-10C II', `modules : ${mods.join(', ')}`);
+  ok(mods.join() === 'F/A-18C,F-16C,A-10C II,AH-64D,F-14B,F-15C,Mirage F1,Su-25T', `modules : ${mods.join(', ')}`);
   ok(!shown(a, 'fighter') && shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'onglet Écrans de bord : pas seulement le F/A-18C');
   a.button('#palmods button:nth-child(2)');
   ok(shown(a, 'f16_rws') && shown(a, 'f16_track') && !shown(a, 'fa18_rws'), 'module F-16C : pas seulement ses écrans');
@@ -1778,6 +1779,43 @@ test('Écrans de bord : chaque avion a son boîtier — DDI du Hornet, MFD du F-
   ok(adj === 4, `bascule ADJ du MFCD, gris clair : ${adj}/4 pixels`);
   const osb = a.s(PX(...SCR(a, 'mfcd', -.47, -.99), 1, [197, 201, 204]));
   ok(osb === 4, `bouton du MFCD, gris clair : ${osb}/4 pixels`);
+});
+
+/* ---------- lot 28 : la bibliothèque des modules du poste ---------- */
+test('Écrans de bord : chaque module du poste a ses écrans, chacun dans la palette de son module et chacun se pose', async (ok) => {
+  let a = await open();
+  a.button('#paltabs [data-pal="ecrans"]');
+  const want = ['F/A-18C', 'F-16C', 'A-10C II', 'AH-64D', 'F-14B', 'F-15C', 'Mirage F1', 'Su-25T'];
+  const mods = [...a.d.querySelectorAll('#palmods button')].map(b => b.textContent);
+  ok(want.every(m => mods.includes(m)), `modules : ${mods.join(', ')}`);
+  const NEW = { 'F/A-18C': 5, 'F-16C': 4, 'A-10C II': 4, 'AH-64D': 4, 'F-14B': 3, 'F-15C': 2, 'Mirage F1': 2, 'Su-25T': 3 };
+  for (const m of want){
+    const b = [...a.d.querySelectorAll('#palmods button')].find(x => x.textContent === m);
+    if (!b){ ok(false, `pas de module ${m}`); continue; }
+    b.click();
+    const keys = a.s(`Object.entries(SHAPES).filter(([k, s]) => s.scope && (GROUPS.find(g => g[0] === s.g) || [])[2] === ${JSON.stringify(m)}).map(([k]) => k)`);
+    ok(keys.length >= NEW[m] + (m === 'F/A-18C' ? 3 : m === 'F-16C' ? 2 : m === 'A-10C II' ? 3 : 0), `${m} : ${keys.length} écrans`);
+    const miss = keys.filter(k => !shown(a, k));
+    ok(!miss.length, `${m} : vignettes absentes ${miss.join(', ')}`);
+    const other = [...a.d.querySelectorAll('#pal .tile')].filter(t => t.offsetParent && SCOPE_MOD(a, t.dataset.k) && SCOPE_MOD(a, t.dataset.k) !== m);
+    ok(!other.length, `${m} : écrans d'un autre module ${other.map(t => t.dataset.k).join(', ')}`);
+  }
+  /* chaque nouvel écran se pose et se dessine : du boîtier et du verre au centre */
+  const fresh = ['fa18_sa', 'fa18_hsi', 'fa18_azel', 'fa18_sms', 'fa18_flir', 'f16_hsd', 'f16_sms', 'f16_tgp', 'f16_gm',
+                 'a10_mav', 'a10_stat', 'a10_tgpaa', 'a10_prof', 'ah64_tsd', 'ah64_fcr', 'ah64_wpn', 'ah64_ase',
+                 'f14_tid', 'f14_ddd', 'f14_hsd', 'f15_vsd', 'f15_tews', 'mf1_search', 'mf1_lock',
+                 'su25t_tv_lltv', 'su25t_tv_lock', 'su25t_spo15'];
+  for (const k of fresh){
+    a = await open();
+    if (!a.s(`!!SHAPES[${JSON.stringify(k)}]`)){ ok(false, `${k} : forme absente`); continue; }
+    a.button('#paltabs [data-pal="ecrans"]');
+    const m = SCOPE_MOD(a, k);
+    [...a.d.querySelectorAll('#palmods button')].find(x => x.textContent === m).click();
+    a.tile(k); a.click(520, 360);
+    ok(a.s('objs.length === 1 && objs[0].k') === k, `${k} non posé`);
+    const ink = a.s(INK(520, 360, 120, 'R + G + B > 150'));
+    ok(ink > 2000, `${k} : ${ink} pixels dessinés`);
+  }
 });
 
 /* ---------- lot 24 : l'A-10C II, TAD, pod de désignation, DSMS ---------- */

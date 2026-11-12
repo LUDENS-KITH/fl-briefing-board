@@ -83,7 +83,11 @@ for (const k of ['côté:G', 'côté:D', 'cap:V', 'déclinaison:O']) ok(own(k), 
 const symbols = read('symbols.js');
 const sandbox = { console };
 require('vm').createContext(sandbox);
-require('vm').runInContext(symbols + ';this.__S = SHAPES; this.__G = GROUPS;', sandbox);
+require('vm').runInContext(symbols, sandbox);
+/* les écrans de bord par module (lot 28), dans l'ordre où la page les charge */
+const ECRANS = [...read('index.html').matchAll(/<script src="(ecrans\/[^"?]+)/g)].map(m => m[1]);
+for (const f of ECRANS) require('vm').runInContext(read(f), sandbox, { filename: f });
+require('vm').runInContext('this.__S = SHAPES; this.__G = GROUPS;', sandbox);
 const labels = Object.values(sandbox.__S).map(s => s.label);
 ok(labels.length >= 40, `seulement ${labels.length} noms de formes lus`);
 for (const s of labels) ok(own(s), `forme sans traduction : « ${s} »`);
@@ -153,7 +157,7 @@ for (const [k, v] of Object.entries(EN)){
   ok(!/[àâçéèêëîïôûùüœ]/i.test(v), `traduction qui garde un accent français : « ${v} »`);
 }
 /* une clé que plus rien n'affiche est du poids mort : elle doit apparaître dans un source */
-const sources = ['index.html', 'board.js', 'symbols.js', 'theatres.js', 'miz.js'].map(read).join('\n');
+const sources = ['index.html', 'board.js', 'symbols.js', 'theatres.js', 'miz.js', ...ECRANS].map(read).join('\n');
 const shown = new Set([...pageStrings.map(p => p[0]), title, ...trKeys, ...labels, ...silTags, ...groups, ...theatres.map(t => t.name), ...mizErrors]);
 for (const k of Object.keys(EN)){
   if (k.startsWith('html:')) ok(i18nBlocks.includes(k.slice(5)), `clé ${k} sans bloc data-i18n dans la page`);

@@ -65,11 +65,13 @@ place, son cap, sa taille, sa couleur et son nom.
 La démo a une planche **Ordre de bataille** pour essayer. Le code de chaque symbole et
 l'icône DCS qu'il reproduit : [docs/SYMBOLES.md](SYMBOLES.md).
 
-## Écrans de bord — F/A-18C, F-16C, A-10C II
+## Écrans de bord — huit modules
 
 Les écrans ont leur onglet dans la palette : **Écrans de bord**, à côté de **Formes**.
-Dedans, un bouton par module (**F/A-18C**, **F-16C**, **A-10C II**), et pour chacun ses
-pages et leurs symboles. L'onglet et le module choisis se gardent. Tout est dessiné
+Dedans, un bouton par module (**F/A-18C**, **F-16C**, **A-10C II**, **AH-64D**,
+**F-14B**, **F-15C**, **Mirage F1**, **Su-25T**), et pour chacun ses pages et leurs
+symboles, chaque écran dans le boîtier de son poste (DDI du Hornet, MFD du Viper, MFCD de
+l'A-10, MPD de l'Apache, TID et DDD du Tomcat…). L'onglet et le module choisis se gardent. Tout est dessiné
 d'après le manuel ED du module, et chaque élément cite sa page : [RADAR.md](RADAR.md).
 Chaque écran reprend ce que montre la figure du manuel : verre, graduations, libellés à
 leur place (en colonne ou encadrés comme dans le cockpit), et les champs de données (cap,
@@ -127,6 +129,22 @@ une marque ne se pose que sur une piste de son appareil.
 - **Symboles du TAD** : bullseye, point de navigation (vert) et point tournant actif
   (jaune), SPI, curseur, losange du pod ; et la liaison SA : membre de la patrouille
   (bleu, son numéro), autre appareil de la liaison, amis au sol, mini-SPI.
+
+**Les autres pages et les autres modules**
+
+- **F/A-18C** : SA, HSI, AZ/EL, SMS air-sol, ATFLIR air-sol.
+- **F-16C** : HSD, SMS (inventaire), pod de désignation A-G, FCR air-sol GM.
+- **A-10C II** : Maverick, STAT, pod en air-air, profils du DSMS.
+- **AH-64D** : TSD (NAV), FCR (GTM), WPN, ASE, dans le MPD.
+- **F-14B** : TID et DDD du RIO, HSD du pilote.
+- **F-15C** : VSD en recherche, TEWS.
+- **Mirage F1** : scope du radar Cyrano, en recherche et accroché.
+- **Su-25T** : écran TV en acquisition et cible accrochée, SPO-15.
+
+La HSD, le GM du F-16C, la SA et le HSI du F/A-18C et le VSD du F-15C changent d'échelle
+avec `↑` `↓`, comme le TAD. Ce qui appartient au vol de la figure — route, menaces,
+pistes — n'est pas dessiné : ce sont des objets à poser ; l'image d'un capteur (pod,
+Maverick, carte radar) est un aplat.
 
 Le radar se prépare de préférence sur une planche **sans carte** : sur une carte, un
 écran suivrait le terrain au gré du zoom. La démo en ligne en montre deux (planches
