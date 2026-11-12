@@ -3,6 +3,31 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.26 — 2026-11-11
+
+Lot 27 du [plan d'action](docs/PLAN.md) : **chaque écran dans le boîtier de son avion**.
+Constat de Vince : les écrans du F/A-18C avaient le boîtier d'un MFD de F-16C — le même
+cadre générique servait aux deux.
+
+### Corrigé
+- **F/A-18C** : le DDI du jeu — coins du haut coupés à 45°, platine du bouton
+  NIGHT/DAY/OFF au-dessus du rang du haut, molettes BRT et CONT aux coins du bas, boutons
+  arrondis marqués d'une barre, fentes entre eux, verre aux coins largement arrondis.
+- **F-16C** : le MFD du jeu — boîtier carré gris bleuté, boutons carrés en relief, les
+  quatre bascules GAIN, SYM, BRT et CON aux coins.
+- **A-10C II** : le MFCD remis à la figure — boutons gris clair reliés au verre par un
+  trait, bascules + ADJ −, + DSP −, + CON −, + BRT − et − SYM + écrites, bouton DAY/NT/OFF
+  et sa plaque, vis du boîtier.
+- Chaque boîtier est relevé sur l'image d'origine de la figure du manuel ED (DDI :
+  figure 82 ; MFD : p. 394 ; MFCD : figure 228). Le contenu des pages ne bouge pas ; la
+  vue radar liée suit le nouveau cadre.
+
+### Vérifié en exécutant
+1 scénario au banc, rouge sur la v1.25 (platine NIGHT/DAY du DDI, coin coupé, bascule GAIN
+du MFD, bascule et boutons gris clair du MFCD) · 5 scénarios d'écrans mis au cadre du
+boîtier · banc complet 107/107 en français et en anglais · les trois boîtiers rendus à
+côté des figures.
+
 ## v1.25 — 2026-11-10
 
 Lot 26 du [plan d'action](docs/PLAN.md) : **chercher dans la palette**.
