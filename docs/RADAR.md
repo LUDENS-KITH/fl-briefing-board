@@ -14,6 +14,13 @@ dépôt). Ce qui change à chaque vol (cap, vitesse, altitude, arme, relèvement
 vraies valeurs. Dans la palette, les écrans ont leur onglet **Écrans de bord**, un bouton
 par module.
 
+**Le boîtier (lot 27)** : chaque appareil a le sien, relevé sur l'image d'origine de sa
+figure — DDI du F/A-18C (figure 82 : coins du haut coupés, bouton NIGHT/DAY/OFF au-dessus
+du rang du haut, molettes BRT et CONT), MFD du F-16C (p. 394 : boîtier carré, bascules
+GAIN, SYM, BRT, CON aux coins), MFCD de l'A-10C II (figure 228). Un boîtier qui déborde le
+carré de la forme est réduit et recentré (`BEZELS` dans `symbols.js`) ; le verre reste à
+±0,79 dans le repère de l'écran.
+
 **Comment les places sont mesurées** : la figure est rendue en grand, quadrillée, et ses
 repères sont ramenés au repère du kit par les boutons du boîtier (pas de 0,26, boutons à
 ±0,935). Sur les deux appareils, le verre fait alors ±0,79 : le kit le dessinait à ±0,87.

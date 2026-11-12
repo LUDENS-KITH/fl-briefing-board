@@ -50,6 +50,8 @@ engagés.
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | v1.23 | fait le 2026-11-10 |
 | 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | arrêté le 2026-11-10 : attend un relevé dans DCS |
 | 26 | Recherche dans la palette | proposition | S | lot 19 | v1.25 | fait le 2026-11-10 |
+| 27 | Chaque écran dans le boîtier de son avion | constat | S | lot 23 | v1.26 | fait le 2026-11-11 |
+| 28 | Bibliothèque d'écrans : les autres pages et les autres modules | demande | L | lot 27 | — | en cours le 2026-11-11 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -1080,6 +1082,25 @@ deux langues.
 comme à l'import (table relevée au lot 21, puis les noms de la défense aérienne). **Écart
 au plan** : « SA-11 » donne la menace sol-air générique, pas sa portée — les véhicules de
 base de DCS ne sont pas dans les fichiers lisibles (lot 21).
+
+#### Lot 27 — Chaque écran dans le boîtier de son avion
+
+**Constat de Vince (2026-11-11)** : « Les écrans des MFD du F/18 sont tous faux ! Ce sont
+ceux du F16 ». Le contenu des pages suivait les figures (lot 23), mais un seul boîtier
+générique servait au F/A-18C et au F-16C, sans aucun des signes du DDI.
+
+**Fait le 2026-11-11 (v1.26).** Trois boîtiers relevés sur l'image d'origine de leur
+figure : DDI (figure 82), MFD (p. 394), MFCD (figure 228). Un boîtier qui déborde le carré
+de la forme est ramené dedans (`BEZELS`, `k` et `dy`) ; la vue radar liée lit la zone par
+`scopeArea()`.
+
+#### Lot 28 — Bibliothèque d'écrans : les autres pages et les autres modules
+
+**Demande de Vince (2026-11-11)** : « Et les autres modules ? la bibliothèque est
+quasiment vide ». Les modules installés sur le poste, chacun d'après son manuel, chacun
+dans son boîtier : pages manquantes du F/A-18C, du F-16C et de l'A-10C II ; AH-64D,
+F-14B, F-15C, Mirage F1, Su-25T. Un fichier par module (`ecrans/`), mêmes règles que le
+lot 23 : places mesurées sur les figures, rien de deviné.
 
 **Ordre proposé** : 19, puis 23 (les deux constats de Vince), puis 21 et 22 (l'import qui
 en profite), 24, puis 20, 26 et 25. Chaque lot attend son « GO ».

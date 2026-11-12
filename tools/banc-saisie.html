@@ -1701,6 +1701,10 @@ const INK = (x, y, r, test) => `(() => { drawFrame(); const g = cv.getContext('2
   const d = g.getImageData((${x} - ${r}) * k, (${y} - ${r}) * k, ${2 * r} * k, ${2 * r} * k).data; let n = 0;
   for (let i = 0; i < d.length; i += 4){ const R = d[i], G = d[i + 1], B = d[i + 2]; if (${test}) n++; } return n; })()`;
 const shown = (a, k) => { const t = a.d.querySelector(`.tile[data-k="${k}"]`); return !!(t && t.offsetParent); };
+/* un point de l'écran (repère du verre, ±0,79) posé en (520, 360), demi-côté 153 px :
+   le boîtier de l'avion le réduit et le recentre (BEZELS, lot 27) */
+const SCR = (a, kind, x, y) => { const b = a.s(`BEZELS.${kind}`), r = 153 * b.k;
+  return [Math.round(520 + r * x), Math.round(360 + r * (y + b.dy))]; };
 
 test('Écrans de bord : la palette les range à part, un onglet par module', async (ok) => {
   const a = await open();
@@ -1732,21 +1736,48 @@ test("Écrans de bord : l'onglet et le module choisis se gardent à la réouvert
 test('Écrans de bord : le F/A-18C a les repères de la figure 82 — verre à sa taille, graduations d\'azimut', async (ok) => {
   const a = await open();
   a.tile('fa18_rws'); a.click(520, 360);
-  /* demi-côté 153 px : graduation d'azimut à 30°, sous le bandeau du haut */
-  const tick = a.s(INK(560, 282, 3, 'G > 100 && G > R + 40'));
+  /* graduation d'azimut à 30°, sous le bandeau du haut */
+  const tick = a.s(INK(...SCR(a, 'ddi', .261, -.51), 3, 'G > 100 && G > R + 40'));
   ok(tick > 0, `graduation d'azimut à 30° : ${tick} pixels verts`);
-  /* à 0,83 du centre on est sur le boîtier, pas sur le verre (±0,79 sur la figure) */
-  const bezel = a.s(PX(647, 360, 2, [22, 29, 37]));
+  /* à 0,83 du centre on est sur le boîtier gris du DDI, pas sur le verre (±0,79) */
+  const bezel = a.s(PX(...SCR(a, 'ddi', .83, 0), 2, [74, 80, 86]));
   ok(bezel === 16, `bord du verre : ${bezel}/16 pixels du boîtier`);
 });
 
 test('Écrans de bord : le F-16C a le cadre de la figure p. 394 — échelle d\'élévation en tirets, FCR en vidéo inverse', async (ok) => {
   const a = await open();
   a.tile('f16_rws'); a.click(520, 360);
-  const line = a.s(INK(427, 406, 2, 'B > 150 && B > R + 60'));
+  const line = a.s(INK(...SCR(a, 'mfd', -.608, .301), 2, 'B > 150 && B > R + 60'));
   ok(line === 0, `trait continu de l'échelle d'élévation : ${line} pixels`);
-  const inv = a.s(INK(485, 462, 4, 'R > 200 && G > 200 && B > 200'));
+  const inv = a.s(INK(...SCR(a, 'mfd', -.229, .667), 4, 'R > 200 && G > 200 && B > 200'));
   ok(inv >= 24, `FCR en vidéo inverse : ${inv}/64 pixels blancs (lettres noires dans un pavé blanc)`);
+});
+
+/* ---------- lot 27 : chaque écran dans le boîtier de son avion ---------- */
+test('Écrans de bord : chaque avion a son boîtier — DDI du Hornet, MFD du F-16C, MFCD de l\'A-10C II', async (ok) => {
+  let a = await open();
+  const hasB = a.s("typeof BEZELS === 'object'");
+  ok(hasB, 'pas de table des boîtiers');
+  if (!hasB) return;
+  a.tile('fa18_rws'); a.click(520, 360);
+  /* la platine du bouton NIGHT/DAY/OFF, au-dessus du rang du haut (figure 82) */
+  const plate = a.s(PX(...SCR(a, 'ddi', .23, -1.12), 1, [74, 80, 86]));
+  ok(plate === 4, `platine NIGHT/DAY du DDI : ${plate}/4 pixels du boîtier`);
+  /* coin du haut coupé à 45° : la bascule d'un MFD de F-16C serait là, le DDI n'y a rien */
+  const cut = a.s(PX(...SCR(a, 'ddi', -.97, -.80), 1, [74, 80, 86]));
+  ok(cut === 0, `coin coupé du DDI : ${cut} pixels du boîtier`);
+  a = await open();
+  a.tile('f16_rws'); a.click(520, 360);
+  const gain = a.s(PX(...SCR(a, 'mfd', -.975, -.70), 1, [74, 84, 92]));
+  ok(gain === 4, `bascule GAIN du MFD : ${gain}/4 pixels`);
+  const top = a.s(PX(...SCR(a, 'mfd', .23, -1.12), 1, [74, 80, 86]));
+  ok(top === 0, `le MFD du F-16C n'a pas de platine au-dessus : ${top} pixels`);
+  a = await open();
+  a.tile('a10_tad'); a.click(520, 360);
+  const adj = a.s(PX(...SCR(a, 'mfcd', -1.04, -.73), 1, [197, 201, 204]));
+  ok(adj === 4, `bascule ADJ du MFCD, gris clair : ${adj}/4 pixels`);
+  const osb = a.s(PX(...SCR(a, 'mfcd', -.47, -.99), 1, [197, 201, 204]));
+  ok(osb === 4, `bouton du MFCD, gris clair : ${osb}/4 pixels`);
 });
 
 /* ---------- lot 24 : l'A-10C II, TAD, pod de désignation, DSMS ---------- */
@@ -1768,12 +1799,12 @@ test('Écrans de bord : le TAD de la figure 228 — anneaux à 90 % et 50 % de l
   const a = await open();
   a.tile('a10_tad'); a.click(520, 360);
   ok(a.s('objs.length === 1 && objs[0].k') === 'a10_tad', 'TAD non posé');
-  /* demi-côté 153 px : l'anneau extérieur à 0,711, l'intérieur à 0,354 */
-  const G = 'G > 100 && G > R + 40';
-  ok(a.s(INK(629, 360, 2, G)) > 0, `anneau extérieur : ${a.s(INK(629, 360, 2, G))} pixels verts`);
-  ok(a.s(INK(574, 360, 2, G)) > 0, `anneau intérieur : ${a.s(INK(574, 360, 2, G))} pixels verts`);
-  ok(a.s(INK(602, 360, 3, G)) === 0, `entre les anneaux : ${a.s(INK(602, 360, 3, G))} pixels verts`);
-  ok(a.s(INK(520, 360, 3, G)) > 4, `appareil au centre : ${a.s(INK(520, 360, 3, G))} pixels verts`);
+  /* l'anneau extérieur à 0,711, l'intérieur à 0,354 */
+  const G = 'G > 100 && G > R + 40', P = x => SCR(a, 'mfcd', x, 0);
+  ok(a.s(INK(...P(.711), 2, G)) > 0, `anneau extérieur : ${a.s(INK(...P(.711), 2, G))} pixels verts`);
+  ok(a.s(INK(...P(.354), 2, G)) > 0, `anneau intérieur : ${a.s(INK(...P(.354), 2, G))} pixels verts`);
+  ok(a.s(INK(...P(.536), 3, G)) === 0, `entre les anneaux : ${a.s(INK(...P(.536), 3, G))} pixels verts`);
+  ok(a.s(INK(...P(0), 3, G)) > 4, `appareil au centre : ${a.s(INK(...P(0), 3, G))} pixels verts`);
   a.key('v'); a.click(520, 360);
   a.key('ArrowUp');
   ok(a.s('objs[0].rng') === 80, `échelle après ↑ : ${a.s('objs[0].rng')}`);
@@ -1783,15 +1814,15 @@ test('Écrans de bord : le pod de désignation sur sa vidéo, le DSMS avec la st
   let a = await open();
   a.tile('a10_tgp'); a.click(520, 360);
   /* la vidéo du pod remplit le verre : gris, à (0,5 ; 0,2) du centre */
-  const vid = a.s(PX(596, 391, 2, [74, 81, 86]));
+  const vid = a.s(PX(...SCR(a, 'mfcd', .497, .203), 2, [74, 81, 86]));
   ok(vid === 16, `vidéo du pod : ${vid}/16 pixels gris`);
   a = await open();
   a.tile('a10_dsms'); a.click(520, 360);
   /* station 5, en haut à gauche, dans le profil choisi : son pavé est blanc (figure 211) */
-  const st5 = a.s(INK(459, 288, 2, 'R > 200 && G > 200 && B > 200'));
+  const st5 = a.s(INK(...SCR(a, 'mfcd', -.399, -.471), 2, 'R > 200 && G > 200 && B > 200'));
   ok(st5 >= 12, `station 5 choisie : ${st5}/16 pixels blancs`);
   /* station 4, dessous : un cadre vert, vide au milieu */
-  const st4 = a.s(INK(459, 325, 2, 'R > 200 && G > 200 && B > 200'));
+  const st4 = a.s(INK(...SCR(a, 'mfcd', -.399, -.229), 2, 'R > 200 && G > 200 && B > 200'));
   ok(st4 === 0, `station 4 non choisie : ${st4} pixels blancs`);
 });
 
