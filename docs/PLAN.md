@@ -52,6 +52,7 @@ engagés.
 | 26 | Recherche dans la palette | proposition | S | lot 19 | v1.25 | fait le 2026-11-10 |
 | 27 | Chaque écran dans le boîtier de son avion | constat | S | lot 23 | v1.26 | fait le 2026-11-11 |
 | 28 | Bibliothèque d'écrans : les autres pages et les autres modules | demande | L | lot 27 | v1.27 | fait le 2026-11-12 |
+| 29 | Écrans sans figure : les fichiers du jeu comme source | demande | S | lot 28 | v1.28 | fait le 2026-11-12 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -1103,10 +1104,19 @@ F-14B, F-15C, Mirage F1, Su-25T. Un fichier par module (`ecrans/`), mêmes règl
 lot 23 : places mesurées sur les figures, rien de deviné.
 
 **Fait le 2026-11-12 (v1.27).** 27 écrans, huit modules, sources écran par écran dans
-[RADAR.md](RADAR.md). **Écarts au plan** : le VDI du F-14B et la page 1 du STAT de
-l'A-10C II ne sont pas faits (figure non retenue, image illisible) ; les images de
+[RADAR.md](RADAR.md). **Écarts au plan** : la page 1 du STAT de l'A-10C II et le VDI du
+F-14B, laissés de côté faute de figure exploitable, sont faits au lot 29 ; les images de
 capteur sont des aplats ; le Su-33, le TF-51D et le F4U-1D, installés, n'ont pas d'écran
 multifonction à dessiner. **Pas encore fait** : la comparaison avec le jeu ouvert.
+
+#### Lot 29 — Écrans sans figure : les fichiers du jeu comme source
+
+**Demande de Vince (2026-11-12)** : « trouve une solution » pour les deux écrans que les
+manuels ne permettaient pas de dessiner. **Fait le 2026-11-12 (v1.28).** Les scripts des
+indicateurs installés avec le jeu (`Mods/aircraft/<module>/Cockpit/Scripts`) disent où
+chaque élément est placé ; ils deviennent la source quand la figure manque ou date d'une
+autre version. VDI du F-14B, page 1 du STAT de l'A-10C II, et page 2 du STAT remise sur
+ces scripts. **Pas encore fait** : la comparaison avec le jeu ouvert (captures en vol).
 
 **Ordre proposé** : 19, puis 23 (les deux constats de Vince), puis 21 et 22 (l'import qui
 en profite), 24, puis 20, 26 et 25. Chaque lot attend son « GO ».

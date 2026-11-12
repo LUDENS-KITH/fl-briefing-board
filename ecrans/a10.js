@@ -93,49 +93,195 @@ function a10Mav(c, o){
   c.restore();
 }
 
-/* ---- page STAT, page 2 (p. 312-316 ; figure 210, p. 315) ----
-   Le tableau des équipements (LRU, STAT, TEST) : vert en service, rouge en panne,
-   blanc sans objet (p. 314), le texte en noir ; les sous-ensembles de HOTAS en
-   retrait ; la flèche désigne la ligne choisie, THRTL, dont le nom passe entre les
-   flèches OSB 20 et 19 et qui ouvre SLEW (OSB 8, p. 316). → PREV revient à la page 1
-   (OSB 1), WS CHK (OSB 5). Le journal des pannes (MFL) en bas. Valeurs de la figure. */
-const A10_STAT = [
-  // [LRU, retrait, STAT, TEST, couleur]
-  ['TGP', 0, 'OFF', 'UN', 'w'], ['LTMFCD', 0, 'VALID', 'UN', 'g'], ['RTMFCD', 0, 'VALID', 'UN', 'g'],
-  ['HOTAS', 0, 'VALID', 'UN', 'g'], ['STICK', 1, 'VALID', '-', 'g'], ['THRTL', 1, 'VALID', '-', 'g'],
-  ['AHCP', 1, 'VALID', '-', 'g'], ['EGI', 0, 'OFF', '-', 'w'], ['IFFCC', 0, 'OFF', '-', 'w'],
-  ['CDU', 0, 'NC', '-', 'r'], ['EPLRS', 0, 'NC', '-', 'r'],
+/* ---- pages STAT 1 et 2 : relevées dans les fichiers du jeu (contrôle : figures 209, p. 313, et 210, p. 315) ----
+   Sources, sous Mods/aircraft/A-10C_2/Cockpit/Scripts/ (lecture seule) :
+     P1  MFCD/indicator/STAT/MFCD_page_STAT_Page1.lua    la page 1 elle-même
+     CO  MFCD/indicator/STAT/MFCD_page_STAT_common.lua   ce que les pages STAT partagent
+     DEF MFCD/indicator/STAT/MFCD_STAT_definitions.lua   LRU, états par défaut, tableau
+     UD  MFCD/indicator/MFCD_useful_definitions.lua      boutons, tableau, symbole d'attitude
+     SZ  MFCD/indicator/MFCD_sizes.lua  FO  MFCD/indicator/MFCD_fonts.lua
+     B15 MFCD/indicator/MFCD_page_OSB_11_15.lua  MAT materials.lua  SYM symbols.lua
+
+   Conversion. Le jeu dessine la page dans un carré de max_pixels_count = 569 px (SZ l.1),
+   origine en bas à gauche, y vers le haut (UD l.82-93). Ce carré est le verre entier :
+   sur la figure 210 le noir du verre fait 498 px d'image et 20 px du jeu y font 17,9 px
+   d'image, soit 498 / 0,89 = 560 px du jeu, le carré à 2 % près. Dans le repère du
+   tableau (verre à ±0,79, y vers le bas), le centre du carré au centre du verre :
+       x = (px − 284,5) × 1,58 / 569        y = (284,5 − py) × 1,58 / 569
+   soit 0,002777 par px du jeu. Contrôle d'échelle sur la figure 210 : les boutons du haut,
+   à 0,25 l'un de l'autre, y sont à 318,5 px d'image par unité, et 20 px du jeu à 17,9 px
+   d'image : 0,00281 par px du jeu, 1 % près. Une ligne du tableau (TblRowHeight = 20,
+   DEF l.181) fait donc 0,0555, ce que mesure aussi la figure 210 (boutons à 0,25).
+   Textes : la police 1 (txt_labels_font, FO l.26, l.39, l.46, l.53-57) a une cellule de
+   13 × 1,8 = 23,4 px de haut et une chasse de (569 − 60) × 0,779 / 36 = 11,02 px (0,0306) ;
+   un texte aligné « …Top » a son centre 11,7 px sous l'ancre, « …Center » sur l'ancre
+   (vérifié sur la figure 210 : PREV, THRTL, MFL / FLT-1 retombent à 1 px près).
+   Ancres des libellés (UD l.51-75, l.251-270 ; SZ l.12, l.16 ; soi_min/max UD l.377-380) :
+   en haut, x de l'OSB (OSB 1 = 110, OSB 3 = 284,5, OSB 5 = 459), y = 539 + 20 = 559 ;
+   à droite, x = 539, y de l'OSB (OSB 10 = 469 − 4 × 82,5 = 139) ; à gauche, x = 30.
+
+   État affiché : celui que les Lua écrivent au démarrage (DEF l.125-163) — CICU et ses
+   sous-ensembles VALID, CICU en test UN, les autres « - » ; les six stations 1760 n'ont
+   pas d'état dans les Lua (il vient du simulateur) : sans arme, STATUS_NA, leur nom
+   « 1760-n » (P1 l.76), « - » (P1 l.104, l.134) et le fond blanc (P1 l.53), comme sur la
+   figure 209. La ligne choisie est ALL, la première (curseur, CO l.262). */
+const A10_PX = 1.58 / 569, A10_HALF = 11.7, A10_CHAR = 11.02, A10_CELL_Y = 23.4 * A10_PX;
+const a10X = px => (px - 284.5) * A10_PX, a10Y = py => (284.5 - py) * A10_PX;
+/* fonds par état (P1 l.37, l.52-56) et traits MFCD_BLUE (DEF l.236) : les matériaux du jeu
+   (MAT l.14-17 : blanc, vert 0/255/50, rouge, bleu 100/100/255) tels que l'écran les rend,
+   relevés sur la figure 210 (image d'origine, prise de face) ; le jaune (DEGR) n'est sur
+   aucune figure et aucune ligne par défaut ne l'emploie : il n'est pas repris */
+const A10_MAT = { w: '#F2F4F2', g: '#2CEB45', r: '#F02424', blue: '#4C5BE6' };
+const A10_STAT1 = [
+  // [nom tel que DEF l.64-76 l'écrit (8 caractères, le retrait compris), STAT, TEST, fond]
+  ['ALL     ', '-', '-', 'w'],          // fond blanc fixe P1 l.36-47 ; « - » P1 l.91, l.114 (DEF l.126, l.142)
+  ['CICU    ', 'VALID', 'UN', 'g'],     // VALID DEF l.127, UN DEF l.143 ; P1 l.101, l.123
+  [' WP     ', 'VALID', '-', 'g'],      // VALID DEF l.128-132 ; « - » DEF l.144-148, P1 l.116-118
+  [' MP     ', 'VALID', '-', 'g'],
+  [' DLP    ', 'VALID', '-', 'g'],
+  [' GVM    ', 'VALID', '-', 'g'],
+  [' ALM    ', 'VALID', '-', 'g'],
+  ['1760-3  ', '-', '-', 'w'],          // STATUS_NA : P1 l.53, l.76, l.104 ; TEST_NA P1 l.134
+  ['1760-4  ', '-', '-', 'w'],
+  ['1760-5  ', '-', '-', 'w'],
+  ['1760-7  ', '-', '-', 'w'],
+  ['1760-8  ', '-', '-', 'w'],
+  ['1760-9  ', '-', '-', 'w'],
 ];
-const A10_ROW = { w: '#F2F4F2', g: '#2CEB45', r: '#F02424' };
-function a10Stat(c, o){
-  const sc = SHAPES[o.k].scope, lw = c.lineWidth, ink = c.strokeStyle;
+/* le tableau STAT (DEF l.177-185, l.203-237 ; UD l.707-755) : centre TblCenterX =
+   569 / 2 + 6 = 290,5, demi-largeur 150, colonnes à ±49 du centre, première ligne à
+   569 − 100 = 469, lignes de 20 ; textes centrés à 290,5 − 99,5, 290,5, 290,5 + 99,5,
+   en noir (font_MFCD_BLACK, DEF l.208) ; les en-têtes à une demi-ligne au-dessus. */
+function a10StatTable(c, rows, mini){
+  const L = a10X(140.5), R = a10X(440.5), T = a10Y(469), H = 20 * A10_PX;
+  c.save();
+  rows.forEach(([, , , k], i) => { c.fillStyle = A10_MAT[k]; c.fillRect(L, T + i * H, R - L, H); });
+  c.strokeStyle = A10_MAT.blue;                                    // addSTAT_Table, DEF l.236
+  c.beginPath();
+  for (let i = 0; i <= rows.length; i++){ c.moveTo(L, T + i * H); c.lineTo(R, T + i * H); }
+  for (const px of [140.5, 241.5, 339.5, 440.5]){ c.moveTo(a10X(px), T); c.lineTo(a10X(px), T + rows.length * H); }
+  c.stroke();
+  c.restore();
+  if (mini) return;
+  c.save(); c.fillStyle = HALO;
+  rows.forEach(([lru, st, te], i) => {
+    const y = a10Y(459 - 20 * i);                                  // TblHdrTxtY − n × 20, DEF l.219
+    /* le nom fait 8 caractères centrés sur 191 : il commence à 191 − 4 × 11,02 */
+    a10Text(c, lru.trimEnd(), a10X(191 - 4 * A10_CHAR), y, 'left');
+    a10Text(c, st, a10X(290.5), y); a10Text(c, te, a10X(390), y);
+  });
+  c.restore();
+  for (const [t, px] of [['LRU', 191], ['STAT', 290.5], ['TEST', 390]]) a10Text(c, t, a10X(px), a10Y(479));   // CO l.270-301
+}
+/* flèches pleines des OSB 20 (haut) et 19 (bas) : addScrollers(20, 19, 5), CO l.213,
+   UD l.569-627, au x de 30 + 5 = 35 ; le glyphe fait 32 × 22 px du jeu dans son
+   carré de 36 × 26 (mesuré sur la figure 210) */
+function a10Scrollers(c){
+  const x = a10X(35), w = 16 * A10_PX, h = 11 * A10_PX;
+  for (const [py, s] of [[469, -1], [386.5, 1]]){
+    const y = a10Y(py);
+    c.beginPath(); c.moveTo(x, y + s * h); c.lineTo(x + w, y - s * h); c.lineTo(x - w, y - s * h); c.closePath(); c.fill();
+  }
+}
+/* SYS_ACTION (SYM l.5) : la puce ronde, un cercle et son point */
+function a10Puce(c, x, y){ c.beginPath(); c.arc(x, y, .012, 0, 7); c.stroke(); c.beginPath(); c.arc(x, y, .005, 0, 7); c.fill(); }
+
+/* ce que les deux pages partagent (CO), à la ligne choisie `row` (0 = la première) dont
+   le nom `cur` passe entre les flèches ; rang du bas et altitude : ceux de la figure */
+function a10StatCommon(c, sc, cur, row){
+  const top = a10Y(559 - A10_HALF);                                // CenterTop sous 559
+  /* OSB 3 → HMCS : BRANCH_L (SYM l.1) 27 px à gauche du libellé, CO l.8-32 */
+  a10Text(c, '→', a10X(284.5 - 27), top); a10Text(c, 'HMCS', a10X(284.5), top);
+  /* OSB 5 : puce SYS_ACTION (SYM l.5) 22 px à gauche, puis WS / CHK sur deux lignes, CO l.35-60 */
+  a10Puce(c, a10X(459 - 22), top);
+  a10Text(c, 'WS', a10X(459), top); a10Text(c, 'CHK', a10X(459), top + A10_CELL_Y);
+  /* OSB 10 : ROTARY (SYM l.3) à 539 − 5 = 534, MFL / FLT-1 calé à droite sur 524, CO l.153-179 */
+  a10Text(c, '↕', a10X(534), a10Y(139));
+  a10Text(c, 'MFL', a10X(524), a10Y(139 + A10_HALF), 'right');
+  a10Text(c, 'FLT-1', a10X(524), a10Y(139 - A10_HALF), 'right');
+  /* OSB 20 / 19 : les flèches, et entre elles le nom de la ligne choisie, calé à gauche
+     sur 20 − 15 = 5, à mi-hauteur des deux boutons, CO l.220-253 */
+  a10Scrollers(c);
+  a10Text(c, cur, a10X(5), a10Y((469 + 386.5) / 2), 'left');
+  /* curseur BRANCH_L sur la ligne choisie, ancré à droite sur 290,5 − 150 − 15 = 125,5,
+     20 plus bas par ligne (CO l.256-268) ; son glyphe est centré 10 px à gauche de
+     l'ancre (figure 210) */
+  a10Text(c, '→', a10X(115.5), a10Y(459 - 20 * row));
+  /* journal des pannes : placé à 290,5 − 150 + 5 = 145,5 et 146 (DEF l.189-197) ;
+     titre et soulignement (23 « _ », au bas de la même cellule), MFL EMPTY une ligne
+     de 23,4 plus bas (CO l.303-333, DEF l.187) */
+  a10Text(c, 'MAINT FAULT LOG DISPLAY', a10X(145.5), a10Y(146 - A10_HALF), 'left');
+  c.beginPath(); c.moveTo(a10X(146), a10Y(146 - 23)); c.lineTo(a10X(146 + 23 * A10_CHAR), a10Y(146 - 23)); c.stroke();
+  a10Text(c, 'MFL EMPTY', a10X(145.5), a10Y(146 - 23.4 - A10_HALF), 'left');
+  /* rang du bas, OSB 12-15 : CenterTop à 30 + 2 = 32, fond noir (B15 l.5-23) ; les
+     pages affectées sont un réglage du pilote : celles de la figure, la page en cours
+     en vidéo inverse ; DCLT (OSB 11) n'y est pas */
+  for (const [t, px] of sc.bottom) a10Text(c, t, a10X(px), a10Y(32 - A10_HALF), 'center', A10_SIZE, HALO);
+  /* altitude barométrique : milliers calés à droite sur 33, à 32 (UD l.533-545), centaines
+     en petit (0,8 × police 1) 4,7 px plus bas (UD l.547-558) ; valeur de la figure */
+  a10Text(c, sc.alt[0], a10X(33), a10Y(32 - A10_HALF), 'right', A10_SIZE, HALO);
+  a10Text(c, sc.alt[1], a10X(33), a10Y(32 - 4.7 - .8 * A10_HALF), 'left', A10_SIZE * .8);
+  /* symbole d'attitude : l'avion au centre du fond noir, 30 + 32 − 21 = 41 et 30 + 33 = 63 (UD l.428-441, B15 l.51) */
+  a10Ars(c, a10X(41), a10Y(63));
+}
+
+function a10Stat1(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth;
   mfcdBezel(c);
   c.save();
   c.lineWidth = lw * .45;
-  /* tableau : colonnes à -0,418, -0,139, 0,137, 0,416 ; lignes de 0,0555 depuis -0,509 */
-  const X = [-.418, -.139, .137, .416], Y0 = -.509, H = .0555;
-  A10_STAT.forEach(([, , , , k], i) => { c.fillStyle = A10_ROW[k]; c.fillRect(X[0], Y0 + i * H, X[3] - X[0], H); });
-  c.strokeStyle = '#4C5BE6';
-  c.beginPath();
-  for (let i = 0; i <= A10_STAT.length; i++){ c.moveTo(X[0], Y0 + i * H); c.lineTo(X[3], Y0 + i * H); }
-  for (const x of X.slice(1, 3)){ c.moveTo(x, Y0); c.lineTo(x, Y0 + A10_STAT.length * H); }
-  c.stroke();
+  a10StatTable(c, A10_STAT1, o.mini);
   if (o.mini){ c.restore(); return; }
-  c.fillStyle = HALO;
-  A10_STAT.forEach(([lru, ind, st, te], i) => {
-    const y = Y0 + (i + .5) * H;
-    a10Text(c, lru, ind ? -.375 : -.401, y, 'left');
-    a10Text(c, st, -.003, y); a10Text(c, te, .276, y);
-  });
-  c.strokeStyle = c.fillStyle = ink;
-  for (const [t, x, y, al, size] of sc.texts) a10Text(c, t, x, y, al || 'center', size);
-  /* flèches OSB 20 et 19, pleines ; puce de WS ; MAINT FAULT LOG DISPLAY souligné */
-  c.beginPath(); c.moveTo(-.706, -.549); c.lineTo(-.654, -.48); c.lineTo(-.759, -.48); c.closePath(); c.fill();
-  c.beginPath(); c.moveTo(-.706, -.244); c.lineTo(-.654, -.314); c.lineTo(-.759, -.314); c.closePath(); c.fill();
-  c.beginPath(); c.arc(.407, -.733, .012, 0, 7); c.stroke(); c.beginPath(); c.arc(.407, -.733, .005, 0, 7); c.fill();
-  c.beginPath(); c.moveTo(-.406, .457); c.lineTo(.302, .457); c.stroke();
-  a10Text(c, '#STAT', .228, .747, 'center', A10_SIZE, HALO);
-  a10Ars(c, -.706, .642);
+  /* OSB 1 → NEXT : BRANCH_L 27 px à gauche, P1 l.5-29 */
+  const top = a10Y(559 - A10_HALF);
+  a10Text(c, '→', a10X(110 - 27), top); a10Text(c, 'NEXT', a10X(110), top);
+  /* OSB 6 RESET, 7 PWR, 8 SLEW, 18 TEST : leurs contrôleurs les cachent quand ALL est
+     choisi (CO l.71, l.100, l.130, l.192) ; la figure 209 n'en montre aucun */
+  a10StatCommon(c, sc, 'ALL', 0);
+  c.restore();
+}
+
+/* ---- page STAT 2 : MFCD_page_STAT_Page2.lua (P2) ; contrôle : figure 210, p. 315 ----
+   Les LRU TGP à HMCS (P2 l.45-52 : index du jeu moins LRU_1760_9), même tableau que la
+   page 1 (P2 l.114, DEF l.230-237). La figure 210 date d'avant l'A-10C II : elle n'a ni
+   la ligne HMCS (P2 l.52, l.103-105, l.194-198), ni NEXT à l'OSB 2 (P2 l.30-43), ni
+   → HMCS à l'OSB 3 (CO l.8-32) ; les Lua les écrivent, ils sont dessinés. États : ceux
+   de la figure 210 (ils viennent du simulateur ; les tests par défaut de DEF l.149-163,
+   TGP UN et les autres « - », y retombent) ; HMCS en NC, sans casque (P2 l.196). La
+   ligne choisie est THRTL, la 6e : son nom entre les flèches, SLEW à l'OSB 8 (CO l.122-150). */
+const A10_STAT2 = [
+  // [nom de DEF l.77-89 (8 caractères, le retrait compris), STAT, TEST, fond]
+  ['TGP     ', 'OFF', 'UN', 'w'],       // fond P2 l.59-61, STAT P2 l.127-130, TEST DEF l.149 (P2 l.207-209)
+  ['LTMFCD  ', 'VALID', 'UN', 'g'],     // P2 l.62-65, l.131-137, TEST P2 l.213-217
+  ['RTMFCD  ', 'VALID', 'UN', 'g'],     // P2 l.66-69, l.138-144, l.218-222
+  ['HOTAS   ', 'VALID', 'UN', 'g'],     // P2 l.70-73, l.146-152, l.223-227
+  [' STICK  ', 'VALID', '-', 'g'],      // P2 l.74-77, l.153-159 ; « - » DEF l.153
+  [' THRTL  ', 'VALID', '-', 'g'],      // P2 l.78-81, l.160-166 ; DEF l.154
+  [' AHCP   ', 'VALID', '-', 'g'],      // P2 l.82-85, l.167-173 ; DEF l.155
+  ['EGI     ', 'OFF', '-', 'w'],        // P2 l.86-90, l.175-180 ; DEF l.156
+  ['IFFCC   ', 'OFF', '-', 'w'],        // P2 l.91-94, l.181-184 ; DEF l.157
+  ['CDU     ', 'NC', '-', 'r'],         // P2 l.95-99, l.185-189 ; DEF l.158
+  ['EPLRS   ', 'NC', '-', 'r'],         // P2 l.100-102, l.190-193 ; DEF l.159
+  ['HMCS    ', 'NC', '-', 'r'],         // P2 l.103-105, l.195-198 ; DEF l.160
+];
+function a10Stat(c, o){
+  const sc = SHAPES[o.k].scope, lw = c.lineWidth;
+  mfcdBezel(c);
+  c.save();
+  c.lineWidth = lw * .45;
+  a10StatTable(c, A10_STAT2, o.mini);
+  if (o.mini){ c.restore(); return; }
+  const top = a10Y(559 - A10_HALF);
+  /* OSB 1 → PREV (P2 l.3-28) ; OSB 2 NEXT, sans flèche : son symbole n'est jamais créé (P2 l.30-43) */
+  a10Text(c, '→', a10X(110 - 27), top); a10Text(c, 'PREV', a10X(110), top);
+  a10Text(c, 'NEXT', a10X(197.25), top);
+  /* OSB 8 : DATA_ENTRY (SYM l.4) à 539 − 5 = 534, SLEW et le taux calés à droite sur 524,
+     au y de l'OSB 8, 469 − 2 × 82,5 = 304 (CO l.122-150) ; le taux, 4.0, de la figure 210 */
+  a10Text(c, '[]', a10X(534), a10Y(304), 'center', .045);
+  a10Text(c, 'SLEW', a10X(524), a10Y(304 + A10_HALF), 'right');
+  a10Text(c, sc.slew, a10X(524), a10Y(304 - A10_HALF), 'right');
+  /* OSB 6 RESET, 7 PWR, 18 TEST : la figure 210 n'en montre aucun pour THRTL */
+  a10StatCommon(c, sc, 'THRTL', 5);
   c.restore();
 }
 
@@ -248,16 +394,12 @@ Object.assign(SHAPES, {
               ['06', -.79, .713, -.742, .774, 'left'], ['TGP', -.549, .713, -.462, .774],
               ['CDU', -.06, .713, .031, .774], ['MSG', .181, .713, .272, .774], ['DCLT', .412, .713, .53, .774]] }),
   /* textes de la figure 210 [texte, x, y, alignement, taille] */
-  a10_stat: a10Other('Écran STAT', a10Stat,
-    { page:'stat',
-      texts: [['→PREV', -.593, -.733, 'left'], ['WS', .437, -.733, 'left'], ['CHK', .47, -.666],
-              ['THRTL', -.73, -.397], ['→', -.488, -.205],
-              ['LRU', -.282, -.544], ['STAT', -.003, -.544], ['TEST', .276, -.544],
-              ['SLEW', .594, -.083], ['4.0', .58, -.017], ['[]', .678, -.05, 'center', .045],
-              ['MAINT FAULT LOG DISPLAY', -.406, .428, 'left'], ['MFL EMPTY', -.406, .492, 'left'],
-              ['MFL', .603, .381], ['FLT-1', .647, .445, 'right'], ['↕', .678, .413],
-              ['00', -.794, .747, 'left'], ['0', -.722, .757, 'left', .04],
-              ['TGP', -.505, .747], ['MAV', -.263, .747], ['CDU', -.018, .747]] }),
+  /* pages STAT, relevées dans les Lua du jeu ; rang du bas [texte, x en px du jeu] (B15 l.16)
+     et altitude [milliers, centaines] : ceux de la figure de chaque page */
+  a10_stat1: a10Other('Écran STAT (page 1)', a10Stat1,
+    { page:'stat1', bottom: [['TGP', 110], ['#STAT', 197.25], ['CDU', 284.5], ['MSG', 371.75]], alt: ['02', '1'] }),
+  a10_stat: a10Other('Écran STAT (page 2)', a10Stat,
+    { page:'stat', bottom: [['TGP', 110], ['MAV', 197.25], ['CDU', 284.5], ['#STAT', 371.75]], alt: ['00', '0'], slew: '4.0' }),
   /* textes de la figure 254, chacun sur son pavé noir [texte, x0, y0, x1, y1] */
   a10_tgpaa: a10Other('Écran du pod (A-A)', a10TgpAa,
     { page:'tgpaa',
