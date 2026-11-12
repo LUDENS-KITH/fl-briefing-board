@@ -385,7 +385,8 @@ aplat.
 | Écran | Figure | Laissé de côté |
 |---|---|---|
 | `a10_mav` Maverick | fig. 260, p. 415 ; fig. 261, p. 418 (p. 413-419) | l'image du missile (aplat) |
-| `a10_stat` STAT, page 2 | fig. 210, p. 315 (p. 312-316) | la page 1 (fig. 209, image illisible) |
+| `a10_stat1` STAT, page 1 | les fichiers du jeu, `Mods/aircraft/A-10C_2/Cockpit/Scripts/MFCD/indicator/` : `STAT/MFCD_page_STAT_Page1.lua`, `STAT/MFCD_page_STAT_common.lua`, `STAT/MFCD_STAT_definitions.lua`, `MFCD_useful_definitions.lua`, `MFCD_sizes.lua`, `MFCD_fonts.lua`, `MFCD_page_OSB_11_15.lua` (couleurs : les matériaux de `Cockpit/Scripts/materials.lua` tels que la fig. 210 les montre) ; carré de 569 px du jeu = le verre (±0,79) ; contrôle : fig. 209, p. 313 | les pages du rang du bas et l'altitude sont celles de la figure (réglage du pilote, valeur du vol) ; l'état des stations 1760 vient du simulateur : sans arme, « - », comme la figure |
+| `a10_stat` STAT, page 2 | les fichiers du jeu, mêmes dossier et conversion que `a10_stat1`, plus `STAT/MFCD_page_STAT_Page2.lua` ; ensemble et états : fig. 210, p. 315 (p. 312-316) | la figure précède l'A-10C II : la ligne HMCS (NC, sans casque), « NEXT » (OSB 2) et « → HMCS » (OSB 3) sont dessinés d'après les Lua ; états, taux SLEW, rang du bas et altitude : ceux de la figure |
 | `a10_tgpaa` pod de désignation, A-A | fig. 254, p. 404 (p. 402-404) | — ; un petit carré blanc que le texte n'explique pas est dessiné tel que la figure le montre |
 | `a10_prof` DSMS, profils | fig. 217, p. 326 (p. 326-327) | — |
 
