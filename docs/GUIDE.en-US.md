@@ -130,9 +130,9 @@ aircraft.
 
 - **F/A-18C:** SA, HSI, AZ/EL, A/G SMS, A/G ATFLIR.
 - **F-16C:** HSD, SMS (inventory), A-G targeting pod, A-G FCR GM.
-- **A-10C II:** Maverick, STAT, A-A targeting pod, DSMS profiles.
+- **A-10C II:** Maverick, STAT (pages 1 and 2), A-A targeting pod, DSMS profiles.
 - **AH-64D:** TSD (NAV), FCR (GTM), WPN, ASE, in the MPD.
-- **F-14B:** RIO's TID and DDD, pilot's HSD.
+- **F-14B:** RIO's TID and DDD, pilot's HSD and VDI.
 - **F-15C:** VSD in search, TEWS.
 - **Mirage F1:** Cyrano radar scope, in search and locked on.
 - **Su-25T:** TV display in acquisition and target locked, SPO-15.

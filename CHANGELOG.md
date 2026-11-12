@@ -3,6 +3,34 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.28 — 2026-11-12
+
+Lot 29 du [plan d'action](docs/PLAN.md) : **les deux écrans que les manuels ne
+permettaient pas de dessiner**, pris dans les fichiers du jeu. Demande de Vince : « trouve
+une solution ».
+
+### Ajouté
+- **F-14B : le VDI du pilote**, d'après les scripts de l'indicateur
+  (`Mods/aircraft/F14/Cockpit/Scripts/VerticalDisplayIndicator`) et sa texture : horizon,
+  trapèzes du sol, échelle de tangage, index de roulis, bande de cap, symbole avion ; boîtier
+  relevé sur la figure de face du manuel Heatblur (p. 69), valeurs de la capture de jeu de
+  Chuck's Guide (p. 52).
+- **A-10C II : la page 1 du STAT**, d'après les scripts du MFCD
+  (`Cockpit/Scripts/MFCD/indicator/STAT`) : tableau des LRU, états par défaut, journal des
+  pannes, boutons.
+
+### Corrigé
+- **A-10C II, page 2 du STAT** : replacée sur les mêmes scripts (elle était décalée de
+  0,02 vers la gauche et étirée en bas, figure prise de biais) ; elle montre enfin ce que
+  l'A-10C II a de plus que l'A-10C de la figure 210 — la ligne HMCS, NEXT vers la page 3,
+  → HMCS.
+
+### Vérifié en exécutant
+Chaque écran rendu à côté de la capture ou de la figure redressée, puis superposé ; la
+conversion des places du jeu vers le tableau contrôlée sur la page 2 (aucun pixel d'écart
+avec un placement indépendant) · `test_ecrans` 262 · `test_i18n` 2 575 · banc 108/108 en
+français et en anglais. **Pas encore comparé au jeu ouvert.**
+
 ## v1.27 — 2026-11-12
 
 Lot 28 du [plan d'action](docs/PLAN.md) : **la bibliothèque d'écrans, les autres pages

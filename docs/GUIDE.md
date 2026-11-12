@@ -134,9 +134,9 @@ une marque ne se pose que sur une piste de son appareil.
 
 - **F/A-18C** : SA, HSI, AZ/EL, SMS air-sol, ATFLIR air-sol.
 - **F-16C** : HSD, SMS (inventaire), pod de désignation A-G, FCR air-sol GM.
-- **A-10C II** : Maverick, STAT, pod en air-air, profils du DSMS.
+- **A-10C II** : Maverick, STAT (pages 1 et 2), pod en air-air, profils du DSMS.
 - **AH-64D** : TSD (NAV), FCR (GTM), WPN, ASE, dans le MPD.
-- **F-14B** : TID et DDD du RIO, HSD du pilote.
+- **F-14B** : TID et DDD du RIO, HSD et VDI du pilote.
 - **F-15C** : VSD en recherche, TEWS.
 - **Mirage F1** : scope du radar Cyrano, en recherche et accroché.
 - **Su-25T** : écran TV en acquisition et cible accrochée, SPO-15.
