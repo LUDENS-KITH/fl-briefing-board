@@ -3,6 +3,32 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.27 — 2026-11-12
+
+Lot 28 du [plan d'action](docs/PLAN.md) : **la bibliothèque d'écrans, les autres pages
+et les autres modules**. Demande de Vince : « Et les autres modules ? la bibliothèque est
+quasiment vide ».
+
+### Ajouté
+- **27 écrans**, 35 en tout, chacun dans le boîtier de son poste :
+  - F/A-18C : SA, HSI, AZ/EL, SMS air-sol, ATFLIR air-sol ;
+  - F-16C : HSD, SMS, pod de désignation A-G, FCR GM ;
+  - A-10C II : Maverick, STAT, pod en air-air, profils du DSMS ;
+  - **AH-64D** (nouveau) : TSD, FCR GTM, WPN, ASE, dans le MPD ;
+  - **F-14B** (nouveau) : TID et DDD du RIO, HSD du pilote ;
+  - **F-15C** (nouveau) : VSD, TEWS ;
+  - **Mirage F1** (nouveau) : scope du radar Cyrano, recherche et accroché ;
+  - **Su-25T** (nouveau) : écran TV, acquisition et cible accrochée, SPO-15.
+- Un fichier par module dans `ecrans/` ; la palette montre huit boutons de module.
+
+### Vérifié en exécutant
+Chaque écran mesuré sur l'image d'origine de sa figure et rendu à côté d'elle (figure,
+rendu, superposition) jusqu'à coïncider · `test_ecrans` 248 vérifications (chaque fichier
+chargé, chaque écran dessiné en grand et en vignette sans erreur, boîtier connu, module,
+cité dans RADAR.md) · `test_i18n` 2 537 · 1 scénario au banc, rouge sans les fichiers
+(chaque module a ses écrans dans sa palette, chacun des 27 se pose et se dessine) · banc
+complet 108/108 en français et en anglais. **Pas encore comparé au jeu ouvert.**
+
 ## v1.26 — 2026-11-11
 
 Lot 27 du [plan d'action](docs/PLAN.md) : **chaque écran dans le boîtier de son avion**.

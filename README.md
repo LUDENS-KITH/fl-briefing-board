@@ -47,9 +47,10 @@
   de la précédente.
 - **Vue radar liée** — sous la carte, l'écran radar d'un appareil, calculé depuis la
   manœuvre dessinée : aspect, cible chaude ou froide, part radiale de sa vitesse.
-- **Écrans de bord F/A-18C, F-16C et A-10C II** — les écrans radar air-air (RDR ATTK du
-  Hornet, FCR du Viper), le TAD, le pod et le DSMS de l'A-10C II, leurs symboles,
-  dessinés d'après le manuel de chaque module, page par page.
+- **Écrans de bord de huit modules** — F/A-18C, F-16C, A-10C II, AH-64D, F-14B, F-15C,
+  Mirage F1 et Su-25T : 35 pages (radar, SA, HSI, HSD, TSD, TAD, pods, emports, alerte
+  radar…), chacune dans le boîtier de son poste, dessinées d'après le manuel de chaque
+  module, page par page.
 - **Export kneeboard DCS** — la planche, ou le cadre qu'on y pose, avec sa coupe et ses
   caps, aux proportions de la planchette du jeu.
 - **Un fichier de briefing** — tout le tableau, images comprises, à préparer sur un poste

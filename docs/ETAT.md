@@ -1,6 +1,6 @@
 # État du projet — FL Briefing Board
 
-> Document vivant. Dernière mise à jour : **2026-11-10**, version **v1.26**.
+> Document vivant. Dernière mise à jour : **2026-11-10**, version **v1.27**.
 > Il répond à une seule question : *où en est le projet, et sur quoi peut-on compter ?*
 > Le modèle technique est dans [MODELE.md](MODELE.md).
 
@@ -16,7 +16,7 @@ Le dépôt est **public depuis le 2026-09-18** :
 ligne sur [briefing.flightledger.io](https://briefing.flightledger.io/?demo)
 (GitHub Pages, branche `main`). Deux filets automatiques : la déclinaison magnétique contre les valeurs
 officielles du NOAA (`node tools/test_magnetic.js`) et, depuis la v1.2, le banc de saisie
-(`tools/banc-saisie.html`, 107 scénarios, à passer en français et en anglais) et la géométrie de la vue radar liée
+(`tools/banc-saisie.html`, 108 scénarios, à passer en français et en anglais) et la géométrie de la vue radar liée
 (`node tools/test_radar.js`, 26 vérifications), et la lecture des missions
 (`node tools/test_miz.js`, 46 vérifications), et depuis la v1.19 les sources des symboles OTAN
 (`node tools/test_symboles.js`). Pas de déploiement.
@@ -116,6 +116,7 @@ par événements pointeur réels, pas en relisant le code.
 | Interface en anglais | Lot 16 (v1.17, v1.18). `node tools/test_i18n.js` 1 914/1 914 : chaque texte affiché a sa traduction (noms des formes lus en exécutant `symbols.js`), rien d'écrit en dur, mêmes valeurs insérées, et chaque bouton cité par un guide existe à l'écran dans la langue du guide ; en échec sur une traduction retirée et sur les 11 libellés français que citait le guide anglais. 6 scénarios au banc, rouges sur la v1.16 : aucun texte français à l'écran en anglais (info-bulles, panneaux fermés, dessins de la démo, écrans radar, messages), aucun texte anglais en français, kneeboard et PNG exportés en anglais (en-tête, date américaine), bascule par le bouton EN / FR qui garde le choix et le travail. Banc 83/83 dans chaque langue | conforme | 2026-10-09 |
 | Symboles OTAN | Lot 19 (v1.19). `node tools/test_symboles.js` 285/285, rouge sur la v1.18 (29 échecs) : chaque code est dessiné par milsymbol, cite sa clé d'icône DCS et sa ligne dans [SYMBOLES.md](SYMBOLES.md) ; les 15 familles DCS ont un dessin de repli et un repère ; aucun aéronef ni unité sans code sans raison écrite ; marqueurs tactiques et armement sans code. 7 scénarios au banc, rouges sur la v1.18 : bascule Silhouettes ↔ OTAN de tout le briefing, sélection et historique gardés ; réglage gardé à la réouverture et dans le fichier, ancien fichier en silhouettes ; chasseur dessiné cadre et signe noirs, rempli de sa couleur (pixels lus) ; familles dans la palette en OTAN seulement, repli en silhouettes ; flèche de direction au geste de pose, pas au clic ni sur un SAM ; kneeboard en OTAN ; ✚ Nouveau garde le réglage, une mission importée prend les codes de ses menaces. Banc 90/90 en français et en anglais ; `test_i18n` 2 115/2 115 | conforme | 2026-11-10 |
 | Symboles OTAN | navigateur, vrais clics : les 28 formes codées posées sur fond clair et sombre, comparées une à une aux icônes `nato/` de l'installation DCS du poste ; repli des 15 familles en silhouettes ; planche de démo « Ordre de bataille » à 1 440 × 900. Le rendu n'a pas été comparé à la carte F10 en jeu | conforme | 2026-11-10 |
+| Bibliothèque d'écrans, huit modules | Lot 28 (v1.27). 27 écrans mesurés sur leur figure et rendus à côté d'elle. `test_ecrans` : chaque fichier de `ecrans/` chargé, chaque écran dessiné en grand et en vignette sans erreur, boîtier connu, module, cité dans RADAR.md. 1 scénario au banc, rouge sans les fichiers : huit modules, écrans dans la palette de leur module, chacun posé et dessiné | conforme ; pas comparé au jeu ouvert | 2026-11-12 |
 | Boîtiers des écrans | Lot 27 (v1.26). 1 scénario au banc, rouge sur la v1.25 : platine NIGHT/DAY et coin coupé du DDI, bascule GAIN du MFD, bascules et boutons gris clair du MFCD ; les scénarios d'écrans lisent le cadre du boîtier. Boîtiers rendus à côté des figures 82, p. 394 et 228 | conforme | 2026-11-11 |
 | Recherche dans la palette | Lot 26 (v1.25). 2 scénarios au banc, rouges avant le code, en français et en anglais : filtre par nom, écrans d'un autre onglet (« TWS »), type DCS (« SA-11 », « Buk » en OTAN), vignette trouvée posée ; sans résultat, `Échap`, lettres sans raccourci, invite | conforme | 2026-11-10 |
 | Symboles russes | Lot 20 (v1.24). `test_symboles` : un glyphe par famille, à la clé de son icône OTAN, dans son icône, cité dans SYMBOLES.md. 3 scénarios au banc, rouges avant le code : réglage à trois valeurs, chasseur au trait bordé de noir (contre le dôme plein de l'OTAN), familles DCS dans la palette, cercle du SAM, réouverture, fichier, kneeboard. Les 30 glyphes rendus à côté des icônes du jeu | conforme ; pas vu sur la carte du jeu (DCS fermé) | 2026-11-10 |

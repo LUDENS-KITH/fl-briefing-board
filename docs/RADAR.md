@@ -344,3 +344,101 @@ Relevés en rendant chaque page du kit à côté de sa figure, le 2026-11-10 :
   inventaire, largage sélectif, missiles, p. 326-353) : la page de chaque figure de
   référence d'abord.
 - **Le numéro à côté du point tournant** (p. 355) : dans l'étiquette.
+
+## Bibliothèque des modules (lot 28)
+
+Un fichier par module dans `ecrans/`, chargé après `symbols.js`. Mêmes règles que le
+lot 23 : chaque écran est mesuré sur l'image d'origine de sa figure, dans le boîtier de
+son appareil relevé sur la même figure, et rendu à côté d'elle (figure, rendu,
+superposition) jusqu'à coïncider. Les valeurs affichées sont celles de la figure. Ce
+qui appartient au vol de la figure — route, menaces, pistes, image du capteur — n'est
+pas dessiné : ce sont des objets à poser, et une image de capteur est rendue par un
+aplat.
+
+### F/A-18C — autres pages (DDI)
+
+*DCS F/A-18C Early Access Guide*. Les cinq figures montrent ces pages sur un DDI.
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `fa18_sa` SA | fig. 98, p. 205 (texte p. 204-205) ; échelle p. 118 | pistes, symboles EW, cercle SAM, membre PPLI ; un second cercle pointé que le texte ne nomme pas |
+| `fa18_hsi` HSI | fig. 42, p. 121 ; boutons p. 117-120 ; symboles fig. 68, p. 144 ; TACAN fig. 62, p. 137 ; ADF p. 143 | la carte mobile ; un petit rectangle que le texte ne nomme pas |
+| `fa18_azel` AZ/EL | fig. 92, p. 180 | HAFU et curseur ; les données de la cible L&S de la figure sont gardées |
+| `fa18_sms` SMS air-sol | fig. 160, p. 303 | — |
+| `fa18_flir` ATFLIR air-sol | fig. 106-107, p. 220-221 | l'image du pod (aplat vert) |
+
+### F-16C — autres pages (MFD)
+
+*DCS F-16C Early Access Guide* ; figures non numérotées, citées par leur page.
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `f16_hsd` HSD | p. 358 (texte p. 358-361) ; échelles 15 à 240 | route, menaces, points, lignes de la mission |
+| `f16_sms` SMS, inventaire | p. 366 (p. 366-367) | — |
+| `f16_tgp` pod de désignation, A-G | p. 495 (p. 495-499) | l'image du pod (aplat gris) |
+| `f16_gm` FCR GM air-sol | p. 437 (p. 437-438) ; échelles 10 à 80 | la carte radar (aplat sur le secteur) |
+
+### A-10C II — autres pages (MFCD)
+
+*DCS A-10C II Flight Manual* (EN).
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `a10_mav` Maverick | fig. 260, p. 415 ; fig. 261, p. 418 (p. 413-419) | l'image du missile (aplat) |
+| `a10_stat` STAT, page 2 | fig. 210, p. 315 (p. 312-316) | la page 1 (fig. 209, image illisible) |
+| `a10_tgpaa` pod de désignation, A-A | fig. 254, p. 404 (p. 402-404) | — ; un petit carré blanc que le texte n'explique pas est dessiné tel que la figure le montre |
+| `a10_prof` DSMS, profils | fig. 217, p. 326 (p. 326-327) | — |
+
+### AH-64D — écrans MPD
+
+*DCS AH-64D Flight Manual* (EN). Boîtier MPD (`BEZELS.mpd`) d'après la figure p. 164 et
+les captures du manuel : VAB T1-T6, L1-L6, R1-R6, B1-B6 (B1 = M, p. 165), boutons FCR,
+WPN, TSD, M, A/C, VID, COM et `*`, molettes VID et BRT, sélecteur DAY / NT / MONO.
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `ah64_tsd` TSD, NAV | p. 196 (p. 196-199) ; fond du format STICK, p. 220 | le fond de carte, les lignes de grille (dépendent du terrain), route, points, menaces |
+| `ah64_fcr` FCR, GTM | p. 446 (p. 446-448) ; secteur p. 455-456 | cibles, PFZ/NFZ, empreinte TADS ; deux marques sous la bande de cap dessinées sans nom (la légende ne les nomme pas) |
+| `ah64_wpn` WPN | p. 536 (p. 536-538) ; icônes SAL et RF p. 586, 610 | — |
+| `ah64_ase` ASE | p. 625 (p. 625-626) | les menaces |
+
+### F-14B — écrans du RIO et du pilote
+
+Manuel Heatblur (*F-14 Manual*), seule source.
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `f14_tid` TID, TWS | écran p. 485 ; symboles p. 355-364 ; boîtier p. 158 et 366, commandes p. 353-354 | le pupitre sous le TID (DISPLAY, TID MODE, RANGE : un panneau à part) ; photos prises de biais, places ramenées par l'ovale du verre |
+| `f14_ddd` DDD, pulse-Doppler | boîtier et réseau gravé p. 408, commandes p. 346-349 ; échos p. 394-395 ; mode PD p. 350, 392 | les boutons de portée au-dessus (hors figure) ; la cible 4 de la p. 395, noyée dans le fouillis |
+| `f14_hsd` HSD, NAV (pilote) | p. 72-73 ; sous-mode TACAN d'après p. 264 | — ; un chevron « E » et une croix que le manuel n'explique pas sont dessinés tels que la figure les montre |
+
+### F-15C — écrans
+
+*F-15C DCS Flaming Cliffs Flight Manual* (EN) ; ses figures font foi, pas les phrases
+recopiées d'autres appareils.
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `f15_vsd` VSD, recherche LRS | fig. 54, p. 66-68 ; boîtier fig. 21, p. 35-36 ; portées 10 à 160 | — |
+| `f15_tews` TEWS | fig. 63, p. 78 (p. 76-80) | — |
+
+### Mirage F1 — radar Cyrano
+
+*DCS Mirage F1 Flight Manual* (Aerges), § 3.18, p. 108-130. Boîtier (`BEZELS.f1`) haut,
+flanc droit en courbe : places de la fig. 3-130, teintes de jour et plaques de la
+fig. 3-133 (p. 128).
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `mf1_search` scope, recherche (HA, 15 NM) | fig. 3-130, p. 126 | les échos parasites ; l'échelle ne change pas (places connues pour 15 NM seulement) |
+| `mf1_lock` scope, accroché | fig. 3-132, p. 127 (p. 116-117) | — ; figure prise de biais, redressée sur les trois traits gravés |
+
+### Su-25T — écrans
+
+*DCS World Su-25T Flight Manual* (EN).
+
+| Écran | Figure | Laissé de côté |
+|---|---|---|
+| `su25t_tv_lltv` écran TV, acquisition | fig. 27, p. 26 | l'image (fond vert à lignes de balayage) ; la graduation −90°, hors figure |
+| `su25t_tv_lock` écran TV, cible accrochée | fig. 28, p. 27 (redressée sur la fig. 27) | l'image ; une ligne pointillée que le manuel ne nomme pas est dessinée telle que la figure la montre |
+| `su25t_spo15` indicateur SPO-15 | fig. 13, p. 10 | — |

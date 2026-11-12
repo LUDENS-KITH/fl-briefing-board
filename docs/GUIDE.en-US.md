@@ -65,11 +65,13 @@ heading, size, color and name.
 The demo has an **Order of battle** board to try it. Each symbol's code and the DCS icon
 it reproduces: [docs/SYMBOLES.md](SYMBOLES.md) (in French).
 
-## Cockpit Displays — F/A-18C, F-16C, A-10C II
+## Cockpit Displays — eight modules
 
 Cockpit displays have their own palette tab: **Cockpit displays**, next to **Shapes**.
-Inside, one button per module (**F/A-18C**, **F-16C**, **A-10C II**), each with its
-pages and their symbols. The tab and module you pick are remembered. Everything is drawn
+Inside, one button per module (**F/A-18C**, **F-16C**, **A-10C II**, **AH-64D**,
+**F-14B**, **F-15C**, **Mirage F1**, **Su-25T**), each with its pages and their
+symbols, each display in its own cockpit's bezel (Hornet DDI, Viper MFD, A-10 MFCD,
+Apache MPD, Tomcat TID and DDD…). The tab and module you pick are remembered. Everything is drawn
 from the module's ED manual, and every element cites its page: [RADAR.md](RADAR.md)
 (in French). Each display follows the manual's figure: glass, scales, labels where they
 sit (stacked or boxed as in the cockpit), and the data fields (heading, airspeed,
@@ -123,6 +125,22 @@ aircraft.
 - **TAD symbols:** bullseye, waypoint (green) and active steerpoint (yellow), SPI,
   cursor, TGP diamond; and the SA Link: flight member (blue, with its number), SA Link
   member, friendly ground, mini-SPI.
+
+**Other pages and other modules**
+
+- **F/A-18C:** SA, HSI, AZ/EL, A/G SMS, A/G ATFLIR.
+- **F-16C:** HSD, SMS (inventory), A-G targeting pod, A-G FCR GM.
+- **A-10C II:** Maverick, STAT, A-A targeting pod, DSMS profiles.
+- **AH-64D:** TSD (NAV), FCR (GTM), WPN, ASE, in the MPD.
+- **F-14B:** RIO's TID and DDD, pilot's HSD.
+- **F-15C:** VSD in search, TEWS.
+- **Mirage F1:** Cyrano radar scope, in search and locked on.
+- **Su-25T:** TV display in acquisition and target locked, SPO-15.
+
+The F-16C HSD and GM, the F/A-18C SA and HSI and the F-15C VSD change scale with `↑`
+`↓`, like the TAD. What belongs to the figure's flight — route, threats, tracks — is not
+drawn: those are objects you place; a sensor image (pod, Maverick, radar map) is a flat
+fill.
 
 Prepare radar boards **without a map**: on a map, a display would follow the terrain
 as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" boards).
