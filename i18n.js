@@ -457,6 +457,7 @@ const EN = {
   'Écran FCR GM (air-sol)': 'FCR GM page (air-to-ground)',
   'Écran Maverick': 'Maverick page',
   'Écran STAT': 'STAT page',
+  'Écran VDI': 'VDI display',
   'Écran du pod (A-A)': 'Targeting pod page (A-A)',
   'Écran DSMS (profils)': 'DSMS page (profiles)',
   'Écrans MPD': 'MPD displays',

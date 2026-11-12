@@ -1103,8 +1103,9 @@ F-14B, F-15C, Mirage F1, Su-25T. Un fichier par module (`ecrans/`), mêmes règl
 lot 23 : places mesurées sur les figures, rien de deviné.
 
 **Fait le 2026-11-12 (v1.27).** 27 écrans, huit modules, sources écran par écran dans
-[RADAR.md](RADAR.md). **Écarts au plan** : le VDI du F-14B et la page 1 du STAT de
-l'A-10C II ne sont pas faits (figure non retenue, image illisible) ; les images de
+[RADAR.md](RADAR.md). **Écarts au plan** : la page 1 du STAT de
+l'A-10C II n'est pas faite (image illisible) ; le VDI du F-14B, laissé de côté faute de
+figure, a été ajouté au lot 29 d'après les fichiers du jeu ; les images de
 capteur sont des aplats ; le Su-33, le TF-51D et le F4U-1D, installés, n'ont pas d'écran
 multifonction à dessiner. **Pas encore fait** : la comparaison avec le jeu ouvert.
 

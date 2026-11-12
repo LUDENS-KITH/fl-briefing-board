@@ -404,13 +404,16 @@ WPN, TSD, M, A/C, VID, COM et `*`, molettes VID et BRT, sélecteur DAY / NT / MO
 
 ### F-14B — écrans du RIO et du pilote
 
-Manuel Heatblur (*F-14 Manual*), seule source.
+Manuel Heatblur (*F-14 Manual*), seule source pour le TID, le DDD et le HSD. Le VDI est
+dessiné d'après les fichiers du jeu eux-mêmes (`Mods/aircraft/F14/Cockpit/`, lecture seule) :
+ses Lua décrivent chaque symbole, sa texture en donne la forme.
 
 | Écran | Figure | Laissé de côté |
 |---|---|---|
 | `f14_tid` TID, TWS | écran p. 485 ; symboles p. 355-364 ; boîtier p. 158 et 366, commandes p. 353-354 | le pupitre sous le TID (DISPLAY, TID MODE, RANGE : un panneau à part) ; photos prises de biais, places ramenées par l'ovale du verre |
 | `f14_ddd` DDD, pulse-Doppler | boîtier et réseau gravé p. 408, commandes p. 346-349 ; échos p. 394-395 ; mode PD p. 350, 392 | les boutons de portée au-dessus (hors figure) ; la cible 4 de la p. 395, noyée dans le fouillis |
 | `f14_hsd` HSD, NAV (pilote) | p. 72-73 ; sous-mode TACAN d'après p. 264 | — ; un chevron « E » et une croix que le manuel n'explique pas sont dessinés tels que la figure les montre |
+| `f14_vdi` VDI (pilote), mode A/A | fichiers du jeu : `Scripts/VerticalDisplayIndicator/Indicator/` — `init.lua` l. 50-60 (page principale), `indication_page.lua` l. 300-645 (horizon, trapèzes, échelle de tangage A/A l. 478-527, index de roulis l. 537-546, bande de cap l. 566-645), `vdi_fov.lua` l. 162-168 (symbole avion), `overlay_mask.lua` l. 14-21 (graduations de roulis), `overlay.lua` l. 45-53 et `CRT_Mask.dds` (forme de l'image), `materials.lua` l. 22-36 (couleurs) ; formes relevées sur `Resources/IndicationTextures/VDI_Elements.tga` ; boîtier et rapport mrad/FOV sur la figure p. 69 du manuel Heatblur (commandes p. 69-71) ; valeurs d'exemple (inclinaison, cap, trapèzes) et teintes sur la capture du jeu de *Chuck's Guide* p. 52 | les symboles que le jeu cache dans ce mode (barre de distance, TACAN, barres d'atterrissage, té de guidage, croix de dégagement, arme) ; le rapport mrad/FOV et l'aspect ne sont dans aucun Lua (géométrie 3D) : mesurés, 118 mrad par unité, aspect 1 ; les deux images du jeu diffèrent de 3 % sur ce rapport |
 
 ### F-15C — écrans
 
