@@ -192,9 +192,11 @@ const SHAPES = {
     c.restore();
   }},
 
-  sam: { g:'sol', label:'Menace SA', tag:'SAM', tile:.26, hit:1.75, draw(c){
-    c.save(); c.setLineDash([.16, .13]);                     // cercle d'engagement
-    c.beginPath(); c.arc(0, 0, 1.6, 0, 7); c.stroke(); c.restore();
+  sam: { g:'sol', label:'Menace SA', tag:'SAM', tile:.26, hit:1.75, draw(c, o){
+    if (!(o && o.__rr)){                                     // cercle d'engagement, sauf au rayon relevé (lot 25)
+      c.save(); c.setLineDash([.16, .13]);
+      c.beginPath(); c.arc(0, 0, 1.6, 0, 7); c.stroke(); c.restore();
+    }
     c.beginPath();
     c.moveTo(-.55, .48); c.lineTo(0, -.62); c.lineTo(.55, .48);
     c.closePath(); body(c);

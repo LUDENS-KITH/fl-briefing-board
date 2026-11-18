@@ -3,6 +3,38 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.29 — 2026-11-18
+
+Lot 25 du [plan d'action](docs/PLAN.md) : **le cercle d'une menace importée dit sa vraie
+portée**, celle que DCS donne au système.
+
+### Ajouté
+- **Portées relevées dans le jeu** : `tools/portees_probe.lua`, posé le temps d'un
+  lancement de DCS, a demandé au jeu la fiche de chaque type (`ThreatRange`,
+  `ThreatRangeMin`, `DetectionRange` : les rayons des cercles de l'éditeur de mission et
+  de la carte F10) ; `portees.js` en garde 126 types — Buk 50 km, Kub 25 km, S-300PS
+  120 km, Patriot 100 km, Hawk 45 km, Tor 12 km, Osa 10,3 km, Shilka 2,5 km… Le relevé
+  brut est gardé dans `tools/data/fl_portees.tsv`.
+- **Cercle au rayon réel** : une défense aérienne importée d'une mission (.miz) porte la
+  plus grande portée de ses unités ; sur la carte ou sur la planche sans carte à
+  l'échelle, son cercle est tracé à ce rayon, étiqueté « portée max. DCS » — une
+  enveloppe, pas une zone de destruction. Un SAM posé à la main garde le cercle du
+  symbole ; un radar d'alerte n'a pas de cercle d'engagement.
+
+### Écart au plan
+- **Les navires** ne sont pas dans le relevé (il ne demandait que les véhicules) : ils
+  gardent leur symbole. Sur 40 missions réelles du poste, 182 menaces sur 210 prennent
+  leur rayon ; les 28 autres sont des navires et le poste de commandement du Buk.
+- L'altitude maximale n'est pas dans la fiche lue : le dôme de la coupe reste posé à la
+  main.
+
+### Vérifié en exécutant
+`node tools/test_miz.js` 124/124, 7 contrôles nouveaux rouges avant le code (table bien
+formée, Buk à 50 km, plus grande portée du groupe, radar d'alerte et type inconnu sans
+cercle, sans table). 2 scénarios au banc : rayon dessiné égal à 50 000 m sur la carte du
+Caucase et sur la planche sans carte de Normandie, étiquette écrite, SAM posé à la main
+inchangé. Banc complet en français et en anglais.
+
 ## v1.28 — 2026-11-12
 
 Lot 29 du [plan d'action](docs/PLAN.md) : **les deux écrans que les manuels ne

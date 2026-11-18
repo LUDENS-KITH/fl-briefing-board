@@ -42,6 +42,7 @@ const IDB_NAME = 'fl-briefing-board';      // octets des images de fond
 async function open(){                     // application neuve, tableau vide, aucune image gardée
   localStorage.removeItem(KEY);
   localStorage.removeItem(LANG_KEY);
+  localStorage.removeItem('fl-briefing-board-moving-ok');   // « Compris » d'un passage précédent du banc
   await new Promise(r => { const q = indexedDB.deleteDatabase(IDB_NAME); q.onsuccess = q.onerror = q.onblocked = () => r(); });
   return reload();
 }
@@ -705,6 +706,36 @@ test('Un .miz illisible est refusé ; le tableau reste', async (ok) => {
   a.drop(new a.w.File(['pas une archive'], 'faux.miz')); await pause(300);
   ok(a.s('boards.length === 1 && objs.length') === 1, `planches ${a.s('boards.length')}, objets ${a.s('objs.length')}`);
   ok(/mission|archive/i.test(a.toast()), `message : « ${a.toast()} »`);
+});
+
+/* ---------- lot 25 : le cercle de menace au rayon que DCS donne au système ---------- */
+
+/* le texte écrit sur la planche pendant un rendu : on écoute fillText, sans rien changer */
+const drawnTexts = a => a.s(`(() => { const seen = [], f = ctx.fillText;
+  ctx.fillText = function(t, ...r){ seen.push(String(t)); return f.call(this, t, ...r); };
+  try { drawFrame(); } finally { ctx.fillText = f; } return JSON.stringify(seen); })()`);
+const RANGE_TXT = () => (LANG === 'en' ? 'DCS max. range ' : 'portée max. DCS ') + '27.0 NM';
+
+test('Lot 25 : SAM importé sur la carte — cercle au rayon relevé dans DCS, étiqueté', async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Rioni Gate.miz', [['mission', MISSION('Caucasus')]])); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[1].click(); await pause(200);
+  ok(a.s('objs.find(o => o.k === "sam").rng') === 50000, `portée portée par le SAM : ${a.s('objs.find(o => o.k === "sam").rng')}`);
+  const m = a.s('(() => { const o = objs.find(o => o.k === "sam"); return ringPx(toScreen(o)) / (nmAt(o.y) * camK()) * 1852; })()');
+  ok(Math.abs(m - 50000) < 1, `rayon dessiné : ${Math.round(m)} m, attendu 50 000 m`);
+  const t = JSON.parse(drawnTexts(a));
+  ok(t.includes(RANGE_TXT()), `étiquette du cercle absente : ${t.filter(x => /DCS/.test(x)).join(' | ') || 'aucune'}`);
+});
+
+test('Lot 25 : planche sans carte — même rayon, à l’échelle de la planche ; SAM posé à la main inchangé', async (ok) => {
+  const a = await open();
+  a.drop(a.miz('Overlord.miz', [['mission', MISSION('Normandy')]])); await pause(400);
+  a.d.querySelectorAll('#mizlist button')[0].click(); await pause(200);
+  const m = a.s('(() => { const o = objs.find(o => o.k === "sam"); return ringPx(o) / nmPx * 1852; })()');
+  ok(Math.abs(m - 50000) < 1, `rayon dessiné : ${Math.round(m)} m, attendu 50 000 m`);
+  a.tile('sam'); a.click(300, 300); await pause(100);
+  ok(a.s('ringPx(objs[objs.length - 1])') === 0, 'un SAM posé à la main a pris une portée');
+  ok(JSON.parse(drawnTexts(a)).filter(x => x === RANGE_TXT()).length === 1, 'une seule étiquette de portée attendue');
 });
 
 /* ---------- lot 7 : animation entre phases ---------- */

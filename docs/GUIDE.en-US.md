@@ -179,6 +179,10 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
   it nowhere in plain files: they take their category's symbol — **Ground unit**, an empty
   frame, or ship —, and the import summary counts and names them. Air defences are still
   recognized by their type, as before.
+- An imported **air defence**'s circle is drawn at its **range in DCS** — the one of the
+  mission editor's and the F10 map's circle, the largest of the group's units —, labelled
+  "DCS max. range". It is an envelope, not a kill zone. A SAM placed by hand, an early
+  warning radar and ships keep the symbol's circle.
 - AI **tankers** and **AWACS**, recognized by their group's task in the editor
   ("Refueling", "AWACS"), come along too, from both sides: their **route** dashed, their
   **orbit** as a racetrack symbol, and the aircraft attached to it, labelled — "Texaco 11

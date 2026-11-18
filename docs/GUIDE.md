@@ -188,6 +188,10 @@ nouvelle planche.
   catégorie — **Unité terrestre**, cadre nu, ou navire —, et le bilan de l'import les
   compte et les nomme. Les défenses aériennes restent reconnues à leur type, comme
   avant.
+- Le cercle d'une **défense aérienne** importée est tracé à sa **portée dans DCS** — celle
+  du cercle de l'éditeur et de la carte F10, la plus grande des unités du groupe —,
+  étiqueté « portée max. DCS ». C'est une enveloppe, pas une zone de destruction. Un SAM
+  posé à la main, un radar d'alerte et les navires gardent le cercle du symbole.
 - Les **ravitailleurs** et les **AWACS** de l'IA, reconnus à la tâche de leur groupe dans
   l'éditeur (« Refueling », « AWACS »), viennent aussi, des deux camps : leur **route**
   en tireté, leur **orbite** en symbole d'hippodrome, et l'appareil accroché dessus,

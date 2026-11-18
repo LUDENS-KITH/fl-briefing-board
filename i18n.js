@@ -206,6 +206,7 @@ const EN = {
   'Char': 'Tank',
   'Radar': 'Radar',
   'Menace SA': 'SAM threat',
+  'portée max. DCS {0}': 'DCS max. range {0}',
   'Aéroport': 'Airfield',
   'Navire': 'Ship',
   'Porte-avions': 'Carrier',

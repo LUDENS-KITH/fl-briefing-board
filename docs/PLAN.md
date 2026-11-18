@@ -48,7 +48,7 @@ engagés.
 | 22 | Import `.miz` : les dessins de la carte F10 (traits, zones, flèches, textes) | proposition | M | — | v1.22 | fait le 2026-11-10 |
 | 23 | Écrans de bord : palette à part, un onglet par module ; F/A-18C et F-16C remis au plus près des figures du manuel | demande | M | — | v1.20 | fait le 2026-11-10 |
 | 24 | Écrans de bord : A-10C II (TAD, pod de désignation, DSMS) | demande | L | lot 23 | v1.23 | fait le 2026-11-10 |
-| 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | — | arrêté le 2026-11-10 : attend un relevé dans DCS |
+| 25 | Cercles de menace au rayon du système, lu dans les fichiers du jeu | proposition | L | — | v1.29 | fait le 2026-11-18 (relevé dans DCS) |
 | 26 | Recherche dans la palette | proposition | S | lot 19 | v1.25 | fait le 2026-11-10 |
 | 27 | Chaque écran dans le boîtier de son avion | constat | S | lot 23 | v1.26 | fait le 2026-11-11 |
 | 28 | Bibliothèque d'écrans : les autres pages et les autres modules | demande | L | lot 27 | v1.27 | fait le 2026-11-12 |
@@ -1069,6 +1069,16 @@ la table du lot 21) et les écrit dans un fichier ; `tools/build_portees.py` en 
 table `portees.js`. Essayés contre un faux DCS, pas encore dans le jeu : il faut **un
 lancement de DCS jusqu'au menu**, à l'accord de Vince. Ensuite : le cercle au rayon
 relevé, banc et tests rouges d'abord, comme prévu ci-dessus.
+
+**Fait le 2026-11-18 (v1.29).** Relevé fait dans DCS, sur le profil principal du poste,
+remis à l'identique ensuite : 126 types avec une portée (`portees.js`, relevé brut dans
+`tools/data/fl_portees.tsv`). Une défense aérienne importée prend la plus grande portée de
+ses unités et son cercle est tracé à ce rayon, étiqueté « portée max. DCS ». Le hook
+interroge aussi le jeu à chaque image (toutes les 5 s) : `onShowMainInterface` ne parvient
+pas aux hooks. **Écarts au plan** : les navires ne sont pas dans le relevé (véhicules
+seulement) et gardent leur symbole ; l'altitude maximale n'est pas dans la fiche ; le
+DF-21D du mod CurrentHill engage à 1 000 km dans le jeu, la borne de vraisemblance passe à
+2 000 km.
 
 #### Lot 26 — Recherche dans la palette
 
