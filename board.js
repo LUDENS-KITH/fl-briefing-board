@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.28', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.29', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -1023,7 +1023,7 @@ const natoBox = new WeakMap();                  // objet → encombrement du sym
 function paintNato(c, o, sh, spec, s){
   const k = Math.max(1, Math.hypot(c.getTransform().a, c.getTransform().b));
   const halo = dark && !o.mini ? 'rgba(230,237,245,.9)' : '';
-  if (sh.ring && !o.mini){                      // cercle d'engagement, comme la silhouette du SAM
+  if (sh.ring && !o.mini && !ringPx(o)){        // cercle d'engagement, comme la silhouette du SAM
     c.save(); c.lineWidth = o.w || 4; c.setLineDash([.16 * s, .13 * s]);
     c.beginPath(); c.arc(o.x, o.y, 1.6 * s, 0, 7); c.stroke(); c.restore();
   }
@@ -1046,7 +1046,7 @@ function paintNato(c, o, sh, spec, s){
 const RU_K = .65;
 function paintRu(c, o, sh, s){
   const halo = dark && !o.mini ? 'rgba(230,237,245,.9)' : '';
-  if (sh.ring && !o.mini){                      // cercle d'engagement, comme en OTAN
+  if (sh.ring && !o.mini && !ringPx(o)){        // cercle d'engagement, comme en OTAN
     c.save(); c.lineWidth = o.w || 4; c.setLineDash([.16 * s, .13 * s]);
     c.beginPath(); c.arc(o.x, o.y, 1.6 * s, 0, 7); c.stroke(); c.restore();
   }
@@ -1063,9 +1063,29 @@ function paintRu(c, o, sh, s){
   natoBox.set(o, { bottom: u * (sh.ru.n || 32) / 32 });
 }
 
+/* lot 25 : une menace importée d'une mission porte la portée que DCS donne à ses unités
+   (rng, en mètres : le rayon du cercle de l'éditeur et de la carte F10). Son cercle se
+   dessine alors à ce rayon, sur la carte ou la planche étalonnée — une enveloppe, pas une
+   zone de destruction ; sans échelle, il reste le cercle du symbole. En pixels écran. */
+function ringPx(o){
+  if (!(o.rng > 0 && o.rng <= 2e6) || o.v === 'p' || o.mini) return 0;
+  const per = cam ? nmAt((o.__src || o).y) * camK() : nmPx;
+  return per ? o.rng / 1852 * per : 0;
+}
+function paintRange(c, o, r){
+  c.save();
+  c.globalAlpha = .08; c.beginPath(); c.arc(o.x, o.y, r, 0, 7); c.fill();
+  c.globalAlpha = .55; c.lineWidth = 6; c.strokeStyle = BG(); c.stroke();   // liseré : lisible sur le relief
+  c.globalAlpha = 1; c.lineWidth = 3; c.strokeStyle = o.c; c.setLineDash([12, 8]); c.stroke();
+  c.restore();
+  label(c, o.x, o.y - r - 4, tr('portée max. DCS {0}', fmtNm(o.rng / 1852)), o.c, 'bottom');
+}
+
 function paintSym(c, o){
   const sh = SHAPES[o.k]; if (!sh) return;
   const s = SIZE * (o.s || 1), side = o.v === 'p' && sh.side;
+  const rr = ringPx(o);
+  if (rr) paintRange(c, o, rr);
   const spec = natoSpec(o), rspec = !spec && ruSpec(o);
   if (spec || rspec){
     if (spec) paintNato(c, o, sh, spec, s); else paintRu(c, o, sh, s);
@@ -1084,7 +1104,7 @@ function paintSym(c, o){
   c.scale(s, s);
   c.lineWidth = (o.w || 4) / s;
   c.lineJoin = 'round'; c.lineCap = 'round';
-  if (side) sh.side(c); else sh.draw(c, o);
+  if (side) sh.side(c); else sh.draw(c, rr ? { ...o, __rr: rr } : o);
   if (sh.stem){                              // seule sa tige suit le cap
     c.save(); c.rotate(o.a || 0);
     c.beginPath(); c.moveTo(0, -sh.stem[0]); c.lineTo(0, -sh.stem[1]); c.stroke();
@@ -2432,8 +2452,12 @@ function importMission(m, f, base){
   }
   const sym = (k, q, c, extra) => { const [x, y] = pos(q); return { t:'sym', k, x, y, a:0, s: SHAPES[k].s0 || 1, c, w:4, n:0, ...extra }; };
   /* chaque groupe à la famille de son unité principale (miz.js) ; les menaces par-dessus */
-  const out = [...grd, ...m.threats].map(t => sym(SHAPES[t.k] ? t.k : THREAT_SYM[t.kind], t,
-                                                    SIDE_COL[t.side] || SIDE_COL.neutrals, { lbl: groupLabel(t) }));
+  const table = typeof PORTEES !== 'undefined' ? PORTEES : null;          // lot 25 : relevée dans DCS
+  const out = [...grd, ...m.threats].map(t => {
+    const rng = m.threats.includes(t) ? MIZ.threatRange(t.types, table) : 0;
+    return sym(SHAPES[t.k] ? t.k : THREAT_SYM[t.kind], t, SIDE_COL[t.side] || SIDE_COL.neutrals,
+               { lbl: groupLabel(t), ...(rng && { rng }) });
+  });
   if (be) out.push(sym('bullseye', be, '#D1A94A'));
   /* le premier point porte le nom du vol : l'étiquette de l'appareil, posé au même endroit, le cacherait */
   wps.forEach((q, i) => {

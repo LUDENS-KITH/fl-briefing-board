@@ -461,6 +461,17 @@ const soutien = `mission =
   await refus('numéro en double', () => MIZ.withDtc(src, uzi.ref, [PTS[0], PTS[0]]), /double/);
   await refus('vol introuvable', () => MIZ.withDtc(src, 'blue/1/plane/9', PTS), /vol/);
 
+  /* lot 25 : la portée d'une menace, celle que DCS donne à ses unités (ThreatRange,
+     relevé dans le jeu par tools/portees_probe.lua) ; la plus grande du groupe */
+  const { PORTEES } = require(path.join(__dirname, '..', 'portees.js'));
+  eq('table : chaque type a trois rayons entiers', Object.values(PORTEES).every(v => v.length === 3 && v.every(x => Number.isInteger(x) && x >= 0)), true);
+  eq('table : le Buk engage à 50 km dans le jeu', PORTEES['SA-11 Buk LN 9A310M1'][0], 50000);
+  eq('portée : la plus grande du groupe', MIZ.threatRange(['SA-11 Buk SR 9S18M1', 'SA-11 Buk LN 9A310M1', 'Ural-375'], PORTEES), 50000);
+  eq('portée : Kub et Shilka', MIZ.threatRange(['ZSU-23-4 Shilka', 'Kub 2P25 ln'], PORTEES), 25000);
+  eq("portée : un radar d'alerte ne fait pas de cercle d'engagement", MIZ.threatRange(['1L13 EWR'], PORTEES), 0);
+  eq('portée : type inconnu', MIZ.threatRange(['Pas un type'], PORTEES), 0);
+  eq('portée : sans table', MIZ.threatRange(['Kub 2P25 ln'], undefined), 0);
+
   console.log(`${n} vérifications, ${bad} en échec`);
   if (bad) process.exit(1);
 })().catch(e => { console.log('ERREUR', e.message); process.exit(1); });

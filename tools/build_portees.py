@@ -11,12 +11,12 @@ l'encyclopédie du jeu engage de 3 à 35 km).
 
 Écrit portees.js à la racine : type → [portée max., portée min., détection], en mètres,
 0 quand le jeu ne donne rien. Refuse un fichier vide ou une valeur hors de toute
-vraisemblance (au-delà de 500 km).
+vraisemblance (au-delà de 2 000 km : le DF-21D du mod CurrentHill engage à 1 000 km).
 """
 import csv, io, json, os, sys
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-MAX_M = 500_000
+MAX_M = 2_000_000
 
 
 def read(path):

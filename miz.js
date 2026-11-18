@@ -491,7 +491,15 @@ const MIZ = (() => {
     return { bytes: zipBytes([...next, dtc]), cartridge: name, units: units.length };
   }
 
-  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, typeFamily, WYPT_MAX };
+  /* lot 25 : la portée d'engagement d'un groupe, en mètres — la plus grande de ses unités
+     dans la table relevée dans DCS (portees.js : le ThreatRange de leur fiche, le rayon du
+     cercle de l'éditeur et de la carte F10). 0 : le jeu n'en donne pas, pas de cercle. */
+  function threatRange(types, table){
+    let m = 0;
+    if (table) for (const t of types || []){ const v = table[t]; if (v && v[0] > m) m = v[0]; }
+    return m;
+  }
+  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, typeFamily, threatRange, WYPT_MAX };
 })();
 
 if (typeof module !== 'undefined') module.exports = MIZ;

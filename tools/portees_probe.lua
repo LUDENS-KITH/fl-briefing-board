@@ -77,4 +77,10 @@ end
 -- au menu principal (la base des unités est chargée), ou au chargement d'une mission
 local done = false
 local function essai() if not done then local ok, r = pcall(releve); done = ok and r end end
-DCS.setUserCallbacks({ onShowMainInterface = essai, onMissionLoadEnd = essai })
+local nextTry = 0
+local function parImage()                       -- le signal du menu n'arrive pas toujours :
+  if done then return end                       -- on essaie aussi toutes les 5 s au menu
+  local t = DCS.getRealTime()
+  if t >= nextTry then nextTry = t + 5; essai() end
+end
+DCS.setUserCallbacks({ onShowMainInterface = essai, onMissionLoadEnd = essai, onSimulationFrame = parImage })
