@@ -1620,6 +1620,46 @@ test('Symboles : ✚ Nouveau garde le réglage ; la mission importée en OTAN pr
   ok(a.s('natoSpec(objs.find(o => o.k === "wp"))') === null, 'un waypoint a changé de dessin');
 });
 
+/* ---------- lot 30 : les missiles air-air, rangés par Fox ---------- */
+
+test('Missiles : un onglet, trois groupes Fox 1, 2, 3 ; le missile choisi se pose, son nom dessous', async (ok) => {
+  const a = await open();
+  const tab = a.d.querySelector('#paltabs [data-pal="missiles"]');
+  ok(!!tab && tab.textContent === 'Missiles', `onglet Missiles : ${tab && tab.textContent}`);
+  if (!tab) return;
+  ok(!shown(a, 'msl_aim_120c') && shown(a, 'fighter'), 'à l’ouverture, les missiles sont parmi les formes');
+  a.button('#paltabs [data-pal="missiles"]');
+  const titres = [...a.d.querySelectorAll('#pal .grp')].filter(h => h.offsetParent).map(h => h.textContent);
+  const want = LANG === 'en' ? ['Fox 1 · semi-active radar', 'Fox 2 · infrared', 'Fox 3 · active radar']
+                             : ['Fox 1 · radar semi-actif', 'Fox 2 · infrarouge', 'Fox 3 · radar actif'];
+  ok(JSON.stringify(titres) === JSON.stringify(want), `groupes : ${titres.join(' | ')}`);
+  ok(a.d.getElementById('palmods').hidden, 'les modules des écrans restent affichés');
+  const sous = (k, f) => { const t = a.d.querySelector(`.tile[data-k="${k}"]`); return !!t && t.parentElement.previousElementSibling.textContent.startsWith('Fox ' + f); };
+  ok(sous('msl_aim_7m', 1) && sous('msl_aim_9x', 2) && sous('msl_r_73', 2) && sous('msl_aim_120c', 3) && sous('msl_r_77', 3),
+     'AIM-7M, AIM-9X, R-73, AIM-120C ou R-77 hors de son Fox');
+  ok(shown(a, 'msl_aim_120c') && !shown(a, 'fighter') && !shown(a, 'fa18_rws'), 'onglet Missiles : autre chose que des missiles');
+  a.tile('msl_aim_120c'); a.click(520, 360);
+  ok(a.s('objs.length === 1 && objs[0].k') === 'msl_aim_120c', 'le missile choisi ne se pose pas');
+  const t = JSON.parse(a.s(`(() => { const seen = [], f = ctx.fillText;
+    ctx.fillText = function(t, ...r){ seen.push(String(t)); return f.call(this, t, ...r); };
+    try { drawFrame(); } finally { ctx.fillText = f; } return JSON.stringify(seen); })()`));
+  ok(t.includes('AIM-120C') && t.includes('3'), `textes dessinés : ${t.join(' | ')}`);
+});
+
+test('Missiles : la recherche trouve « Fox 2 » et « AIM-120 » ; l’onglet se garde à la réouverture', async (ok) => {
+  let a = await open();
+  palq(a, 'Fox 2');
+  let s = shownTiles(a);
+  ok(s.includes('msl_aim_9m') && s.includes('msl_r_73') && !s.includes('msl_aim_120c') && !s.includes('msl_aim_7m'), `Fox 2 : ${s.join(', ')}`);
+  palq(a, 'AIM-120');
+  s = shownTiles(a);
+  ok(s.includes('msl_aim_120b') && s.includes('msl_aim_120c') && !s.includes('msl_aim_9m'), `AIM-120 : ${s.join(', ')}`);
+  palq(a, '');
+  a.button('#paltabs [data-pal="missiles"]');
+  a = await reload();
+  ok(shown(a, 'msl_aim_120c') && !shown(a, 'fighter'), 'la réouverture ne revient pas à l’onglet Missiles');
+});
+
 /* ---------- lot 26 : recherche dans la palette ---------- */
 const palq = (a, v) => { const i = a.d.getElementById('palq'); i.value = v; i.dispatchEvent(new a.w.Event('input', { bubbles: true })); };
 const shownTiles = a => [...a.d.querySelectorAll('#pal .tile')].filter(t => t.offsetParent).map(t => t.dataset.k);
@@ -1741,8 +1781,8 @@ const SCR = (a, kind, x, y) => { const b = a.s(`BEZELS.${kind}`), r = 153 * b.k;
 test('Écrans de bord : la palette les range à part, un onglet par module', async (ok) => {
   const a = await open();
   const tabs = a.d.querySelectorAll('#paltabs button');
-  ok(tabs.length === 2, `onglets de la palette : ${tabs.length}`);
-  if (tabs.length !== 2) return;
+  ok(tabs.length === 3, `onglets de la palette : ${tabs.length}`);           // Formes, Écrans de bord, Missiles (lot 30)
+  if (tabs.length !== 3) return;
   ok(shown(a, 'fighter') && !shown(a, 'fa18_rws') && !shown(a, 'f16_rws'), 'à l\'ouverture, les écrans sont parmi les formes');
   a.button('#paltabs [data-pal="ecrans"]');
   const mods = [...a.d.querySelectorAll('#palmods button')].map(b => b.textContent);

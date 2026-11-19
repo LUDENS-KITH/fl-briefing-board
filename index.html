@@ -68,6 +68,7 @@
   #paltabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:2px 0 8px}
   #paltabs button, #palmods button{font:inherit;font-size:10.5px;line-height:1.15;padding:5px 3px;border-radius:6px;
     border:1px solid var(--fl-line, #2A3642);background:transparent;color:var(--fl-silver-1);cursor:pointer}
+  #paltabs button[data-pal=missiles]{grid-column:1/-1}          /* lot 30 : le troisième onglet, sur sa ligne */
   #paltabs button.on, #palmods button.on{background:rgba(47,140,255,.2);border-color:var(--fl-blue-2);color:#fff}
   #palmods{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px}
   #palmods button{flex:1 1 auto}
@@ -375,11 +376,12 @@
   </div>
 </div>
 
-<script src="i18n.js?v=1.11"></script>
+<script src="i18n.js?v=1.12"></script>
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
 <script src="vendor/milsymbol-3.0.4.js"></script>
-<script src="symbols.js?v=0.18"></script>
+<script src="missiles.js?v=1.0"></script>
+<script src="symbols.js?v=0.19"></script>
 <script src="ecrans/fa18.js?v=1.0"></script>
 <script src="ecrans/f16.js?v=1.0"></script>
 <script src="ecrans/a10.js?v=1.1"></script>
@@ -393,7 +395,7 @@
 <script src="mapclass.js?v=1.1"></script>
 <script src="portees.js?v=1.0"></script>
 <script src="miz.js?v=1.6"></script>
-<script src="board.js?v=1.29"></script>
+<script src="board.js?v=1.30"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

@@ -130,6 +130,8 @@ relu à côté des icônes du jeu, agrandies, le 2026-11-10.
 - **Aéroport** : la carte DCS dessine les aérodromes elle-même, sans icône du thème OTAN.
 - **Armement et effets** (missile, bombe, explosion, abattu, éjection, leurres) : la
   norme a un code pour le missile de croisière (0040), pas pour ces gestes de briefing.
+  Les missiles de l'onglet Missiles (lot 30) non plus : ils gardent leur silhouette et le
+  chiffre de leur Fox dans toutes les bibliothèques.
 - **Marqueurs tactiques** (ami, hostile, inconnu, waypoint, objectif, orbite, bullseye,
   IP) : ce sont des repères du briefing, pas des unités.
 - **Écrans de bord** : leur symbologie est celle du module ([RADAR.md](RADAR.md)).

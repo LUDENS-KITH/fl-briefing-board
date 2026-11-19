@@ -1,0 +1,51 @@
+name	user_name	Head_Type	fichier
+AIM_120	AIM-120B	2	CoreMods/aircraft/AircraftWeaponPack/aim120_family.lua
+AIM_120C	AIM-120C	2	CoreMods/aircraft/AircraftWeaponPack/aim120_family.lua
+AIM_54A_Mk47	AIM-54A-Mk47	2	CoreMods/aircraft/F14/Entry/Weapons.lua
+AIM_54A_Mk60	AIM-54A-Mk60	2	CoreMods/aircraft/F14/Entry/Weapons.lua
+AIM_54C_Mk47	AIM-54C-Mk47	2	CoreMods/aircraft/F14/Entry/Weapons.lua
+AIM_54C_Mk60	AIM-54C-Mk60	2	CoreMods/aircraft/F14/Entry/Weapons.lua
+AIM-7E	AIM-7E	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+HB-AIM-7E	AIM-7E	6	CoreMods/aircraft/F-4E/Entry/Weapons.lua
+AIM-7E-2	AIM-7E-2	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+HB-AIM-7E-2	AIM-7E-2	6	CoreMods/aircraft/F-4E/Entry/Weapons.lua
+AIM-7F	AIM-7F	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+AIM_7	AIM-7M	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+AIM-7MH	AIM-7MH	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+AIM-7P	AIM-7P	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+GAR-8	AIM-9B	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9E	AIM-9E	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9J	AIM-9J	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9JULI	AIM-9JULI	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9L	AIM-9L	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM_9	AIM-9M	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9P	AIM-9P	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9P3	AIM-9P3	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM-9P5	AIM-9P5	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+AIM_9X	AIM-9X	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+OH58D_FIM_92	FIM-92	1	CoreMods/aircraft/OH-58D/OH58D_Weapons.lua
+PL-12	PL-12 AAM	2	CoreMods/aircraft/ChinaAssetPack/Entries/Loadouts/mils_sd10.lua
+PL-5EII	PL-5EII	1	CoreMods/aircraft/ChinaAssetPack/Entries/Loadouts/mils_pl5.lua
+PL-8A	PL-8A	1	CoreMods/aircraft/ChinaAssetPack/Entries/Loadouts/mils_pl8.lua
+PL-8B	PL-8B	1	CoreMods/aircraft/ChinaAssetPack/Entries/Loadouts/mils_pl8.lua
+R-13M	R-13M	1	CoreMods/aircraft/AircraftWeaponPack/R3_family.lua
+R-13M1	R-13M1	1	CoreMods/aircraft/AircraftWeaponPack/R3_family.lua
+P_27PE	R-27ER	6	CoreMods/aircraft/AircraftWeaponPack/r27_family.lua
+P_27TE	R-27ET	1	CoreMods/aircraft/AircraftWeaponPack/r27_family.lua
+P_27P	R-27R	6	CoreMods/aircraft/AircraftWeaponPack/r27_family.lua
+P_27T	R-27T	1	CoreMods/aircraft/AircraftWeaponPack/r27_family.lua
+R-3R	R-3R	6	CoreMods/aircraft/AircraftWeaponPack/R3_family.lua
+R-3S	R-3S	1	CoreMods/aircraft/AircraftWeaponPack/R3_family.lua
+R-60	R-60 (AA-8 Aphid)	1	CoreMods/aircraft/AircraftWeaponPack/R_60.lua
+P_60	R-60M (AA-8 Aphid-B)	1	CoreMods/aircraft/AircraftWeaponPack/R_60.lua
+R_530F_EM	R530F EM	6	CoreMods/aircraft/AircraftWeaponPack/Matra_A2A.lua
+R_530F_IR	R530F IR	1	CoreMods/aircraft/AircraftWeaponPack/Matra_A2A.lua
+R_550_M1	R550 Magic 1	1	CoreMods/aircraft/AircraftWeaponPack/Matra_A2A.lua
+R_550	R550 Magic 2	1	CoreMods/aircraft/AircraftWeaponPack/Matra_A2A.lua
+Rb 24	Rb 24	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+Rb 24J	Rb 24J	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+Rb 74	Rb 74	1	CoreMods/aircraft/AircraftWeaponPack/aim9_family.lua
+SeaSparrow	RIM-7M	6	CoreMods/aircraft/AircraftWeaponPack/aim7_family.lua
+Super_530D	S530D	6	CoreMods/aircraft/AircraftWeaponPack/Matra_A2A.lua
+Super_530F	S530F	6	CoreMods/aircraft/AircraftWeaponPack/Matra_A2A.lua
+SD-10	SD-10A AAM	2	CoreMods/aircraft/ChinaAssetPack/Entries/Loadouts/mils_sd10.lua

@@ -3,6 +3,37 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.30 — 2026-11-19
+
+Lot 30 du [plan d'action](docs/PLAN.md) : **un onglet Missiles, rangé par Fox**. Demande
+de Vince : « un onglet pour les missiles et leurs classification Fox 1/2/3 ».
+
+### Ajouté
+- **Onglet Missiles** dans la palette, à côté de Formes et Écrans de bord : 56 missiles
+  air-air de DCS en trois groupes — **Fox 1** (radar semi-actif : AIM-7, R-27R/ER,
+  Super 530…), **Fox 2** (infrarouge : AIM-9, R-73, R-27T/ET, Magic, PL-5, PL-8…),
+  **Fox 3** (radar actif : AIM-120, AIM-54, R-77, MICA EM, PL-12, SD-10). Chaque vignette
+  porte le chiffre de son Fox, qui reste droit quel que soit le cap ; posé, le missile
+  écrit son nom dessous. La recherche trouve « Fox 2 » ou « AIM-120 ». L'onglet choisi se
+  garde.
+- **Classement tiré du jeu** : `tools/build_missiles.py` lit l'autodirecteur
+  (`Head_Type`) que déclarent les fichiers d'armement lisibles de l'installation ;
+  47 missiles sont classés ainsi (relevé dans `tools/data/missiles_dcs.tsv`).
+
+### Écart au plan
+- Neuf missiles ont leur fiche dans la base chiffrée du jeu : R-73, R-77, MICA IR et EM,
+  R-24R/T, R-40R/T, R-33. Ils sont classés d'après leur désignation dans le jeu
+  (`wsTypes.lua` : « MICA, IR », « MICA, AR », « PBB-AE »…, lettre R ou T des
+  désignations russes) ; la table le dit pour chacun.
+
+### Vérifié en exécutant
+`node tools/test_missiles.js` 468/468, rouge avant le code (61 échecs) : table sans
+doublon, Fox de chaque missile du jeu égal à ce que déclare son fichier, exemples
+attendus (AIM-7M Fox 1, AIM-9X Fox 2, AIM-120C Fox 3…), Sea Sparrow écarté, une vignette
+par missile sous son Fox, dessin sans erreur. 2 scénarios au banc : onglet, trois
+groupes dans la langue choisie, missile posé avec son nom et son chiffre, recherche,
+onglet gardé à la réouverture ; le scénario des onglets attend désormais trois onglets.
+
 ## v1.29 — 2026-11-18
 
 Lot 25 du [plan d'action](docs/PLAN.md) : **le cercle d'une menace importée dit sa vraie

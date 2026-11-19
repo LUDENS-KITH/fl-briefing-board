@@ -1418,3 +1418,35 @@ Object.assign(SHAPES, {
   }, { over:true }),
 });
 GROUPS.push(['a10', 'Écrans MFCD', 'A-10C II'], ['a10s', 'Symboles du TAD et du pod', 'A-10C II']);
+
+/* ================= missiles air-air, rangés par guidage (lot 30) =================
+   La table missiles.js, relevée dans les fichiers de DCS (tools/build_missiles.py), dit le
+   guidage de chaque missile dans la phraséologie des pilotes : Fox 1 radar semi-actif,
+   Fox 2 infrarouge, Fox 3 radar actif. Chaque missile a sa vignette : la silhouette du
+   missile, le chiffre de son Fox dans un rond, son nom écrit dessous une fois posé. Ces
+   groupes vont dans le troisième onglet de la palette, « Missiles » (quatrième champ de
+   GROUPS). Un nom de missile est un nom propre : il ne se traduit pas (proper). */
+const ARMS = new Set(['arm', 'fox1', 'fox2', 'fox3']);          // l'armement, dans la coupe
+if (typeof MISSILES !== 'undefined'){
+  const foxDraw = f => (c, o) => {
+    SHAPES.missile.draw(c, o);
+    c.save();
+    c.setLineDash([]);
+    c.translate(.66, -.46); c.rotate(-((o && o.a) || 0));      // le chiffre reste droit, quel que soit le cap
+    c.beginPath(); c.arc(0, 0, .34, 0, 7); c.stroke();
+    c.font = '700 .5px ui-sans-serif, system-ui, sans-serif';
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(String(f), 0, .02);
+    c.restore();
+  };
+  const used = new Set();
+  for (const [nom, f] of MISSILES){
+    let k = 'msl_' + nom.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    while (used.has(k)) k += '_';
+    used.add(k);
+    SHAPES[k] = { g:'fox' + f, label:nom, tag:nom, proper:true, fox:f, s0:.95, tile:.42, ldy:1.55, draw: foxDraw(f) };
+  }
+  GROUPS.push(['fox1', 'Fox 1 · radar semi-actif', null, 'missiles'],
+              ['fox2', 'Fox 2 · infrarouge', null, 'missiles'],
+              ['fox3', 'Fox 3 · radar actif', null, 'missiles']);
+}

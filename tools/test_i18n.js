@@ -83,12 +83,13 @@ for (const k of ['côté:G', 'côté:D', 'cap:V', 'déclinaison:O']) ok(own(k), 
 const symbols = read('symbols.js');
 const sandbox = { console };
 require('vm').createContext(sandbox);
+require('vm').runInContext(read('missiles.js'), sandbox);   // les missiles par Fox (lot 30), chargés avant symbols.js
 require('vm').runInContext(symbols, sandbox);
 /* les écrans de bord par module (lot 28), dans l'ordre où la page les charge */
 const ECRANS = [...read('index.html').matchAll(/<script src="(ecrans\/[^"?]+)/g)].map(m => m[1]);
 for (const f of ECRANS) require('vm').runInContext(read(f), sandbox, { filename: f });
 require('vm').runInContext('this.__S = SHAPES; this.__G = GROUPS;', sandbox);
-const labels = Object.values(sandbox.__S).map(s => s.label);
+const labels = Object.values(sandbox.__S).filter(s => !s.proper).map(s => s.label);   // un nom de missile ne se traduit pas
 ok(labels.length >= 40, `seulement ${labels.length} noms de formes lus`);
 for (const s of labels) ok(own(s), `forme sans traduction : « ${s} »`);
 /* le repère d'une famille DCS vue en silhouettes (lot 19) s'affiche lui aussi */

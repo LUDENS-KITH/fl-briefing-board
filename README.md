@@ -51,6 +51,8 @@
   Mirage F1 et Su-25T : 37 pages (radar, SA, HSI, HSD, TSD, TAD, pods, emports, alerte
   radar…), chacune dans le boîtier de son poste, dessinées d'après le manuel de chaque
   module, page par page.
+- **Missiles par Fox** — 56 missiles air-air de DCS rangés Fox 1, Fox 2, Fox 3, d'après
+  l'autodirecteur que déclarent les fichiers du jeu.
 - **Export kneeboard DCS** — la planche, ou le cadre qu'on y pose, avec sa coupe et ses
   caps, aux proportions de la planchette du jeu.
 - **Un fichier de briefing** — tout le tableau, images comprises, à préparer sur un poste

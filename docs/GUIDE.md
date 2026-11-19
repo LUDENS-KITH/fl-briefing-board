@@ -65,6 +65,22 @@ place, son cap, sa taille, sa couleur et son nom.
 La démo a une planche **Ordre de bataille** pour essayer. Le code de chaque symbole et
 l'icône DCS qu'il reproduit : [docs/SYMBOLES.md](SYMBOLES.md).
 
+## Missiles — Fox 1, 2, 3
+
+Troisième onglet de la palette : **Missiles**. Les missiles air-air de DCS y sont rangés
+par guidage, comme on les annonce à la radio :
+
+- **Fox 1** — radar semi-actif : l'avion tireur éclaire la cible jusqu'à l'impact
+  (AIM-7, R-27R et ER, Super 530…).
+- **Fox 2** — infrarouge (AIM-9, R-73, R-27T et ET, Magic, MICA IR…).
+- **Fox 3** — radar actif : le missile se guide seul en fin de course (AIM-120, AIM-54,
+  R-77, MICA EM, PL-12, SD-10).
+
+Chaque vignette porte le chiffre de son Fox ; posé, le missile écrit son nom dessous et
+se tourne comme une forme. La recherche trouve « Fox 3 » ou « AIM-120 ». Le classement
+vient des fichiers du jeu ; neuf missiles dont la fiche est chiffrée (R-73, R-77, MICA…)
+sont classés d'après leur désignation dans le jeu.
+
 ## Écrans de bord — huit modules
 
 Les écrans ont leur onglet dans la palette : **Écrans de bord**, à côté de **Formes**.

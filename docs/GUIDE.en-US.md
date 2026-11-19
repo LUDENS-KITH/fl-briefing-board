@@ -65,6 +65,22 @@ heading, size, color and name.
 The demo has an **Order of battle** board to try it. Each symbol's code and the DCS icon
 it reproduces: [docs/SYMBOLES.md](SYMBOLES.md) (in French).
 
+## Missiles — Fox 1, 2, 3
+
+Third palette tab: **Missiles**. DCS air-to-air missiles are sorted by guidance, the way
+you call them on the radio:
+
+- **Fox 1** — semi-active radar: the shooter illuminates the target until impact
+  (AIM-7, R-27R and ER, Super 530…).
+- **Fox 2** — infrared (AIM-9, R-73, R-27T and ET, Magic, MICA IR…).
+- **Fox 3** — active radar: the missile guides itself in the terminal phase (AIM-120,
+  AIM-54, R-77, MICA EM, PL-12, SD-10).
+
+Each tile carries its Fox number; once placed, the missile writes its name below and
+rotates like any shape. Search finds "Fox 3" or "AIM-120". The classification comes from
+the game's files; nine missiles whose data is encrypted (R-73, R-77, MICA…) are sorted
+by their designation in the game.
+
 ## Cockpit Displays — eight modules
 
 Cockpit displays have their own palette tab: **Cockpit displays**, next to **Shapes**.
