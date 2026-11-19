@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.29', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.30', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -1115,7 +1115,7 @@ function paintSym(c, o){
   /* dans la coupe, tout s'écrit au-dessus : dessous, c'est le sol. Un aéronef ou une
      munition y ajoute son altitude — « HAWG 1-1 · 1 000 ft » */
   if (o.v === 'p' && !o.mini){
-    const alt = (sh.g === 'air' || sh.g === 'arm') ? altText(altAt(o.y)) : '';
+    const alt = (sh.g === 'air' || ARMS.has(sh.g)) ? altText(altAt(o.y)) : '';
     const txt = [o.lbl, alt].filter(Boolean).join(' · ');
     if (txt) label(c, o.x, o.y - s * .95 - 16, txt, o.c);
     if (sh.num){
@@ -1625,7 +1625,7 @@ function endPointer(){
     /* dans la coupe, altitudes calées sur 500 ft : un briefing parle en niveaux ronds */
     const o = drag.o || {};                             // un glisser de carte n'a pas d'objet
     if (o.v === 'p' && drag.saved){
-      if (o.t === 'sym' && ['air', 'arm'].includes((SHAPES[o.k] || {}).g)) o.y = snapAlt(o.y);
+      if (o.t === 'sym' && ((SHAPES[o.k] || {}).g === 'air' || ARMS.has((SHAPES[o.k] || {}).g))) o.y = snapAlt(o.y);
       if (o.t === 'block'){ o.y1 = snapAlt(o.y1); o.y2 = snapAlt(o.y2); }
       if (o.t === 'dome') o.y2 = Math.min(snapAlt(o.y2), groundY() - 4);
     }
@@ -1821,8 +1821,10 @@ addEventListener('paste', e => {
    Refaite quand la bibliothèque change : ses vignettes dessinent la bibliothèque choisie,
    et les familles DCS sans silhouette n'y sont qu'en OTAN (lot 19).
    Deux onglets (lot 23) : les formes, et les écrans de bord, rangés par module. Un groupe
-   d'écrans porte son module en troisième champ de GROUPS. Toutes les vignettes restent
-   dans la page ; l'onglet et le module choisis décident lesquelles se voient. */
+   d'écrans porte son module en troisième champ de GROUPS. Un troisième onglet (lot 30),
+   les missiles rangés par Fox, porte son nom en quatrième champ. Toutes les vignettes
+   restent dans la page ; l'onglet et le module choisis décident lesquelles se voient. */
+const PAL_TABS = [['formes', 'Formes'], ['ecrans', 'Écrans de bord'], ['missiles', 'Missiles']];
 let palTab = 'formes', palMod = null;
 const MODULES = [...new Set(GROUPS.map(g => g[2]).filter(Boolean))];
 
@@ -1858,7 +1860,7 @@ function applyPal(){
     const mod = grid.dataset.mod, h = grid.previousElementSibling;
     let any = 0;
     for (const t of grid.children){ const on = !hits || hits.has(t.dataset.k); t.hidden = !on; if (on) any++; }
-    const off = hits ? !any : mod ? palTab !== 'ecrans' || mod !== palMod : palTab !== 'formes';
+    const off = hits ? !any : grid.dataset.tab !== palTab || (mod && mod !== palMod);
     grid.hidden = h.hidden = off;
     h.textContent = hits && mod ? h.dataset.title + ' · ' + mod : h.dataset.title;
     if (hits) n += any;
@@ -1882,7 +1884,7 @@ pal.textContent = '';
 palQ.placeholder = tr('Chercher : nom, type DCS, module…');
 pal.appendChild(palQ);
 const tabs = document.createElement('div'); tabs.id = 'paltabs';
-for (const [v, t] of [['formes', 'Formes'], ['ecrans', 'Écrans de bord']]){
+for (const [v, t] of PAL_TABS){
   const b = document.createElement('button'); b.dataset.pal = v; b.textContent = tr(t);
   b.className = palTab === v ? 'on' : '';
   tabs.appendChild(b);
@@ -1895,10 +1897,11 @@ for (const m of MODULES){
   mods.appendChild(b);
 }
 pal.appendChild(mods);
-for (const [g, titre, mod] of GROUPS){
+for (const [g, titre, mod, tab] of GROUPS){
   const h = document.createElement('div'); h.className = 'grp'; h.textContent = h.dataset.title = titre;
   pal.appendChild(h);
   const grid = document.createElement('div'); grid.className = 'grid'; grid.dataset.mod = mod || '';
+  grid.dataset.tab = tab || (mod ? 'ecrans' : 'formes');
   pal.appendChild(grid);
 
   for (const k in SHAPES){
@@ -1928,7 +1931,7 @@ applyPal();
 palMod = MODULES[0];
 buildPalette();
 function setPal(tab, mod){
-  palTab = tab === 'ecrans' ? 'ecrans' : 'formes';
+  palTab = PAL_TABS.some(t => t[0] === tab) ? tab : 'formes';
   if (MODULES.includes(mod)) palMod = mod;
   buildPalette();
 }

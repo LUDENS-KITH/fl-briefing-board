@@ -53,6 +53,7 @@ engagés.
 | 27 | Chaque écran dans le boîtier de son avion | constat | S | lot 23 | v1.26 | fait le 2026-11-11 |
 | 28 | Bibliothèque d'écrans : les autres pages et les autres modules | demande | L | lot 27 | v1.27 | fait le 2026-11-12 |
 | 29 | Écrans sans figure : les fichiers du jeu comme source | demande | S | lot 28 | v1.28 | fait le 2026-11-12 |
+| 30 | Onglet Missiles, rangé par Fox 1, 2, 3 | demande | S | lot 23 | v1.30 | fait le 2026-11-19 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -1127,6 +1128,18 @@ indicateurs installés avec le jeu (`Mods/aircraft/<module>/Cockpit/Scripts`) di
 chaque élément est placé ; ils deviennent la source quand la figure manque ou date d'une
 autre version. VDI du F-14B, page 1 du STAT de l'A-10C II, et page 2 du STAT remise sur
 ces scripts. **Pas encore fait** : la comparaison avec le jeu ouvert (captures en vol).
+
+#### Lot 30 — Onglet Missiles, rangé par Fox 1, 2, 3
+
+**Demande de Vince (2026-11-19)** : « un onglet pour les missiles et leurs classification
+Fox 1/2/3 ». **Fait le 2026-11-19 (v1.30).** Un troisième onglet de la palette, trois
+groupes : Fox 1 radar semi-actif, Fox 2 infrarouge, Fox 3 radar actif. La source est
+l'autodirecteur (`Head_Type` : 6 semi-actif, 1 infrarouge, 2 actif) que déclarent les
+fichiers d'armement lisibles du jeu, lus par `tools/build_missiles.py` dans un bac à
+sable Lua : 47 missiles. **Écart** : neuf missiles ont leur fiche dans la base chiffrée
+(R-73, R-77, MICA IR et EM, R-24R/T, R-40R/T, R-33), classés d'après leur désignation
+dans le jeu, marqués « désignation » dans `missiles.js`. Le Sea Sparrow, lancé d'un
+navire, est écarté.
 
 **Ordre proposé** : 19, puis 23 (les deux constats de Vince), puis 21 et 22 (l'import qui
 en profite), 24, puis 20, 26 et 25. Chaque lot attend son « GO ».
