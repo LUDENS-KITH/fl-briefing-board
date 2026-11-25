@@ -344,7 +344,7 @@ const MIZ = (() => {
     const say = s => typeof s === 'string' && s.startsWith('DictKey_') ? String(dict[s] ?? '') : String(s ?? '');
     const out = { theatre: String(m.theatre || ''), bullseye: {}, flights: [], threats: [], support: [], ground: [],
                   hiddenGroups: 0, hiddenUnits: 0, unknownUnits: 0, unknownTypes: [] };
-    const unknown = new Set();
+    const unknown = new Set(), players = new Set();
     /* un groupe caché sur la carte F10 (« hidden ») n'est pas posé, sauf en vue du concepteur,
        où il l'est marqué comme tel ; le bilan dit combien d'unités sont restées cachées */
     const shown = (g, units) => {
@@ -377,6 +377,7 @@ const MIZ = (() => {
               continue;
             }
             /* ref : le chemin du groupe dans la table, pour y revenir (withDtc) */
+            for (const u of units.filter(PLAYER)) players.add(String(u.type || ''));
             out.flights.push({ name: say(g.name), side, cat, ref: `${side}/${ci}/${cat}/${gi}`,
                                type: String(units[0].type || ''), units: units.length,
               points: list((g.route || {}).points).map(p => ({ x: +p.x, y: +p.y, alt: +p.alt || 0,
@@ -401,6 +402,7 @@ const MIZ = (() => {
       }
     }
     out.unknownTypes = [...unknown].sort();
+    out.playerTypes = [...players].filter(Boolean).sort();   // lot 31 : les appareils des places joueur
     out.drawn = drawingsOf(m);
     return out;
   }
@@ -491,6 +493,42 @@ const MIZ = (() => {
     return { bytes: zipBytes([...next, dtc]), cartridge: name, units: units.length };
   }
 
+  /* ---------- les kneeboards de la mission (lot 31) ----------
+     DCS range les pages dans l'archive : KNEEBOARD/IMAGES/* pour tous les appareils,
+     KNEEBOARD/<type>/IMAGES/* pour un type (FA-18C_hornet, F-15ESE…). Des missions
+     écrivent « Kneeboard », ou posent les pages sans dossier IMAGES : la casse et ce
+     dossier ne comptent pas. Seules les images (png, jpg) sont des pages. */
+  const KB_IMG = /\.(png|jpe?g)$/i;
+  function kneeboardIndex(names){
+    const out = [];
+    for (const name of names){
+      const p = String(name).replace(/[\\]/g, '/').split('/').filter(Boolean);
+      if (p.length < 2 || p[0].toUpperCase() !== 'KNEEBOARD' || !KB_IMG.test(p[p.length - 1])) continue;
+      const images = p.length > 2 && p[p.length - 2].toUpperCase() === 'IMAGES';
+      const dirs = p.slice(1, images ? -2 : -1);           // entre KNEEBOARD et IMAGES : le type, ou rien
+      if (dirs.length > 1) continue;
+      out.push({ name, file: p[p.length - 1], type: dirs[0] || null });
+    }
+    const byFile = (a, b) => a.file.localeCompare(b.file, 'en', { numeric: true, sensitivity: 'base' });
+    return out.sort((a, b) => (a.type || '').localeCompare(b.type || '', 'en', { sensitivity: 'base' }) || byFile(a, b));
+  }
+  /* les pages d'un appareil : les communes, puis les siennes */
+  const sameType = (a, b) => String(a).toLowerCase() === String(b).toLowerCase();
+  const kneeboardPages = (pages, type) => [...pages.filter(k => !k.type), ...pages.filter(k => k.type && sameType(k.type, type))];
+  /* par appareil : ceux des places joueur d'abord, puis ceux qui n'ont que des pages */
+  function kneeboardTypes(pages, playerTypes){
+    const out = (playerTypes || []).map(type => ({ type, slot: true, count: kneeboardPages(pages, type).length }));
+    for (const k of pages)
+      if (k.type && !out.some(o => sameType(o.type, k.type)))
+        out.push({ type: k.type, slot: false, count: kneeboardPages(pages, k.type).length });
+    return out;
+  }
+  async function kneeboards(bytes){
+    const entries = zipEntries(bytes), byName = new Map(entries.map(e => [e.name, e]));
+    return Promise.all(kneeboardIndex(entries.map(e => e.name)).map(async k =>
+      ({ ...k, mime: /\.png$/i.test(k.file) ? 'image/png' : 'image/jpeg', data: await inflate(byName.get(k.name)) })));
+  }
+
   /* lot 25 : la portée d'engagement d'un groupe, en mètres — la plus grande de ses unités
      dans la table relevée dans DCS (portees.js : le ThreatRange de leur fiche, le rayon du
      cercle de l'éditeur et de la carte F10). 0 : le jeu n'en donne pas, pas de cercle. */
@@ -499,7 +537,8 @@ const MIZ = (() => {
     if (table) for (const t of types || []){ const v = table[t]; if (v && v[0] > m) m = v[0]; }
     return m;
   }
-  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, typeFamily, threatRange, WYPT_MAX };
+  return { tm, tmInverse, toGeo, fromGeo, parseLua, list, readMiz, unzip, withDtc, drawingsFor, typeFamily, threatRange, WYPT_MAX,
+           kneeboardIndex, kneeboardPages, kneeboardTypes, kneeboards };
 })();
 
 if (typeof module !== 'undefined') module.exports = MIZ;

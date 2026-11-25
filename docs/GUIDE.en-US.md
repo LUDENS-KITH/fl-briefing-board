@@ -208,6 +208,26 @@ as you zoom. The online demo shows two (the "Radar F/A-18C" and "Radar F-16C" bo
   leg, from the point carrying the orbit to the next one. Other AI aircraft are not
   imported.
 
+## Opened from a FlightLedger Operation
+
+On a FlightLedger operation's page, the flight lead, the mission officer and those who
+manage the operation have an **Open the Briefing Board** button. The board opens in a new
+tab, the operation's mission already imported (pilot view), with an **Operation** panel
+on the right:
+
+- **Kneeboards**: the kneeboard pages the mission carries, per aircraft — the pages
+  shared by all, then the type's own, the way DCS files them. An aircraft with pages but
+  no player slot in the mission is shown too, and says so. A click enlarges a page; ←
+  and → turn the pages, Esc closes.
+- **Debrief**: who flew, with a link to each flight on FlightLedger; **Tracks on the
+  map** adds a board, the mission underneath, anchored, and each flight's simplified
+  track with its pilot's name. A track erased by the plan's retention or scrambled at
+  recording is stated, not drawn.
+
+The link lasts 15 minutes: after that, reopen the board from the operation's page.
+**Nothing is saved in this browser** for an operation, as for the demo: to keep your
+work, save the briefing (⇩ Briefing).
+
 ## Loading the Route into the F/A-18C DTC
 
 **⇩ DTC**, then pick the DCS mission (`.miz`) to use as a base: the board's waypoints

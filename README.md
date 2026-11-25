@@ -67,6 +67,9 @@
   que la carte F10 cache au pilote reste caché.
 - **La route dans la DTC du F/A-18C** — la route préparée sur le tableau s'écrit dans la
   cartouche de données d'une copie de la mission : le pilote démarre ses points chargés.
+- **Ouvert depuis une opération FlightLedger** — la page de l'opération ouvre le tableau
+  sur sa mission, ses kneeboards rangés par appareil et, après le vol, la liste des vols
+  avec leurs liens et leurs traces sur la carte ; rien n'est enregistré dans le navigateur.
 
 Tout tient dans une page web : **aucune installation, aucun compte, rien à payer.**
 

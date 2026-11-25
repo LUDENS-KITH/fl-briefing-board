@@ -67,7 +67,8 @@ ok(own(title), `titre de la page sans traduction : « ${title} »`);
 ok(/<script src="i18n\.js[^"]*"><\/script>\s*<script src="theatres\.js/.test(html), 'i18n.js n\'est pas chargé avant les autres scripts');
 
 /* ---------- le code : chaque tr() a sa traduction ---------- */
-const board = read('board.js');
+/* board.js et operation.js (lot 31 : l'opération FlightLedger) écrivent tous deux à l'écran */
+const board = [read('board.js'), read('operation.js')].join(String.fromCharCode(10));
 const STR = String.raw`'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|\x60(?:\\.|[^\x60\\$])*\x60`;
 const trKeys = [];
 for (const m of board.matchAll(new RegExp(String.raw`\btr\(\s*(${STR})\s*[,)]`, 'g'))) trKeys.push(lit(m[1]));
@@ -158,7 +159,7 @@ for (const [k, v] of Object.entries(EN)){
   ok(!/[àâçéèêëîïôûùüœ]/i.test(v), `traduction qui garde un accent français : « ${v} »`);
 }
 /* une clé que plus rien n'affiche est du poids mort : elle doit apparaître dans un source */
-const sources = ['index.html', 'board.js', 'symbols.js', 'theatres.js', 'miz.js', ...ECRANS].map(read).join('\n');
+const sources = ['index.html', 'board.js', 'operation.js', 'symbols.js', 'theatres.js', 'miz.js', ...ECRANS].map(read).join('\n');
 const shown = new Set([...pageStrings.map(p => p[0]), title, ...trKeys, ...labels, ...silTags, ...groups, ...theatres.map(t => t.name), ...mizErrors]);
 for (const k of Object.keys(EN)){
   if (k.startsWith('html:')) ok(i18nBlocks.includes(k.slice(5)), `clé ${k} sans bloc data-i18n dans la page`);
