@@ -54,6 +54,7 @@ engagés.
 | 28 | Bibliothèque d'écrans : les autres pages et les autres modules | demande | L | lot 27 | v1.27 | fait le 2026-11-12 |
 | 29 | Écrans sans figure : les fichiers du jeu comme source | demande | S | lot 28 | v1.28 | fait le 2026-11-12 |
 | 30 | Onglet Missiles, rangé par Fox 1, 2, 3 | demande | S | lot 23 | v1.30 | fait le 2026-11-19 |
+| 31 | L'opération FlightLedger dans le Board (kneeboards, débrief, traces) | demande | M | lot 6 | v1.31 | fait le 2026-11-25 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -1143,6 +1144,17 @@ navire, est écarté.
 
 **Ordre proposé** : 19, puis 23 (les deux constats de Vince), puis 21 et 22 (l'import qui
 en profite), 24, puis 20, 26 et 25. Chaque lot attend son « GO ».
+
+#### Lot 31 — L'opération FlightLedger dans le Board
+
+**Plan FlightLedger du 2026-11-25** (`PLAN_OPERATIONS_DEPART_SERVEUR_2026_11_25.md`, § 7,
+lots 4 et 4b). **Fait le 2026-11-25 (v1.31).** La page d'une opération FlightLedger ouvre
+le Board sur `?op=<opération>&t=<jeton>` : la mission jointe s'importe (vue pilote), un
+panneau « Opération » montre les kneeboards de la mission par appareil (pages communes,
+puis celles du type) et le débrief (vols et liens FlightLedger) ; « Traces sur la carte »
+ajoute une planche avec la mission dessous et la trace simplifiée de chaque vol. Rien
+n'est enregistré dans le navigateur ; le jeton quitte la barre d'adresse. Ouvre en partie
+le « Débriefing sur trace » du § 8 : les traces viennent de FlightLedger, simplifiées.
 
 ## 8. Hors plan
 

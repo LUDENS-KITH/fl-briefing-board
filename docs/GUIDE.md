@@ -217,6 +217,26 @@ nouvelle planche.
   vole. Un Race-Track est posé au milieu de sa branche, du point qui porte l'orbite au
   suivant. Les autres appareils de l'IA ne sont pas importés.
 
+## Ouvert depuis une opération FlightLedger
+
+Sur la page d'une opération FlightLedger, le chef de patrouille, l'officier de mission et
+ceux qui gèrent l'opération ont un bouton **Ouvrir le Briefing Board**. Le tableau s'ouvre
+dans un nouvel onglet, la mission de l'opération déjà importée (vue pilote), et un
+panneau **Opération** à droite :
+
+- **Kneeboards** : les pages de kneeboard que la mission embarque, par appareil — les
+  pages communes à tous, puis celles du type, comme DCS les range. Un appareil qui a
+  des pages mais aucune place joueur dans la mission est montré aussi, et le dit. Une
+  page s'agrandit d'un clic ; ← et → tournent les pages, Échap ferme.
+- **Débrief** : qui a volé, avec un lien vers chaque vol sur FlightLedger ; **Traces sur
+  la carte** ajoute une planche, la mission dessous, ancrée, et la trace simplifiée de
+  chaque vol avec le nom de son pilote. Une trace effacée par la conservation de l'offre
+  ou brouillée à l'enregistrement est dite, pas dessinée.
+
+Le lien vaut 15 minutes : passé ce délai, rouvrez le tableau depuis la page de
+l'opération. **Rien n'est enregistré dans ce navigateur** pour une opération, comme pour
+la démo : pour garder votre travail, enregistrez le briefing (⇩ Briefing).
+
 ## Charger la route dans la DTC du F/A-18C
 
 **⇩ DTC**, puis choisissez la mission DCS (`.miz`) qui sert de support : les waypoints

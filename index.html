@@ -172,6 +172,37 @@
   #moving div{display:flex;gap:8px;justify-content:flex-end}
   body.present #moving{display:none}
   @media (max-width:760px){ .brand{display:none} #pal{width:104px} .tile span{display:none} }
+  /* l'opération FlightLedger (lot 31) : un panneau à droite, au-dessus du tableau */
+  #opbtn{color:var(--fl-blue-2);border-color:rgba(47,140,255,.55)}
+  #opbox{position:absolute;top:8px;right:8px;bottom:8px;width:min(380px,calc(100% - 16px));z-index:7;overflow:auto;
+    background:rgba(11,18,32,.97);border:1px solid rgba(47,140,255,.45);border-radius:12px;padding:14px 16px;
+    color:var(--fl-silver-0);font-size:13px;line-height:1.45;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+  #opbox[hidden]{display:none}
+  #opbox h2{font-size:17px;margin:0 28px 6px 0}
+  #opbox .opeyebrow{margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fl-blue-2)}
+  #oplink{display:inline-block;margin-bottom:10px;color:var(--fl-gold-2);font-size:12px}
+  #opclose{position:absolute;top:8px;right:10px}
+  #optabs{display:flex;gap:6px;margin:4px 0 10px}
+  #optabs button.on, .optypes button.on{background:rgba(209,169,74,.18);border-color:var(--fl-gold-2);color:#fff}
+  .optypes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .opnote{margin:0 0 8px;color:var(--fl-silver-1);font-size:12px}
+  .operr{margin:0;padding:10px 12px;border:1px solid var(--fl-danger);border-radius:8px;color:#FFD0D0}
+  .opdim{color:var(--fl-silver-1)}
+  .opkb{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+  .opkb button{display:flex;flex-direction:column;gap:4px;padding:4px;text-align:left;font-size:11px}
+  .opkb img{width:100%;aspect-ratio:768/1157;object-fit:cover;border-radius:4px;background:#000}
+  .opkb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .opdraw{margin:0 0 10px;color:var(--fl-blue-2)}
+  .opflights{margin:0;padding-left:18px}
+  .opflights ul{margin:2px 0 6px;padding-left:16px;font-size:12px}
+  .opflights a{color:var(--fl-gold-2)}
+  body.present #opbox{display:none}
+  #kbview{position:fixed;inset:0;z-index:21;background:rgba(3,6,10,.85);display:flex;align-items:center;justify-content:center;padding:12px}
+  #kbview[hidden]{display:none}
+  #kbview .card{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;max-height:100%}
+  #kbimg{max-height:calc(100vh - 80px);max-width:100%;border-radius:6px;background:#000}
+  #kbview .kbnav{display:flex;gap:10px;align-items:center;color:var(--fl-silver-0);font-size:12px}
+  #kbclose{position:absolute;top:-4px;right:-4px}
   .noscript{max-width:640px;margin:48px auto;padding:0 16px;line-height:1.5}
   .noscript a{color:var(--fl-blue-2)}
 </style>
@@ -193,6 +224,7 @@
 <div id="bar">
   <span class="brand"><img src="assets/fl-briefing-board-icon.svg" alt="" width="22" height="22">FL <b>Briefing Board</b></span>
   <a class="demobadge" href="index.html" title="Démo : rien n'est enregistré. Cliquez pour ouvrir votre propre tableau.">DÉMO</a>
+  <button id="opbtn" hidden title="L'opération FlightLedger : ses kneeboards et ses vols. Rien n'est enregistré dans ce navigateur.">✈ Opération</button>
 
   <button data-tool="select" title="Sélectionner / déplacer (V) — sur une carte, glisser dans le vide déplace la carte">⬈</button>
   <button data-tool="pan"    title="Main : déplacer la carte (H) — ou clic droit glissé, clic molette, espace + glisser">✋</button>
@@ -320,10 +352,29 @@
       <div><button id="movingsave">Récupérer mes briefings</button> <button id="movingok">Compris</button></div>
     </div>
     <div id="pbadge" hidden></div>
+    <aside id="opbox" hidden aria-label="Opération FlightLedger">
+      <button id="opclose" title="Fermer">×</button>
+      <p class="opeyebrow">Opération FlightLedger</p>
+      <h2 id="optitle">Opération FlightLedger</h2>
+      <a id="oplink" href="#" target="_blank" rel="noopener noreferrer" hidden>Ouvrir l'opération sur FlightLedger ↗</a>
+      <div id="optabs" role="tablist">
+        <button type="button" data-tab="kb" role="tab">Kneeboards</button>
+        <button type="button" data-tab="debrief" role="tab">Débrief</button>
+      </div>
+      <div id="opbody"></div>
+    </aside>
   </div>
 </div>
 
 <input id="ti" placeholder="texte puis Entrée">
+
+<div id="kbview" hidden role="dialog" aria-label="Page de kneeboard">
+  <div class="card">
+    <button id="kbclose" title="Fermer">×</button>
+    <img id="kbimg" alt="">
+    <div class="kbnav"><button id="kbprev" title="Page précédente (←)">←</button><span id="kbcap"></span><button id="kbnext" title="Page suivante (→)">→</button></div>
+  </div>
+</div>
 
 <div id="mizbox" hidden>
   <div class="card">
@@ -376,7 +427,7 @@
   </div>
 </div>
 
-<script src="i18n.js?v=1.12"></script>
+<script src="i18n.js?v=1.13"></script>
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
 <script src="vendor/milsymbol-3.0.4.js"></script>
@@ -394,8 +445,9 @@
 <script src="projections.js?v=1.0"></script>
 <script src="mapclass.js?v=1.1"></script>
 <script src="portees.js?v=1.0"></script>
-<script src="miz.js?v=1.6"></script>
-<script src="board.js?v=1.30"></script>
+<script src="miz.js?v=1.7"></script>
+<script src="board.js?v=1.31"></script>
+<script src="operation.js?v=1.0"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')

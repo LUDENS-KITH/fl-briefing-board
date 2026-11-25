@@ -3,6 +3,54 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.31 — 2026-11-25
+
+Lot 31 du [plan d'action](docs/PLAN.md) : **l'opération FlightLedger dans le Board**
+(plan FlightLedger du 2026-11-25, § 7, lots 4 et 4b).
+
+### Ajouté
+- **Ouverture depuis une opération** : FlightLedger ouvre le tableau sur
+  `?op=<opération>&t=<jeton>` (bouton « Ouvrir le Briefing Board » de la page de
+  l'opération). La mission jointe s'importe d'elle-même, en vue pilote ; le jeton quitte la
+  barre d'adresse dès la lecture et revient seulement le temps d'un changement de langue.
+- **Panneau « Opération »** (bouton ✈ Opération) : le titre, un lien vers l'opération sur
+  FlightLedger, et deux onglets.
+  - **Kneeboards** : les pages que la mission embarque, par appareil — communes
+    (`KNEEBOARD/IMAGES`), puis celles du type (`KNEEBOARD/<type>/IMAGES`), casse et dossier
+    IMAGES indifférents. Les appareils des places joueur d'abord ; un type qui a des pages
+    sans place joueur est montré et le dit. Visionneuse : clic, ← →, Échap.
+  - **Débrief** : qui a volé, chaque vol avec son lien vers FlightLedger, un vol privé dit
+    comme tel ; le même filtre que la page de l'opération.
+- **Traces sur la carte** (lot 4b) : une planche « Traces des vols », la mission clonée
+  dessous et ancrée, la trace simplifiée de chaque vol (300 points au plus, venus de
+  FlightLedger) en trait plein, le pilote écrit au départ. Une trace effacée par la
+  conservation de l'offre, brouillée à l'enregistrement ou absente est dite, pas dessinée.
+- `miz.js` : `kneeboards`, `kneeboardIndex`, `kneeboardPages`, `kneeboardTypes`, et
+  `playerTypes` dans la lecture d'une mission.
+
+### Rien d'enregistré
+Comme la démo, une opération n'écrit rien dans le navigateur, ni localStorage ni
+IndexedDB, et ne relit pas le tableau du visiteur : elle part d'un tableau vierge. Pour
+garder son travail, on enregistre le briefing (⇩ Briefing).
+
+### Refus dits au pilote
+Lien expiré (15 minutes), lien d'une autre opération, droits perdus, mission du serveur
+sans fichier, FlightLedger injoignable : chaque cas a sa phrase, en français et en
+anglais, et dit quoi faire.
+
+### Vérifié en exécutant
+`node tools/test_kneeboards.js` 15/15, nouveau, en erreur sur la v1.30 (fonctions
+absentes) : mission fabriquée (casse, dossier IMAGES, rangement trop profond refusé,
+fichier non image écarté, ravitailleur IA hors des places joueur), puis le `.miz` réel
+d'Opération Tripwire : 13 pages, 8 communes, **9 pages par Hornet**, 4 pages F-15ESE sans
+place joueur. `test_i18n` 2 884/2 884 (il lit désormais `operation.js`) · `test_miz`
+124/124 · `test_seo` · `test_symboles` 671 · `test_ecrans` 262 · `test_missiles` 468 ·
+`test_radar` 26 · `test_magnetic` · banc 112/112. Au navigateur sans tête, servi en local
+avec une API simulée et le vrai Tripwire : jeton retiré de l'adresse, mission importée en
+vue pilote, 9 kneeboards du Hornet lus en image, débrief et liens en nouvel onglet,
+planche des traces sur la mission, aucune écriture locale, trois lectures sans cookie,
+anglais, refus 410 et 409, téléphone 375 px.
+
 ## v1.30 — 2026-11-19
 
 Lot 30 du [plan d'action](docs/PLAN.md) : **un onglet Missiles, rangé par Fox**. Demande

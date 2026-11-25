@@ -14,7 +14,7 @@ const KEY     = 'fl-briefing-board-v3';
 const OLD_KEY = 'fl-briefing-board-v2';   // relu une fois, pour ne pas perdre un tableau v0.2–v0.4
 const SIZE  = 34;                       // demi-taille de référence d'un symbole
 /* LK Studio : la signature des exports et la fenêtre « À propos » */
-const APP = { version: '1.30', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
+const APP = { version: '1.31', studio: 'https://l-k-studio.com', flightledger: 'https://flightledger.io',
               code: 'https://github.com/LUDENS-KITH/fl-briefing-board' };
 const SIGNATURE = 'FL Briefing Board · LK Studio · l-k-studio.com';
 /* langue (lot 16, i18n.js) : les noms des formes, des groupes et des théâtres se
@@ -1756,8 +1756,8 @@ function idbStore(mode){
   return idbOpen.then(db => db.transaction('images', mode).objectStore('images'));
 }
 const idbReq = q => new Promise((ok, ko) => { q.onsuccess = () => ok(q.result); q.onerror = () => ko(q.error); });
-/* la démo n'écrit jamais chez le visiteur : ni localStorage, ni IndexedDB */
-const idbPut = (id, blob) => DEMO ? Promise.resolve() : idbStore('readwrite').then(s => idbReq(s.put(blob, id)));
+/* la démo et une opération n'écrivent jamais chez le visiteur : ni localStorage, ni IndexedDB */
+const idbPut = (id, blob) => NO_STORE ? Promise.resolve() : idbStore('readwrite').then(s => idbReq(s.put(blob, id)));
 const idbGet = id => idbStore('readonly').then(s => idbReq(s.get(id)));
 /* ne garder en IndexedDB que les images qu'une planche cite encore */
 async function idbKeep(ids){
@@ -1798,7 +1798,7 @@ async function restoreImages(){
   }
   objs = boards[cur].objs;
   if (lost) toast(lost > 1 ? tr('{0} images de fond n\'ont pas pu être relues', lost) : tr('Une image de fond n\'a pas pu être relue'));
-  if (!DEMO) idbKeep(new Set(boards.flatMap(b => b.objs.filter(o => o.t === 'img').map(o => o.id)))).catch(() => {});
+  if (!NO_STORE) idbKeep(new Set(boards.flatMap(b => b.objs.filter(o => o.t === 'img').map(o => o.id)))).catch(() => {});
   commit();
 }
 addEventListener('dragover', e => e.preventDefault());
@@ -2078,7 +2078,7 @@ $('new').onclick = () => {
   for (const el of imgEls.values()) URL.revokeObjectURL(el.src);
   imgBlobs.clear(); imgEls.clear();
   load(0); renderTabs(); setTool('select'); commit();
-  if (!DEMO) idbKeep(new Set()).catch(() => {});
+  if (!NO_STORE) idbKeep(new Set()).catch(() => {});
   toast(tr('Nouveau briefing : tableau vierge'));
 };
 $('scale').onclick = () => {
@@ -2823,7 +2823,7 @@ function commit(){
   syncPane();
   try {
     stash();
-    if (DEMO) return;                        // la démo ne touche pas au tableau du visiteur
+    if (NO_STORE) return;                    // la démo et une opération ne touchent pas au tableau du visiteur
     localStorage.setItem(KEY, JSON.stringify({ cur, unit, split, showAF, headRef, lib, palTab, palMod, designer, boards: boardsRecord() }));
   } catch(_){}
 }
@@ -2833,6 +2833,10 @@ function commit(){
    préparée au Caucase — carte, route liée, coupe, deux phases. Coordonnées réelles de
    Batumi, Senaki et Kutaïssi, indépendantes des données d'aérodromes. */
 const DEMO = /[?&]demo\b/.test(location.search);
+/* une opération FlightLedger (lot 31, operation.js) : la mission de l'opération sur un
+   tableau vierge, rien d'enregistré ni relu dans ce navigateur, comme la démo */
+const OPERATION = /[?&]op=/.test(location.search) && !DEMO;
+const NO_STORE = DEMO || OPERATION;
 function demoBoards(){
   const P = (lat, lon) => [lon2x(lon), lat2y(lat)];
   const zoom = 8.6, d = v => v / 2 ** (zoom - REF_Z);     // pixels écran -> terrain à ce zoom
@@ -2960,7 +2964,7 @@ function movingNotice(host, now = new Date()){
   let seen = false;
   try { seen = !!localStorage.getItem(MOVE.key); } catch(_){}
   stash();
-  $('moving').hidden = DEMO || seen || host !== MOVE.to || now >= MOVE.until || boards.some(b => b.objs && b.objs.length);
+  $('moving').hidden = NO_STORE || seen || host !== MOVE.to || now >= MOVE.until || boards.some(b => b.objs && b.objs.length);
 }
 function movingDone(){
   try { localStorage.setItem(MOVE.key, '1'); } catch(_){}
@@ -2974,8 +2978,8 @@ $('movingsave').onclick = () => {
 
 (function boot(){
   let data = null;
-  try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(_){}
-  if (!data){
+  try { data = OPERATION ? null : JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(_){}
+  if (!data && !OPERATION){
     try {
       const v2 = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
       if (v2 && Array.isArray(v2.objs)) data = { cur:0, boards:[{ name:'Phase 1', objs:v2.objs }] };
