@@ -24,7 +24,10 @@ const TRACES = (() => {
   const colorOf = (colors, t) => colors.get(t.pseudo) || COLORS[0];
 
   /* pilote · indicatif · appareil : ce que FlightLedger a dit, rien d'inventé */
-  const label = t => [t.pseudo, t.callsign, t.aircraft].filter(Boolean).join(' · ');
+  /* L'indicatif n'est écrit que s'il dit autre chose que le nom du pilote (souvent le même dans DCS). */
+  const same = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  const label = t => [t.pseudo, same(t.callsign, t.pseudo) ? null : t.callsign, t.aircraft]
+    .map(v => (v == null ? '' : String(v).trim())).filter(Boolean).join(' · ');
 
   const defaultShown = tracks => new Set(drawable(tracks).map(t => t.flight_id));
   const selected = (tracks, shown) => drawable(tracks).filter(t => shown.has(t.flight_id));
