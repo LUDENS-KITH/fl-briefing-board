@@ -224,12 +224,14 @@ function opDrawTracks(keep){
     const [la0, lo0] = t.segments.find(seg => seg.length >= 2)[0];
     tags.push({ t: 'text', s: TRACES.label(t), x: lon2x(lo0), y: lat2y(la0), c, w: 2, locked: true });
   }
-  // même départ (même porte-avions, même terrain) : les étiquettes s'empilent au lieu de se couvrir ;
-  // l'interligne vaut le texte grossi de l'export kneeboard (tb 1,8), pour rester lisible aussi là
-  const ys = TRACES.stack(tags.map(o => { const b = bbox(o); return { x: b.x, y: o.y, w: b.w }; }), 36);
-  tags.forEach((o, i) => out.push({ ...o, y: ys[i] }));
   const box = TRACES.bounds(tracks);
   const cam = keep && at >= 0 ? boards[at].cam : box ? fitCam(box) : boards[cur].cam;
+  // même départ (même porte-avions, même terrain) : les étiquettes s'empilent au lieu de se couvrir.
+  // Sur la carte, un texte garde sa taille à l'écran quel que soit le zoom : l'empilement se
+  // calcule en pixels d'écran à la vue où la planche s'ouvre (k), puis se rend au terrain.
+  const k = cam ? 2 ** (cam.z - REF_Z) : 1;
+  const ys = TRACES.stack(tags.map(o => { const b = bbox(o); return { x: o.x * k, y: o.y * k, w: b.w }; }), 30);
+  tags.forEach((o, i) => out.push({ ...o, y: ys[i] / k }));
   const under = src ? src.objs.map(o => ({ ...snap(o), locked: true })) : [];
   const b = { name, objs: [...under, ...out], nmPx: 0, prof: { ceil: 40000, range: 80, linked: false },
               map: src ? { ...src.map } : { theatre: OP.theatre || '', style: $('mstyle').value || 'topo' }, cam,
