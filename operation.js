@@ -4,13 +4,13 @@
    droits à chaque lecture. Le Board lit alors, sans cookie :
      - la mission jointe (.miz), importée comme d'habitude (vue pilote) ;
      - le débrief : les vols de l'opération et leurs liens vers FlightLedger ;
-     - les traces simplifiées des vols, posées sur une planche à part sur demande.
+     - les traces simplifiées des vols, posées sur une planche à part : chaque vol se coche
+       « sur la carte », une couleur par pilote (lot 32, traces.js).
    Rien n'est enregistré dans le navigateur pour une opération (OPERATION, NO_STORE dans
    board.js), comme pour la démo ; le jeton quitte la barre d'adresse dès la lecture. */
 
 const OP_API = 'https://api.flightledger.io';
 const OP_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const OP_COLORS = ['#2F8CFF', '#34D399', '#D1A94A', '#FF8A00', '#C084FC', '#4FC3F7', '#F472B6', '#A3E635'];
 
 const OP = (() => {
   if (typeof OPERATION === 'undefined' || !OPERATION) return null;
@@ -18,7 +18,7 @@ const OP = (() => {
   /* l'adresse de l'API se change pour essayer le Board en local, jamais en ligne */
   const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const st = { id: q.get('op') || '', token: q.get('t') || '', api: (local && q.get('api')) || OP_API,
-               title: '', url: '', file: '', debrief: null, tracks: null, pages: [], types: [],
+               title: '', url: '', file: '', debrief: null, tracks: null, shown: new Set(), pages: [], types: [],
                urls: new Map(), base: '', theatre: '', tab: 'kb', type: null, error: '', missionNote: '' };
   /* le jeton quitte la barre d'adresse : il ne se copie pas avec le lien */
   try {
@@ -149,27 +149,30 @@ function opRenderDebrief(body){
                                                     t.declared, t.flew, t.no_flight ?? 0, t.unexpected ?? 0)));
   else body.append(opEl('p', { class: 'opnote' }, tr("L'opération n'a pas de date : ses vols ne se comptent pas encore.")));
   if (d.view === 'own') body.append(opEl('p', { class: 'opnote' }, tr("Vos vols seulement : vous êtes invité hors de l'unité de l'opération.")));
-  const ok = (OP.tracks && OP.tracks.tracks || []).filter(x => x.state === 'ok' && x.segments.length);
+  const ok = TRACES.drawable(OP.tracks), colors = TRACES.pilotColors(d.rows, ok);
   const draw = opEl('button', { type: 'button', class: 'opdraw' }, tr('Traces sur la carte'));
-  draw.disabled = !ok.length;
-  draw.title = ok.length ? tr('Une planche de plus : la mission et la trace de chaque vol')
-                         : tr("Aucune trace à poser : pas encore de vol analysé, ou traces effacées");
-  draw.onclick = opDrawTracks;
+  draw.onclick = () => opDrawTracks(false);
   body.append(draw);
+  opDrawState(draw);
   if (OP.tracks && OP.tracks.truncated) body.append(opEl('p', { class: 'opnote' }, tr('Les {0} premiers vols seulement sur la carte.', OP.tracks.max_flights)));
   const trackOf = id => (OP.tracks && OP.tracks.tracks || []).find(x => x.flight_id === id);
+  const drawn = new Set(ok.map(x => x.flight_id));
   const list = opEl('ul', { class: 'opflights' });
   for (const row of d.rows || []){
-    const li = opEl('li', {}, opEl('b', {}, row.pseudo), ' · ', OP_STATUS[row.status] || row.status);
+    const mine = ok.some(x => x.pseudo === row.pseudo);
+    const swatch = mine ? opEl('span', { class: 'opswatch', style: 'background:' + colors.get(row.pseudo), 'aria-hidden': 'true' }) : null;
+    const li = opEl('li', {}, swatch, opEl('b', {}, row.pseudo), ' · ', OP_STATUS[row.status] || row.status);
     if (row.flights && row.flights.length){
       const ul = opEl('ul');
       for (const f of row.flights){
         const what = [f.callsign, f.mission_name].filter(Boolean).join(' · ') || tr('Vol');
         const item = opEl('li', {}, opTime(f.recording_started_at), ' — ', what);
+        const tk = f.flight_id && trackOf(f.flight_id);
+        if (tk && tk.aircraft) item.append(' · ', tk.aircraft);
         if (f.hidden) item.append(' · ', tr('vol privé'));
         if (f.url) item.append(' · ', opEl('a', { href: f.url, target: '_blank', rel: 'noopener noreferrer' }, tr('Voir le vol sur FlightLedger')));
-        const tk = f.flight_id && trackOf(f.flight_id);
-        if (tk && tk.state !== 'ok') item.append(opEl('span', { class: 'opdim' }, ' · ' + OP_TRACK[tk.state]));
+        if (tk && drawn.has(tk.flight_id)) item.append(' ', opShowBox(tk, draw));
+        else if (tk) item.append(opEl('span', { class: 'opdim' }, ' · ' + (OP_TRACK[tk.state] || OP_TRACK.none)));
         ul.append(item);
       }
       li.append(ul);
@@ -179,38 +182,57 @@ function opRenderDebrief(body){
   if (!(d.rows || []).length) body.append(opEl('p', { class: 'opnote' }, tr("Personne n'est encore annoncé sur cette opération.")));
   body.append(list);
 }
+/* la case « sur la carte » d'un vol : cochée, sa trace est sur la planche des traces */
+function opShowBox(tk, draw){
+  const box = opEl('input', { type: 'checkbox', 'data-flight': tk.flight_id });
+  box.checked = OP.shown.has(tk.flight_id);
+  box.onchange = () => {
+    if (box.checked) OP.shown.add(tk.flight_id); else OP.shown.delete(tk.flight_id);
+    opDrawState(draw);
+    /* la planche déjà posée suit la case, sans recadrer : on compare d'un coup d'œil */
+    if (boards.some(x => x.name === tr('Traces des vols'))) opDrawTracks(true);
+  };
+  return opEl('label', { class: 'opshow', title: tr('Dessiner ce vol sur la planche des traces') }, box, tr('sur la carte'));
+}
+function opDrawState(draw){
+  const n = TRACES.selected(OP.tracks, OP.shown).length, any = TRACES.drawable(OP.tracks).length;
+  draw.disabled = !n;
+  draw.title = n ? tr('Une planche de plus : la mission et la trace de chaque vol coché')
+             : any ? tr('Cochez au moins un vol « sur la carte »')
+                   : tr("Aucune trace à poser : pas encore de vol analysé, ou traces effacées");
+}
 
-/* ---------- les traces sur la carte (lot 4b) ----------
-   Une planche de plus, la mission clonée dessous, ancrée ; chaque vol en trait plein, son
-   pilote écrit au départ. Les points viennent de FlightLedger, simplifiés (300 au plus par
-   vol), en latitude et longitude : ils se posent sur le fond de carte, comme la mission. */
-function opDrawTracks(){
-  const tracks = (OP.tracks && OP.tracks.tracks || []).filter(x => x.state === 'ok' && x.segments.length);
-  if (!tracks.length) return;
+/* ---------- les traces sur la carte (lot 4b, lot 32) ----------
+   Une planche de plus, la mission clonée dessous, ancrée ; chaque vol coché en trait plein,
+   de la couleur de son pilote, « pilote · indicatif · appareil » écrit au départ. Les points
+   viennent de FlightLedger, simplifiés (300 au plus par vol), en latitude et longitude : ils
+   se posent sur le fond de carte, comme la mission. keep : la planche existe et suit une
+   case cochée ou décochée, sa vue ne bouge pas. */
+function opDrawTracks(keep){
+  const tracks = TRACES.selected(OP.tracks, OP.shown);
+  const name = tr('Traces des vols'), at = boards.findIndex(x => x.name === name);
+  if (!tracks.length && at < 0) return;
   cancelGesture(); leaveGesture(); stash();
-  const name = tr('Traces des vols');
-  const src = boards.find(b => b.name === OP.base && b.map) || boards.find(b => b.map && b.name !== name);
-  const lat = [], lon = [], out = [];
-  tracks.forEach((t, i) => {
-    const c = OP_COLORS[i % OP_COLORS.length];
+  const src = boards.find(x => x.name === OP.base && x.map) || boards.find(x => x.map && x.name !== name);
+  const colors = TRACES.pilotColors(OP.debrief && OP.debrief.rows, TRACES.drawable(OP.tracks)), out = [];
+  for (const t of tracks){
+    const c = TRACES.colorOf(colors, t);
     for (const seg of t.segments){
       if (seg.length < 2) continue;
-      for (const [la, lo] of seg){ lat.push(la); lon.push(lo); }
       out.push({ t: 'stroke', pts: seg.map(([la, lo]) => [lon2x(lo), lat2y(la)]), c, w: 3, ls: 'solid', locked: true });
     }
-    const [la0, lo0] = t.segments[0][0];
-    out.push({ t: 'text', s: t.callsign ? `${t.pseudo} · ${t.callsign}` : t.pseudo, x: lon2x(lo0), y: lat2y(la0), c, w: 2, locked: true });
-  });
-  if (!lat.length) return;
-  const cam = fitCam([Math.min(...lat), Math.min(...lon), Math.max(...lat), Math.max(...lon)]);
+    const [la0, lo0] = t.segments.find(seg => seg.length >= 2)[0];
+    out.push({ t: 'text', s: TRACES.label(t), x: lon2x(lo0), y: lat2y(la0), c, w: 2, locked: true });
+  }
+  const box = TRACES.bounds(tracks);
+  const cam = keep && at >= 0 ? boards[at].cam : box ? fitCam(box) : boards[cur].cam;
   const under = src ? src.objs.map(o => ({ ...snap(o), locked: true })) : [];
   const b = { name, objs: [...under, ...out], nmPx: 0, prof: { ceil: 40000, range: 80, linked: false },
               map: src ? { ...src.map } : { theatre: OP.theatre || '', style: $('mstyle').value || 'topo' }, cam,
               magDec: src ? src.magDec ?? null : null, past: [], future: [] };
-  const at = boards.findIndex(x => x.name === name);
   if (at >= 0){ boards[at] = b; load(at); renderTabs(); commit(); }
   else { boards.splice(cur + 1, 0, b); load(cur + 1); renderTabs(); commit(); }
-  toast(tr(tracks.length > 1 ? '{0} traces posées sur la planche « {1} »' : '{0} trace posée sur la planche « {1} »', tracks.length, name));
+  if (!keep) toast(tr(tracks.length > 1 ? '{0} traces posées sur la planche « {1} »' : '{0} trace posée sur la planche « {1} »', tracks.length, name));
 }
 
 /* ---------- au démarrage ---------- */
@@ -242,6 +264,8 @@ async function opDebrief(){
     return;
   }
   try { OP.tracks = await (await opFetch('tracks')).json(); } catch(_){ OP.tracks = null; }
+  /* tous les vols tracés sont cochés d'abord ; la sélection ne vit que le temps de la page */
+  OP.shown = TRACES.defaultShown(OP.tracks);
 }
 async function opBoot(){
   document.body.classList.add('operation');

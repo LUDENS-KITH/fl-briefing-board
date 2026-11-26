@@ -230,8 +230,11 @@ panneau **Opération** à droite :
   page s'agrandit d'un clic ; ← et → tournent les pages, Échap ferme.
 - **Débrief** : qui a volé, avec un lien vers chaque vol sur FlightLedger ; **Traces sur
   la carte** ajoute une planche, la mission dessous, ancrée, et la trace simplifiée de
-  chaque vol avec le nom de son pilote. Une trace effacée par la conservation de l'offre
-  ou brouillée à l'enregistrement est dite, pas dessinée.
+  chaque vol coché, une couleur par pilote, « pilote · indicatif · appareil » écrit au
+  départ. Chaque vol a sa case **sur la carte**, toutes cochées à l'ouverture : la planche
+  suit les cases sans bouger la vue, pour comparer deux vols. La pastille devant un pilote
+  rappelle sa couleur. Une trace effacée par la conservation de l'offre ou brouillée à
+  l'enregistrement est dite, pas dessinée.
 
 Le lien vaut 15 minutes : passé ce délai, rouvrez le tableau depuis la page de
 l'opération. **Rien n'est enregistré dans ce navigateur** pour une opération, comme pour

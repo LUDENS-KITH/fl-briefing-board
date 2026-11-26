@@ -220,9 +220,12 @@ on the right:
   no player slot in the mission is shown too, and says so. A click enlarges a page; ←
   and → turn the pages, Esc closes.
 - **Debrief**: who flew, with a link to each flight on FlightLedger; **Tracks on the
-  map** adds a board, the mission underneath, anchored, and each flight's simplified
-  track with its pilot's name. A track erased by the plan's retention or scrambled at
-  recording is stated, not drawn.
+  map** adds a board, the mission underneath, anchored, and the simplified track of each
+  ticked flight, one colour per pilot, "pilot · callsign · aircraft" written at its start.
+  Each flight has its **on the map** box, all ticked on opening: the board follows the
+  boxes without moving the view, to compare two flights. The swatch before a pilot recalls
+  their colour. A track erased by the plan's retention or scrambled at recording is
+  stated, not drawn.
 
 The link lasts 15 minutes: after that, reopen the board from the operation's page.
 **Nothing is saved in this browser** for an operation, as for the demo: to keep your

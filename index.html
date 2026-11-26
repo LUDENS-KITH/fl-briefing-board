@@ -193,6 +193,10 @@
   .opkb img{width:100%;aspect-ratio:768/1157;object-fit:cover;border-radius:4px;background:#000}
   .opkb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .opdraw{margin:0 0 10px;color:var(--fl-blue-2)}
+  /* lot 32 : la couleur du pilote, la case « sur la carte » d'un vol */
+  .opswatch{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:2px;vertical-align:baseline}
+  .opshow{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;color:var(--fl-silver-0);cursor:pointer}
+  .opshow input{margin:0;accent-color:var(--fl-blue-2)}
   .opflights{margin:0;padding-left:18px}
   .opflights ul{margin:2px 0 6px;padding-left:16px;font-size:12px}
   .opflights a{color:var(--fl-gold-2)}
@@ -427,7 +431,7 @@
   </div>
 </div>
 
-<script src="i18n.js?v=1.13"></script>
+<script src="i18n.js?v=1.14"></script>
 <script src="theatres.js?v=1.1"></script>
 <script src="magnetic.js?v=1.0"></script>
 <script src="vendor/milsymbol-3.0.4.js"></script>
@@ -446,8 +450,9 @@
 <script src="mapclass.js?v=1.1"></script>
 <script src="portees.js?v=1.0"></script>
 <script src="miz.js?v=1.7"></script>
-<script src="board.js?v=1.31"></script>
-<script src="operation.js?v=1.0"></script>
+<script src="board.js?v=1.32"></script>
+<script src="traces.js?v=1.0"></script>
+<script src="operation.js?v=1.1"></script>
 <script>
   /* garde-fou : une page vide est incompréhensible, un message ne l'est pas */
   if (typeof SHAPES === 'undefined' || typeof objs === 'undefined')
