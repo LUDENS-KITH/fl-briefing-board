@@ -3,6 +3,19 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.34 — 2026-11-26
+
+Second correctif du lot 32, vu le jour même sur la vraie opération Tripwire.
+
+### Corrigé
+- **Les étiquettes des pilotes partis du même endroit ne se couvrent plus** : Shoot et Guiness,
+  catapultés du même porte-avions, avaient leurs deux étiquettes écrites au même point, illisibles.
+  Une étiquette qui en recouvre une autre descend d'une ligne ; un départ ailleurs ne bouge pas.
+  L'interligne tient aussi à l'export kneeboard, où les textes sont grossis.
+
+### Vérifié
+- `node tools/test_traces.js` : 24/24 (4 cas neufs, en échec avant le correctif).
+
 ## v1.33 — 2026-11-26
 
 Correctif du lot 32, vu le jour même sur la vraie opération Tripwire, depuis la page FlightLedger.

@@ -58,5 +58,12 @@ eq('cochés par défaut : tous les dessinables', [...TRACES.defaultShown(tracks)
 eq('emprise de deux vols', TRACES.bounds(TRACES.selected(tracks, shown)), [26, 55, 27.7, 56.1]);
 eq('emprise vide', TRACES.bounds([]), null);
 
+/* deux pilotes partis du même porte-avions : la seconde étiquette descend d'une ligne ;
+   une étiquette ailleurs sur la carte ne bouge pas (Tripwire, 25/11 : Shoot et Guiness superposés) */
+eq('même départ : empilées', TRACES.stack([{ x: 100, y: 200, w: 180 }, { x: 102, y: 201, w: 200 }], 25), [200, 226]);
+eq('trois au même départ', TRACES.stack([{ x: 0, y: 0, w: 50 }, { x: 0, y: 0, w: 50 }, { x: 0, y: 0, w: 50 }], 25), [0, 25, 50]);
+eq('départs éloignés : rien ne bouge', TRACES.stack([{ x: 0, y: 0, w: 50 }, { x: 500, y: 0, w: 50 }, { x: 0, y: 300, w: 50 }], 25), [0, 0, 300]);
+eq('aucune étiquette', TRACES.stack([], 25), []);
+
 console.log(`${n} vérifications, ${bad} en échec`);
 process.exit(bad ? 1 : 0);

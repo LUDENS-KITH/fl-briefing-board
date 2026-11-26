@@ -29,6 +29,19 @@ const TRACES = (() => {
   const label = t => [t.pseudo, same(t.callsign, t.pseudo) ? null : t.callsign, t.aircraft]
     .map(v => (v == null ? '' : String(v).trim())).filter(Boolean).join(' · ');
 
+  /* Les pilotes d'une opération partent souvent du même terrain ou du même porte-avions : leurs
+     étiquettes s'écriraient l'une sur l'autre. Chaque étiquette { x, y, w } (x à gauche, w sa
+     largeur) qui en recouvre une déjà placée descend d'une ligne, jusqu'à trouver sa place. */
+  function stack(spots, line){
+    const placed = [];
+    return spots.map(({ x, y, w }) => {
+      const hits = py => placed.some(p => x < p.x + p.w && p.x < x + w && Math.abs(py - p.y) < line);
+      while (hits(y)) y += line;
+      placed.push({ x, y, w });
+      return y;
+    });
+  }
+
   const defaultShown = tracks => new Set(drawable(tracks).map(t => t.flight_id));
   const selected = (tracks, shown) => drawable(tracks).filter(t => shown.has(t.flight_id));
 
@@ -41,7 +54,7 @@ const TRACES = (() => {
     return s === Infinity ? null : [s, w, n, e];
   }
 
-  return { COLORS, drawable, pilotColors, colorOf, label, defaultShown, selected, bounds };
+  return { COLORS, drawable, pilotColors, colorOf, label, stack, defaultShown, selected, bounds };
 })();
 
 if (typeof module !== 'undefined') module.exports = TRACES;
