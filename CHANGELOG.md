@@ -3,6 +3,13 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.35 — 2026-11-26
+
+### Corrigé
+- **L'empilement des étiquettes de la v1.34 se voit enfin** : la v1.34 comptait l'écart en unités
+  du terrain, minuscules à l'échelle du golfe ; vu dans le Board publié, les deux étiquettes
+  restaient l'une sur l'autre. L'écart se compte maintenant en pixels d'écran.
+
 ## v1.34 — 2026-11-26
 
 Second correctif du lot 32, vu le jour même sur la vraie opération Tripwire.
@@ -11,7 +18,7 @@ Second correctif du lot 32, vu le jour même sur la vraie opération Tripwire.
 - **Les étiquettes des pilotes partis du même endroit ne se couvrent plus** : Shoot et Guiness,
   catapultés du même porte-avions, avaient leurs deux étiquettes écrites au même point, illisibles.
   Une étiquette qui en recouvre une autre descend d'une ligne ; un départ ailleurs ne bouge pas.
-  L'interligne tient aussi à l'export kneeboard, où les textes sont grossis.
+  L'écart se calcule en pixels d'écran, à la vue où la planche des traces s'ouvre.
 
 ### Vérifié
 - `node tools/test_traces.js` : 24/24 (4 cas neufs, en échec avant le correctif).
