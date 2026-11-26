@@ -214,7 +214,7 @@ function opDrawTracks(keep){
   if (!tracks.length && at < 0) return;
   cancelGesture(); leaveGesture(); stash();
   const src = boards.find(x => x.name === OP.base && x.map) || boards.find(x => x.map && x.name !== name);
-  const colors = TRACES.pilotColors(OP.debrief && OP.debrief.rows, TRACES.drawable(OP.tracks)), out = [];
+  const colors = TRACES.pilotColors(OP.debrief && OP.debrief.rows, TRACES.drawable(OP.tracks)), out = [], tags = [];
   for (const t of tracks){
     const c = TRACES.colorOf(colors, t);
     for (const seg of t.segments){
@@ -222,8 +222,12 @@ function opDrawTracks(keep){
       out.push({ t: 'stroke', pts: seg.map(([la, lo]) => [lon2x(lo), lat2y(la)]), c, w: 3, ls: 'solid', locked: true });
     }
     const [la0, lo0] = t.segments.find(seg => seg.length >= 2)[0];
-    out.push({ t: 'text', s: TRACES.label(t), x: lon2x(lo0), y: lat2y(la0), c, w: 2, locked: true });
+    tags.push({ t: 'text', s: TRACES.label(t), x: lon2x(lo0), y: lat2y(la0), c, w: 2, locked: true });
   }
+  // même départ (même porte-avions, même terrain) : les étiquettes s'empilent au lieu de se couvrir ;
+  // l'interligne vaut le texte grossi de l'export kneeboard (tb 1,8), pour rester lisible aussi là
+  const ys = TRACES.stack(tags.map(o => { const b = bbox(o); return { x: b.x, y: o.y, w: b.w }; }), 36);
+  tags.forEach((o, i) => out.push({ ...o, y: ys[i] }));
   const box = TRACES.bounds(tracks);
   const cam = keep && at >= 0 ? boards[at].cam : box ? fitCam(box) : boards[cur].cam;
   const under = src ? src.objs.map(o => ({ ...snap(o), locked: true })) : [];
