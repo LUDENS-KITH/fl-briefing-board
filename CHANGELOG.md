@@ -3,6 +3,41 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.32 — 2026-11-26
+
+Lot 32 du [plan d'action](docs/PLAN.md) : **chaque vol de l'opération sur la carte**
+(plan FlightLedger du 2026-11-25, § 7, lot 4b).
+
+### Ajouté
+- **Une case « sur la carte » par vol** dans l'onglet Débrief du panneau Opération : cochée,
+  la trace du vol est sur la planche « Traces des vols ». Toutes sont cochées à l'ouverture ;
+  la planche déjà posée suit chaque case cochée ou décochée sans bouger la vue, pour
+  comparer deux vols d'un coup d'œil. Tout décoché : la mission reste, le bouton se grise.
+- **Une couleur par pilote**, pas par vol : deux vols du même pilote ont la même couleur,
+  rappelée par une pastille devant son nom dans la liste. L'ordre suit le débrief.
+- **Pilote · indicatif · appareil** écrit au départ de chaque trace, et l'appareil dans la
+  liste des vols : ce que FlightLedger a dit (le registre du pilote), rien d'inventé.
+- `traces.js` : ce qui se dessine, les couleurs, l'étiquette, les vols cochés et leur
+  emprise, sans écran, testé par `tools/test_traces.js`.
+
+### Rien d'enregistré
+La sélection vit le temps de la page : ni localStorage ni IndexedDB, comme pour toute
+opération.
+
+### Vérifié en exécutant
+`node tools/test_traces.js` 18/18, nouveau, en erreur sur la v1.31 (module absent) : vols
+dessinables (trace effacée ou d'un seul point écartée), une couleur par pilote dans l'ordre
+du débrief, la palette qui reprend au-delà de huit pilotes, étiquette sans indicatif ni
+appareil inventé, vols cochés, emprise. `test_i18n` 2 904/2 904 · `test_kneeboards` 15/15 ·
+`test_miz` 124/124 · `test_seo` · `test_symboles` 671 · `test_ecrans` 262 ·
+`test_missiles` 468 · `test_radar` 26 · `test_magnetic` · banc de saisie en français et en
+anglais. Au navigateur sans tête, servi en local, API simulée et vrai `.miz` de Tripwire,
+par de vrais clics : trois cases pour trois vols tracés (la trace effacée n'en a pas), deux
+pastilles de deux couleurs égales à celles des traits, deux vols de Shoot d'une couleur,
+étiquette « Shoot · Ledger 1-1 · F/A-18C », un vol décoché quitte la planche sans changer la
+vue, tout décoché garde la mission, aucune écriture locale, trois lectures sans cookie,
+anglais, téléphone 375 px.
+
 ## v1.31 — 2026-11-25
 
 Lot 31 du [plan d'action](docs/PLAN.md) : **l'opération FlightLedger dans le Board**

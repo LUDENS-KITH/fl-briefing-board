@@ -55,6 +55,7 @@ engagés.
 | 29 | Écrans sans figure : les fichiers du jeu comme source | demande | S | lot 28 | v1.28 | fait le 2026-11-12 |
 | 30 | Onglet Missiles, rangé par Fox 1, 2, 3 | demande | S | lot 23 | v1.30 | fait le 2026-11-19 |
 | 31 | L'opération FlightLedger dans le Board (kneeboards, débrief, traces) | demande | M | lot 6 | v1.31 | fait le 2026-11-25 |
+| 32 | Chaque vol de l'opération sur la carte : case par vol, couleur par pilote | demande | S | lot 31 | v1.32 | fait le 2026-11-26 |
 
 Tailles : **S** une séance de travail, **M** deux ou trois, **L** davantage, avec une
 inconnue à lever avant d'écrire du code.
@@ -1155,6 +1156,14 @@ puis celles du type) et le débrief (vols et liens FlightLedger) ; « Traces sur
 ajoute une planche avec la mission dessous et la trace simplifiée de chaque vol. Rien
 n'est enregistré dans le navigateur ; le jeton quitte la barre d'adresse. Ouvre en partie
 le « Débriefing sur trace » du § 8 : les traces viennent de FlightLedger, simplifiées.
+
+#### Lot 32 — Chaque vol de l'opération sur la carte
+
+**Plan FlightLedger du 2026-11-25**, lot 4b. **Fait le 2026-11-26 (v1.32).** Dans le débrief,
+chaque vol tracé a sa case « sur la carte » ; la planche des traces suit les cases sans
+bouger la vue ; une couleur par pilote, rappelée devant son nom ; « pilote · indicatif ·
+appareil » au départ de chaque trace, l'appareil venu du registre FlightLedger. `traces.js`
+porte ces règles, sans écran, et `tools/test_traces.js` les vérifie.
 
 ## 8. Hors plan
 
