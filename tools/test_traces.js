@@ -44,6 +44,9 @@ eq('au-delà de la palette, les couleurs reprennent', wrap.get('P' + TRACES.COLO
 eq('étiquette complète', TRACES.label(tracks[0]), 'Shoot · Ledger 1-1 · F/A-18C');
 eq('sans indicatif', TRACES.label(tracks[2]), 'Shoot · F-14B');
 eq('pilote seul', TRACES.label(tracks[4]), 'Lafman');
+/* un indicatif égal au nom du pilote ne se répète pas (vu le 26/11 sur Tripwire : « Guiness · Guiness · F/A-18C Hornet ») */
+eq('indicatif égal au pilote, une fois', TRACES.label({ pseudo: 'Guiness', callsign: 'guiness ', aircraft: 'F/A-18C Hornet' }), 'Guiness · F/A-18C Hornet');
+eq('indicatif différent, gardé', TRACES.label({ pseudo: 'Shoot', callsign: 'Shoot 1-1', aircraft: 'F/A-18C Hornet' }), 'Shoot · Shoot 1-1 · F/A-18C Hornet');
 
 /* les vols cochés, dans l'ordre de la réponse ; un vol coché sans trace n'apparaît pas */
 const shown = new Set(['c', 'a', 'd']);

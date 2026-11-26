@@ -3,6 +3,18 @@
 Les dates sont celles de la livraison effective. Chaque version note ce qui a été
 **vérifié en exécutant**, pas seulement écrit.
 
+## v1.33 — 2026-11-26
+
+Correctif du lot 32, vu le jour même sur la vraie opération Tripwire, depuis la page FlightLedger.
+
+### Corrigé
+- **L'étiquette d'une trace ne répète plus le nom du pilote** : « Guiness · Guiness · F/A-18C Hornet »
+  devient « Guiness · F/A-18C Hornet ». L'indicatif n'est écrit que s'il dit autre chose que le nom
+  du pilote (souvent le même dans DCS) ; « Shoot · Ledger 1-1 · F/A-18C » reste entier.
+
+### Vérifié
+- `node tools/test_traces.js` : 20/20, rouge avant le correctif sur le cas de Tripwire.
+
 ## v1.32 — 2026-11-26
 
 Lot 32 du [plan d'action](docs/PLAN.md) : **chaque vol de l'opération sur la carte**
